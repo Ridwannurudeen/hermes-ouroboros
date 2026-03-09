@@ -12,18 +12,37 @@ from providers.trained_fallback import TrainedFallbackProvider
 
 
 
+_OLLAMA_DEFAULT_BASE_URL = 'http://localhost:11434/v1'
+
+
 def build_provider(settings: AppSettings) -> object:
     provider_name = settings.provider.name.lower()
     if provider_name == 'mock':
         return MockCouncilProvider()
 
+    if provider_name == 'ollama':
+        base_url = settings.provider.base_url or _OLLAMA_DEFAULT_BASE_URL
+        return OpenAICompatibleProvider(
+            api_key='ollama',
+            model=settings.provider.model,
+            base_url=base_url,
+            timeout_seconds=settings.provider.timeout_seconds,
+            temperature=settings.provider.temperature,
+            fallback_provider=MockCouncilProvider(),
+        )
+
     if provider_name in {'trained_fallback', 'learned_profile'}:
-        base_provider_settings = settings
-        if settings.provider.name.lower() not in {'openai', 'openai_compatible', 'nous', 'nous_portal'}:
+        # Resolve which base provider to wrap.
+        # If the underlying provider is ollama, keep it as ollama.
+        # Otherwise fall back to openai_compatible.
+        underlying_name = settings.provider.name.lower()
+        if underlying_name not in {'openai', 'openai_compatible', 'nous', 'nous_portal', 'ollama'}:
             base_provider_settings = replace(
                 settings,
                 provider=replace(settings.provider, name='openai_compatible'),
             )
+        else:
+            base_provider_settings = settings
         base_provider = build_provider(base_provider_settings)
         return TrainedFallbackProvider(
             root=settings.root,

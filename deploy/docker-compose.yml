@@ -8,7 +8,9 @@ services:
       - ../.env
     command: ["python", "-X", "utf8", "main.py", "--api", "--host", "0.0.0.0", "--port", "8000"]
     ports:
-      - "8000:8000"
+      - "8002:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - hermes_logs:/app/logs
       - hermes_sessions:/app/sessions
@@ -34,6 +36,8 @@ services:
     depends_on:
       hermes-api:
         condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - hermes_logs:/app/logs
       - hermes_sessions:/app/sessions

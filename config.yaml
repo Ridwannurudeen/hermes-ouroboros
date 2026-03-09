@@ -1,9 +1,9 @@
 provider:
-  name: openai_compatible
-  model: gpt-5-mini
-  base_url: https://api.openai.com/v1
-  api_key_env: OPENAI_API_KEY
-  timeout_seconds: 120
+  name: ollama
+  model: hermes3:8b
+  base_url: http://localhost:11434/v1
+  api_key_env: OPENAI_API_KEY   # unused for ollama; kept for openai_compatible fallback
+  timeout_seconds: 180
   temperature: 0.2
 telegram:
   enabled: false

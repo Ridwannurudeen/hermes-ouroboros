@@ -1,7 +1,7 @@
 provider:
   name: ollama
   model: hermes3:3b
-  base_url: http://localhost:11434/v1
+  base_url: http://host.docker.internal:11434/v1
   api_key_env: OPENAI_API_KEY   # unused for ollama; kept for openai_compatible fallback
   timeout_seconds: 300
   temperature: 0.2

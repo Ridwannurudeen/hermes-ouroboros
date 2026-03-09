@@ -1,9 +1,9 @@
 provider:
   name: ollama
-  model: hermes3:8b
+  model: hermes3:3b
   base_url: http://localhost:11434/v1
   api_key_env: OPENAI_API_KEY   # unused for ollama; kept for openai_compatible fallback
-  timeout_seconds: 180
+  timeout_seconds: 300
   temperature: 0.2
 telegram:
   enabled: false

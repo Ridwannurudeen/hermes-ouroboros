@@ -1106,10 +1106,15 @@
           return;
         }
         runButton.disabled = true;
-        statusLine.textContent = 'Council convening...';
+        const startTime = Date.now();
+        const timerInterval = setInterval(() => {
+          const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
+          statusLine.textContent = `Council running — ${elapsed}s elapsed (CPU inference, ~5-10 min)`;
+        }, 1000);
+        statusLine.textContent = 'Council convening... (CPU inference, ~5-10 min on demo server)';
         const completedAgents = {};
         runtimeBox.innerHTML = agentProgressMarkup(completedAgents);
-        resultBox.innerHTML = '<div class="muted-empty">Waiting for Arbiter verdict...</div>';
+        resultBox.innerHTML = '<div class="muted-empty">Waiting for agents... Each agent runs in parallel — results stream in as they complete.</div>';
 
         try {
           const response = await fetch('/api/query/stream', {
@@ -1157,6 +1162,7 @@
           updateShareControls(result);
           runtimeBox.innerHTML = runtimeMarkup(runtime, result);
           resultBox.innerHTML = renderSessionResult(result, runtime);
+          clearInterval(timerInterval);
           statusLine.textContent = `Council completed. Confidence: ${result.confidence_score}/100`;
           await loadMeta();
           await loadStats();
@@ -1168,6 +1174,7 @@
           resultBox.innerHTML = `<div class="muted-empty">${escapeHtml(String(error))}</div>`;
           statusLine.textContent = 'Request failed.';
         } finally {
+          clearInterval(timerInterval);
           runButton.disabled = false;
         }
       }

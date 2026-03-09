@@ -18,6 +18,7 @@ from core.settings import AppSettings, env_value
 from core.session_store import SessionStore
 from core.user_store import UserStore
 from learning.atropos_runner import get_training_status
+from learning.preference_extractor import build_dpo_dataset
 from learning.trajectory_stats import build_stats
 
 
@@ -81,6 +82,7 @@ class HermesWebApp:
                 web.post('/api/sessions/{session_id}/share', self.handle_create_share),
                 web.delete('/api/sessions/{session_id}/share', self.handle_revoke_share),
                 web.get('/api/report/benchmark', self.handle_benchmark_report),
+                web.get('/api/loop/status', self.handle_loop_status),
                 web.post('/api/query', self.handle_query),
             ]
         )
@@ -272,6 +274,70 @@ class HermesWebApp:
             content_type='text/markdown',
             headers={'Content-Disposition': 'attachment; filename="hermes_benchmark_report.md"'},
         )
+
+    async def handle_loop_status(self, request: web.Request) -> web.Response:
+        """
+        Returns the full Ouroboros loop status for the dashboard.
+        No auth required — read-only, contains no sensitive data.
+        """
+        training_status = get_training_status(self.root)
+        trajectory_stats = build_stats(self.root)
+        sessions = self.session_store.get_recent_sessions(n=1000)
+
+        # Count DPO pairs collected across all sessions
+        dpo_dir = self.root / 'trajectories' / 'dpo'
+        dpo_pair_files = list(dpo_dir.glob('*.json')) if dpo_dir.exists() else []
+        total_dpo_pairs = 0
+        for f in dpo_pair_files:
+            try:
+                import json as _json
+                pairs = _json.loads(f.read_text(encoding='utf-8'))
+                total_dpo_pairs += len(pairs) if isinstance(pairs, list) else 0
+            except Exception:
+                pass
+
+        # Model history from models dir
+        models_dir = self.root / 'models'
+        model_versions = []
+        if models_dir.exists():
+            for entry in sorted(models_dir.iterdir()):
+                result_path = entry / 'training_result.json'
+                if result_path.exists():
+                    try:
+                        import json as _json
+                        res = _json.loads(result_path.read_text(encoding='utf-8'))
+                        model_versions.append({
+                            'name': entry.name,
+                            'loss': res.get('final_training_loss'),
+                            'steps': res.get('steps'),
+                            'dry_run': res.get('dry_run', True),
+                            'mode': res.get('mode', 'sft'),
+                        })
+                    except Exception:
+                        pass
+
+        return web.json_response({
+            'loop': {
+                'current_version': training_status.get('current_version', 'v0'),
+                'next_version': training_status.get('next_version', 'v1'),
+                'auto_train_enabled': training_status.get('auto_train_enabled', False),
+                'auto_train_threshold': training_status.get('auto_train_threshold', 50),
+                'remaining_until_next_cycle': training_status.get('remaining_until_next_cycle', 0),
+                'new_high_quality_since_latest': training_status.get('new_high_quality_since_latest', 0),
+                'high_quality_total': training_status.get('high_quality_total', 0),
+                'auto_train_state': training_status.get('auto_train_state'),
+            },
+            'trajectories': trajectory_stats,
+            'dpo': {
+                'total_pairs': total_dpo_pairs,
+                'sessions_with_pairs': len(dpo_pair_files),
+            },
+            'sessions': {
+                'total': len(sessions),
+                'average_confidence': self._average_confidence(sessions),
+            },
+            'model_history': model_versions,
+        })
 
     async def handle_create_share(self, request: web.Request) -> web.Response:
         principal = self._require_principal(request)

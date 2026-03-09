@@ -576,6 +576,33 @@
             </div>
           </div>
           <div class="note-box" id="benchmarkNote">Benchmark provenance will appear here once stats load.</div>
+
+          <!-- Ouroboros DPO Loop Panel -->
+          <div style="margin-top:16px; padding:14px; border-radius:16px; border:1px solid var(--line); background:rgba(179,71,40,0.05);">
+            <div class="metric-label" style="margin-bottom:8px;">⟳ Ouroboros DPO Loop</div>
+            <div class="stat-grid" style="grid-template-columns: 1fr 1fr; gap:8px; margin-top:0;">
+              <div class="stat-tile" style="padding:10px;">
+                <div class="metric-label">DPO Pairs</div>
+                <strong id="statDpoPairs">-</strong>
+              </div>
+              <div class="stat-tile" style="padding:10px;">
+                <div class="metric-label">Sessions w/ Pairs</div>
+                <strong id="statDpoSessions">-</strong>
+              </div>
+              <div class="stat-tile" style="padding:10px;">
+                <div class="metric-label">HQ Trajectories</div>
+                <strong id="statHqTotal">-</strong>
+              </div>
+              <div class="stat-tile" style="padding:10px;">
+                <div class="metric-label">New Since Deploy</div>
+                <strong id="statNewHq">-</strong>
+              </div>
+            </div>
+            <div id="loopProgressBar" style="margin-top:10px; height:6px; border-radius:4px; background:var(--line); overflow:hidden;">
+              <div id="loopProgressFill" style="height:100%; width:0%; background:var(--accent); border-radius:4px; transition:width 0.6s;"></div>
+            </div>
+            <div id="loopProgressLabel" style="font-size:11px; color:var(--muted); margin-top:4px;">Loading loop status...</div>
+          </div>
         </div>
         <div class="history-card">
           <p class="section-title">Recent Sessions</p>
@@ -617,6 +644,12 @@
       const statConfidence10 = document.getElementById('statConfidence10');
       const statBenchConfidence = document.getElementById('statBenchConfidence');
       const statBenchQuality = document.getElementById('statBenchQuality');
+      const statDpoPairs = document.getElementById('statDpoPairs');
+      const statDpoSessions = document.getElementById('statDpoSessions');
+      const statHqTotal = document.getElementById('statHqTotal');
+      const statNewHq = document.getElementById('statNewHq');
+      const loopProgressFill = document.getElementById('loopProgressFill');
+      const loopProgressLabel = document.getElementById('loopProgressLabel');
       const benchConfidenceTile = document.getElementById('benchConfidenceTile');
       const benchQualityTile = document.getElementById('benchQualityTile');
       const benchmarkNote = document.getElementById('benchmarkNote');
@@ -947,6 +980,31 @@
         }
       }
 
+      async function loadLoopStatus() {
+        try {
+          const response = await fetch('/api/loop/status');
+          if (!response.ok) return;
+          const data = await response.json();
+          if (statDpoPairs) statDpoPairs.textContent = String(data.dpo?.total_pairs ?? 0);
+          if (statDpoSessions) statDpoSessions.textContent = String(data.dpo?.sessions_with_pairs ?? 0);
+          if (statHqTotal) statHqTotal.textContent = String(data.loop?.high_quality_total ?? 0);
+          if (statNewHq) statNewHq.textContent = String(data.loop?.new_high_quality_since_latest ?? 0);
+          // Progress bar
+          const threshold = data.loop?.auto_train_threshold || 50;
+          const newHq = data.loop?.new_high_quality_since_latest || 0;
+          const pct = Math.min(100, Math.round((newHq / threshold) * 100));
+          if (loopProgressFill) loopProgressFill.style.width = `${pct}%`;
+          if (loopProgressLabel) {
+            const remaining = data.loop?.remaining_until_next_cycle ?? 0;
+            loopProgressLabel.textContent = remaining === 0
+              ? `Training threshold met — next cycle ready (${threshold} sessions)`
+              : `${newHq} / ${threshold} sessions until next training cycle`;
+          }
+        } catch (e) {
+          if (loopProgressLabel) loopProgressLabel.textContent = 'Loop status unavailable.';
+        }
+      }
+
       async function loadSessionDetail(sessionId) {
         selectedSessionId = sessionId;
         await loadSessions();
@@ -994,6 +1052,7 @@
           statusLine.textContent = 'Council completed.';
           await loadMeta();
           await loadStats();
+          await loadLoopStatus();
           await loadSessions();
         } catch (error) {
           runtimeBox.innerHTML = '<div class="muted-empty">Request failed.</div>';
@@ -1026,6 +1085,7 @@
           statusLine.textContent = 'Account created and logged in.';
           await loadMeta();
           await loadStats();
+          await loadLoopStatus();
           await loadSessions();
         } catch (error) {
           statusLine.textContent = String(error);
@@ -1040,6 +1100,7 @@
           statusLine.textContent = 'Logged in.';
           await loadMeta();
           await loadStats();
+          await loadLoopStatus();
           await loadSessions();
         } catch (error) {
           statusLine.textContent = String(error);
@@ -1176,7 +1237,10 @@
         updateShareControls(null);
         await loadStats();
         await loadSessions();
+        await loadLoopStatus();
       }).catch(() => {});
+      // Refresh loop status every 30s without requiring auth
+      setInterval(() => loadLoopStatus().catch(() => {}), 30000);
     </script>
   </body>
 </html>

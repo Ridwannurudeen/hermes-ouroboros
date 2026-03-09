@@ -14,6 +14,7 @@ from core.conflict_resolver import ConflictResolver
 from core.session_store import SessionStore
 from core.settings import load_settings
 from core.skill_creator import SkillCreator
+from learning.preference_extractor import extract_preference_pairs
 from learning.trajectory_logger import TrajectoryLogger
 from providers import MockCouncilProvider, build_provider
 
@@ -74,6 +75,11 @@ class MasterOrchestrator:
             skill_path = self.skill_creator.maybe_create_skill(session_result)
             if skill_path:
                 session_result['skill_path'] = skill_path
+            # Extract DPO preference pairs from this session's debate
+            dpo_pairs = extract_preference_pairs(session_result)
+            if dpo_pairs:
+                session_result['dpo_pairs_count'] = len(dpo_pairs)
+                self._save_dpo_pairs(session_id, dpo_pairs)
             session_path = self.session_store.save_session(session_result)
             trajectory_count = self.trajectory_logger.log_session(session_result)
             self._append_log(
@@ -98,6 +104,13 @@ class MasterOrchestrator:
                 'additional_research': None,
                 'agent_timings': {},
             }
+
+    def _save_dpo_pairs(self, session_id: str, pairs: list[dict]) -> None:
+        dpo_dir = self.root / 'trajectories' / 'dpo'
+        dpo_dir.mkdir(parents=True, exist_ok=True)
+        path = dpo_dir / f'{session_id}.json'
+        import json as _json
+        path.write_text(_json.dumps(pairs, indent=2), encoding='utf-8')
 
     def _append_log(self, line: str) -> None:
         with (self.logs_dir / 'sessions.log').open('a', encoding='utf-8') as handle:

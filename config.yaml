@@ -3,7 +3,7 @@ provider:
   model: hermes3:3b
   base_url: http://host.docker.internal:11434/v1
   api_key_env: OPENAI_API_KEY   # unused for ollama; kept for openai_compatible fallback
-  timeout_seconds: 300
+  timeout_seconds: 600
   temperature: 0.2
 telegram:
   enabled: false

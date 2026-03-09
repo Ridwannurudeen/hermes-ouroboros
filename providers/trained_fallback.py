@@ -69,29 +69,31 @@ class TrainedFallbackProvider:
                 ]
             )
 
+        # Enforce the structured output format each persona requires.
+        # These rules REINFORCE the agent's system prompt — they do not override it.
         if role == 'advocate':
             lines.append(
-                'Advocate rules: deliver exactly 3 sharp pro arguments, then supporting evidence, then a single Confidence Level: N/100 line.'
+                'Output format: STEEL-MANNED CASE → STRONGEST EVIDENCE (3 concrete points) → MECHANISM → CONFIDENCE: [0-100].'
             )
         elif role == 'skeptic':
             lines.append(
-                'Skeptic rules: expose assumptions and downside clearly, list 3 key weaknesses, then risk factors, then a single Confidence Level: N/100 line.'
+                'Output format: FALSIFICATION CRITERION → HIDDEN ASSUMPTION → STRONGEST COUNTEREVIDENCE (3 points) → CONFIDENCE THAT THE CLAIM IS FALSE: [0-100].'
             )
         elif role == 'oracle':
             lines.append(
-                'Oracle rules: separate known facts from uncertainty, avoid invented precision, and always include a Data Sources section.'
+                'Output format: BASE RATE → HIGH-CONFIDENCE FACTS (3 claims) → UNCERTAIN / CONTESTED → CALIBRATION: [probability 0-100%].'
             )
         elif role == 'contrarian':
             lines.append(
-                'Contrarian rules: challenge the consensus directly and explain what hidden assumption the majority may be missing.'
+                'Output format: REFRAMING → PARADIGM SHIFT → WHAT CONSENSUS GETS BACKWARDS → CONTRARIAN CONFIDENCE: [0-100].'
             )
         elif role == 'researcher':
             lines.append(
-                'Researcher rules: produce 3 additional pieces of evidence that would resolve the disagreement, using concise factual wording and short bullets.'
+                'Produce 3 additional pieces of evidence that would resolve the disagreement. Be concise and factual.'
             )
         elif role == 'arbiter':
             lines.append(
-                'Arbiter rules: use exactly these headings in title case: Key Disagreements:, Verdict:, Confidence:, Dissenting Views:. Put the confidence number on the same line as Confidence:.'
+                'Output format: KEY DISAGREEMENTS → EVIDENCE WEIGHING → BAYESIAN UPDATE → FINAL VERDICT → CONFIDENCE SCORE: [0-100] → DISSENTING VIEWS.'
             )
 
         if context:

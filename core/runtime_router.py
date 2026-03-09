@@ -20,23 +20,23 @@ class RuntimeRouter:
         self._trained_backend_retry_at: datetime | None = None
         self._trained_backend_reason: str | None = None
 
-    async def run_query(self, query: str, mode: str = 'default') -> tuple[dict[str, Any], dict[str, Any]]:
+    async def run_query(self, query: str, mode: str = 'default', stream_callback=None) -> tuple[dict[str, Any], dict[str, Any]]:
         normalized_mode = mode.strip().lower()
         if normalized_mode == 'trained':
-            return await self._run_trained_query(query)
+            return await self._run_trained_query(query, stream_callback=stream_callback)
 
-        result = await self.orchestrator.run_query(query)
+        result = await self.orchestrator.run_query(query, stream_callback=stream_callback)
         return result, {
             'mode': 'default',
             'provider': type(self.orchestrator.provider).__name__,
             'fallback_reason': None,
         }
 
-    async def _run_trained_query(self, query: str) -> tuple[dict[str, Any], dict[str, Any]]:
+    async def _run_trained_query(self, query: str, stream_callback=None) -> tuple[dict[str, Any], dict[str, Any]]:
         latest_target = self._latest_trained_target()
         if latest_target and latest_target.get('provider') == 'learned_profile':
             profile_orchestrator = self._get_orchestrator('learned_profile', self.settings.provider.model)
-            result = await profile_orchestrator.run_query(query)
+            result = await profile_orchestrator.run_query(query, stream_callback=stream_callback)
             return result, {
                 'mode': 'trained_profile',
                 'provider': type(profile_orchestrator.provider).__name__,
@@ -53,7 +53,7 @@ class RuntimeRouter:
                 fallback_reason = f'Trained Modal backend unavailable: {exc}'
 
         if fallback_reason is None and trained_orchestrator is not None:
-            result = await trained_orchestrator.run_query(query)
+            result = await trained_orchestrator.run_query(query, stream_callback=stream_callback)
             trained_error = self._trained_error_message(result)
             if trained_error is None:
                 self._clear_trained_backend_status()
@@ -69,7 +69,7 @@ class RuntimeRouter:
         self._mark_trained_backend_unavailable(fallback_reason)
 
         fallback_orchestrator = self._get_orchestrator('trained_fallback', self.settings.provider.model)
-        result = await fallback_orchestrator.run_query(query)
+        result = await fallback_orchestrator.run_query(query, stream_callback=stream_callback)
         return result, {
             'mode': 'trained_fallback',
             'provider': type(fallback_orchestrator.provider).__name__,

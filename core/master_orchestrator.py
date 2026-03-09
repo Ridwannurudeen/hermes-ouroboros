@@ -32,7 +32,7 @@ class MasterOrchestrator:
         self.trajectory_logger = TrajectoryLogger(self.root)
         self.skill_creator = SkillCreator(self.root)
 
-    async def run_query(self, query: str) -> dict[str, Any]:
+    async def run_query(self, query: str, stream_callback=None) -> dict[str, Any]:
         session_id = str(uuid.uuid4())
         timestamp = datetime.now(timezone.utc).isoformat()
         started = datetime.now(timezone.utc)
@@ -40,7 +40,7 @@ class MasterOrchestrator:
 
         try:
             print('Agents dispatched... waiting for responses...')
-            agent_responses, agent_timings = await self.agent_launcher.launch_agents(query)
+            agent_responses, agent_timings = await self.agent_launcher.launch_agents(query, stream_callback=stream_callback)
             conflict = await self.conflict_resolver.resolve(query, agent_responses)
             arbiter_prompt = self._build_arbiter_prompt(query, agent_responses, conflict)
             arbiter_verdict = await self.provider.generate(

@@ -84,6 +84,7 @@ class HermesWebApp:
                 web.get('/api/report/benchmark', self.handle_benchmark_report),
                 web.get('/api/loop/status', self.handle_loop_status),
                 web.post('/api/query', self.handle_query),
+                web.post('/api/query/stream', self.handle_query_stream),
             ]
         )
         return app
@@ -386,6 +387,72 @@ class HermesWebApp:
             if owned is not None:
                 result = owned
         return web.json_response({'runtime': runtime_meta, 'result': result})
+
+    async def handle_query_stream(self, request: web.Request) -> web.StreamResponse:
+        """SSE endpoint — streams agent completion events as they happen, then the final result."""
+        principal = self._require_principal(request)
+        self._require_same_origin(request)
+        self._require_csrf_token(request, principal)
+        await self._enforce_rate_limit(principal, request)
+        payload = await self._read_json(request)
+
+        query = str(payload.get('query') or '').strip()
+        if not query:
+            raise web.HTTPBadRequest(text='Field "query" is required.')
+        if len(query) > 4000:
+            raise web.HTTPBadRequest(text='Field "query" must be 4000 characters or fewer.')
+
+        mode = str(payload.get('mode') or 'default').strip().lower()
+        if mode not in {'default', 'trained'}:
+            raise web.HTTPBadRequest(text='Field "mode" must be "default" or "trained".')
+
+        response = web.StreamResponse()
+        response.headers['Content-Type'] = 'text/event-stream'
+        response.headers['Cache-Control'] = 'no-cache'
+        response.headers['X-Accel-Buffering'] = 'no'
+        await response.prepare(request)
+
+        event_queue: asyncio.Queue = asyncio.Queue()
+
+        async def agent_stream_callback(role: str, agent_response: str, meta: dict) -> None:
+            event = {
+                'type': 'agent_complete',
+                'role': role,
+                'duration_seconds': meta.get('duration_seconds'),
+                'status': meta.get('status', 'ok'),
+                'preview': (agent_response or '')[:200],
+            }
+            await event_queue.put(event)
+
+        async def run_council() -> None:
+            try:
+                result, runtime_meta = await self.runtime.run_query(
+                    query, mode=mode, stream_callback=agent_stream_callback
+                )
+                if principal['kind'] == 'user':
+                    owned = self.session_store.attach_owner(
+                        session_id=str(result.get('session_id')),
+                        user_id=principal['user']['user_id'],
+                        email=principal['user']['email'],
+                    )
+                    if owned is not None:
+                        result = owned
+                await event_queue.put({'type': 'final', 'result': result, 'runtime': runtime_meta})
+            except Exception as exc:
+                await event_queue.put({'type': 'error', 'message': str(exc)})
+
+        asyncio.create_task(run_council())
+
+        try:
+            while True:
+                event = await asyncio.wait_for(event_queue.get(), timeout=300.0)
+                data = json.dumps(event)
+                await response.write(f'data: {data}\n\n'.encode('utf-8'))
+                if event.get('type') in {'final', 'error'}:
+                    break
+        except asyncio.TimeoutError:
+            await response.write(b'data: {"type":"error","message":"stream timeout"}\n\n')
+        return response
 
     async def _read_json(self, request: web.Request) -> dict[str, Any]:
         try:

@@ -843,6 +843,12 @@
           <div class="agent-grid">
             ${agents || '<div class="muted-empty">No agent outputs recorded.</div>'}
           </div>
+          ${(payload.dpo_pairs_count > 0) ? `
+          <div style="margin-top:12px; padding:12px 16px; border-radius:14px; border:1px solid var(--line); background:rgba(179,71,40,0.06);">
+            <span style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);">⟳ DPO Pairs Extracted</span>
+            <strong style="display:block; margin-top:4px; font-size:15px;">${payload.dpo_pairs_count} preference pair${payload.dpo_pairs_count === 1 ? '' : 's'} captured</strong>
+            <p style="margin:4px 0 0; font-size:13px; color:var(--muted);">The Arbiter's verdict created ${payload.dpo_pairs_count} chosen/rejected training pair${payload.dpo_pairs_count === 1 ? '' : 's'} from this debate. These feed the next fine-tuning cycle.</p>
+          </div>` : ''}
           <details class="raw-shell">
             <summary>Show raw session JSON</summary>
             <pre>${escapeHtml(JSON.stringify(payload, null, 2))}</pre>
@@ -1025,6 +1031,28 @@
         statusLine.textContent = `Loaded session ${payload.session_id.slice(0, 8)}.`;
       }
 
+      const AGENT_LABELS = {
+        advocate: 'Advocate — steel-manning FOR',
+        skeptic: 'Skeptic — Popperian falsificationist',
+        oracle: 'Oracle — calibrated base-rate',
+        contrarian: 'Contrarian — paradigm challenger',
+      };
+
+      function agentProgressMarkup(completedAgents) {
+        const allRoles = ['advocate', 'skeptic', 'oracle', 'contrarian'];
+        return `<div style="display:flex; flex-direction:column; gap:6px; padding:4px 0;">
+          ${allRoles.map(role => {
+            const done = completedAgents[role];
+            const label = AGENT_LABELS[role] || role;
+            const status = done
+              ? `<span style="color:#2e7d32;">✓ ${done.duration_seconds?.toFixed(1)}s</span>`
+              : `<span style="color:var(--muted);">…running</span>`;
+            return `<div style="display:flex; justify-content:space-between; font-size:13px; padding:6px 10px; border-radius:10px; background:${done ? 'rgba(46,125,50,0.07)' : 'rgba(0,0,0,0.03)'}; border:1px solid var(--line);">
+              <span>${escapeHtml(label)}</span>${status}</div>`;
+          }).join('')}
+        </div>`;
+      }
+
       async function submitQuery() {
         const query = queryInput.value.trim();
         const mode = document.querySelector('input[name="mode"]:checked').value;
@@ -1033,27 +1061,63 @@
           return;
         }
         runButton.disabled = true;
-        statusLine.textContent = 'Council is running...';
-        runtimeBox.innerHTML = `<div class="muted-empty">Council is running in ${escapeHtml(mode)} mode...</div>`;
+        statusLine.textContent = 'Council convening...';
+        const completedAgents = {};
+        runtimeBox.innerHTML = agentProgressMarkup(completedAgents);
+        resultBox.innerHTML = '<div class="muted-empty">Waiting for Arbiter verdict...</div>';
+
         try {
-          const response = await api('/api/query', {
+          const response = await fetch('/api/query/stream', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: headers({'Content-Type': 'application/json'}),
+            credentials: 'same-origin',
             body: JSON.stringify({query, mode}),
           });
+
           if (!response.ok) {
             throw new Error(await response.text());
           }
-          const payload = await response.json();
-          selectedSessionId = payload.result.session_id;
-          updateShareControls(payload.result);
-          runtimeBox.innerHTML = runtimeMarkup(payload.runtime, payload.result);
-          resultBox.innerHTML = renderSessionResult(payload.result, payload.runtime);
-          statusLine.textContent = 'Council completed.';
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          let finalPayload = null;
+
+          while (true) {
+            const {done, value} = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, {stream: true});
+            const chunks = buffer.split('\n\n');
+            buffer = chunks.pop();
+            for (const chunk of chunks) {
+              if (!chunk.startsWith('data: ')) continue;
+              let event;
+              try { event = JSON.parse(chunk.slice(6)); } catch { continue; }
+              if (event.type === 'agent_complete') {
+                completedAgents[event.role] = event;
+                const count = Object.keys(completedAgents).length;
+                statusLine.textContent = `${count}/4 agents complete...`;
+                runtimeBox.innerHTML = agentProgressMarkup(completedAgents);
+              } else if (event.type === 'final') {
+                finalPayload = event;
+              } else if (event.type === 'error') {
+                throw new Error(event.message);
+              }
+            }
+          }
+
+          if (!finalPayload) throw new Error('Stream ended without a final result.');
+          const {result, runtime} = finalPayload;
+          selectedSessionId = result.session_id;
+          updateShareControls(result);
+          runtimeBox.innerHTML = runtimeMarkup(runtime, result);
+          resultBox.innerHTML = renderSessionResult(result, runtime);
+          statusLine.textContent = `Council completed. Confidence: ${result.confidence_score}/100`;
           await loadMeta();
           await loadStats();
           await loadLoopStatus();
           await loadSessions();
+
         } catch (error) {
           runtimeBox.innerHTML = '<div class="muted-empty">Request failed.</div>';
           resultBox.innerHTML = `<div class="muted-empty">${escapeHtml(String(error))}</div>`;

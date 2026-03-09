@@ -235,6 +235,47 @@
         font-size: 13px;
       }
 
+      .example-queries {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+      }
+
+      .example-chip {
+        padding: 5px 11px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.55);
+        color: var(--muted);
+        font-size: 12px;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s, border-color 0.15s;
+        white-space: nowrap;
+        user-select: none;
+      }
+
+      .example-chip:hover {
+        background: rgba(179, 71, 40, 0.1);
+        border-color: var(--accent);
+        color: var(--accent-deep);
+      }
+
+      .token-reveal {
+        font-family: monospace;
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 6px;
+        background: rgba(0,0,0,0.04);
+        border-radius: 8px;
+        padding: 5px 8px;
+        word-break: break-all;
+        cursor: pointer;
+        border: 1px solid var(--line);
+      }
+
+      .token-reveal:hover { background: rgba(0,0,0,0.08); }
+
       pre {
         margin: 0;
         padding: 16px;
@@ -504,6 +545,9 @@
               <div class="actions">
                 <span class="pill" id="authState">Anonymous</span>
               </div>
+              <div class="token-reveal" id="demoTokenReveal" title="Click to copy demo admin token">
+                Demo token (click to copy &amp; paste above): l8VoYbtRvRY2ukhtdyK7Xe1I9tP4DdBiqvA9j8Q1q0k
+              </div>
             </div>
           </div>
         </div>
@@ -516,7 +560,8 @@
               <label><input type="radio" name="mode" value="default" checked> Default council</label>
               <label><input type="radio" name="mode" value="trained"> Trained path</label>
             </div>
-            <textarea id="queryInput" placeholder="Ask Hermes a serious question. Example: Is staking ETH lower risk than trading meme coins?"></textarea>
+            <textarea id="queryInput" placeholder="Ask Hermes a serious question…"></textarea>
+            <div class="example-queries" id="exampleChips"></div>
             <div class="actions">
               <button id="runButton">Run Query</button>
               <span class="status" id="statusLine">Ready.</span>
@@ -1296,6 +1341,45 @@
       historyConflict.addEventListener('change', () => {
         loadSessions().catch(() => {});
       });
+
+      // Example queries — click to pre-fill the textarea
+      const EXAMPLE_QUERIES = [
+        'Does multi-agent debate reliably reach truth or produce groupthink?',
+        'Will DeFi replace traditional finance within a decade?',
+        'Are LLMs developing genuine reasoning or pattern matching?',
+        'Is the AI alignment problem fundamentally unsolvable?',
+        'Does proof-of-work offer security properties PoS cannot replicate?',
+        'Is open-source AI net positive for safety or does it accelerate capabilities?',
+      ];
+      const exampleChips = document.getElementById('exampleChips');
+      EXAMPLE_QUERIES.forEach(q => {
+        const chip = document.createElement('button');
+        chip.className = 'example-chip';
+        chip.textContent = q;
+        chip.addEventListener('click', () => {
+          queryInput.value = q;
+          queryInput.focus();
+        });
+        exampleChips.appendChild(chip);
+      });
+
+      // Demo admin token — click to copy and paste into the field
+      const demoTokenReveal = document.getElementById('demoTokenReveal');
+      if (demoTokenReveal) {
+        demoTokenReveal.addEventListener('click', () => {
+          const token = 'l8VoYbtRvRY2ukhtdyK7Xe1I9tP4DdBiqvA9j8Q1q0k';
+          navigator.clipboard.writeText(token).then(() => {
+            adminToken.value = token;
+            sessionStorage.setItem(ADMIN_TOKEN_KEY, token);
+            demoTokenReveal.textContent = 'Copied! Paste token above and it will activate automatically.';
+            loadMeta().then(() => { loadStats(); loadSessions(); }).catch(() => {});
+          }).catch(() => {
+            adminToken.value = token;
+            sessionStorage.setItem(ADMIN_TOKEN_KEY, token);
+            loadMeta().then(() => { loadStats(); loadSessions(); }).catch(() => {});
+          });
+        });
+      }
 
       loadMeta().then(async () => {
         updateShareControls(null);

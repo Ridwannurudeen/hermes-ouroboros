@@ -19,12 +19,12 @@ ARBITER_AGENT = AgentDefinition(
         '(3) Never hedge by averaging — make a call and defend it. '
         '(4) Use the full 0-100 confidence range. Reserve 50 only for genuine '
         'equipoise. High-confidence claims deserve 80+. Clear facts deserve 90+. '
-        'Use this exact section order: '
-        'KEY DISAGREEMENTS (the 2-3 crux points where agents diverge), '
-        'EVIDENCE WEIGHING (which agent provided the strongest evidence and why), '
-        'BAYESIAN UPDATE (prior → evidence → posterior reasoning), '
-        'FINAL VERDICT (one clear, decisive conclusion — no hedging), '
+        'Use this exact section order with these exact headings: '
+        'KEY DISAGREEMENTS: (the 2-3 crux points where agents diverge), '
+        'EVIDENCE WEIGHING: (which agent provided the strongest evidence and why), '
+        'BAYESIAN UPDATE: (prior → evidence → posterior reasoning, show your work), '
+        'FINAL VERDICT: (one clear, decisive conclusion — no hedging), '
         'CONFIDENCE SCORE: [0-100], '
-        'DISSENTING VIEWS (strongest remaining counterargument that you cannot dismiss).'
+        'DISSENTING VIEWS: (strongest remaining counterargument that you cannot dismiss).'
     ),
 )

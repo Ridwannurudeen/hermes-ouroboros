@@ -26,9 +26,9 @@ def response_quality_score(result: dict[str, Any]) -> int:
         score += 25
     elif len(verdict) >= 100:
         score += 10
-    if 'dissenting views:' in lowered or 'dissenting' in lowered:
+    if 'dissenting views' in lowered or 'dissenting' in lowered:
         score += 20
-    if 'key disagreements:' in lowered or 'verdict:' in lowered:
+    if any(kw in lowered for kw in ('key disagreements', 'final verdict', 'verdict:', 'bayesian update')):
         score += 20
     if confidence >= 80:
         score += 20

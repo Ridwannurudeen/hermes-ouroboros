@@ -1,5 +1,7 @@
 # Hermes Ouroboros
 
+**Live demo:** http://75.119.153.252:8002 — use the admin token shown in the UI to access all sessions.
+
 A self-improving multi-agent council built on [NousResearch/Hermes-3](https://huggingface.co/NousResearch/Hermes-3-Llama-3.1-8B). Four adversarial agents debate every query in parallel. The Arbiter synthesizes a verdict. The verdict becomes training signal. The model that ran the debate improves itself.
 
 **The key insight: the debate IS the preference data.** When the Arbiter picks a winner, the aligned responses become `chosen` and the overruled responses become `rejected` — automatic DPO pairs from every session.
@@ -69,25 +71,21 @@ Each agent embodies a distinct intellectual tradition:
 
 ## Benchmark
 
-Honest comparison: base Hermes-3 (no guidance) vs Hermes-3 + learned guidance distilled from prior council sessions.
+Comparative benchmark: base Hermes-3 (no guidance) vs Hermes-3 + learned guidance distilled from council session history.
 
-| Metric | Base Hermes-3 | + Learned Guidance | Delta |
-|---|---:|---:|---:|
-| Avg confidence | 84.6 | 87.6 | +3.5% |
-| Avg response quality | 88.0 | 100.0 | +13.6% |
-| Avg elapsed time (s) | 135.1 | 101.7 | −24.7% |
-
-To re-run:
+To run:
 ```bash
 python -X utf8 benchmark/run_benchmark_hermes.py
 ```
 
-Five LoRA adapters (v1–v5) have been trained. v1 is the production adapter; v3–v5 achieved lower training loss but did not exceed v1 on confidence scoring. Only a candidate that beats the active benchmark gets promoted.
+The benchmark scores each session on confidence (0–100 from the Arbiter) and response quality (structural completeness: section headings, verdict length, dissenting views). Only a candidate adapter that beats the active benchmark score gets promoted to production.
+
+DPO fine-tuning requires Modal credentials (`MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`). Without credentials the system still runs, generates preference data, and evaluates quality — training is the only step that requires GPU access.
 
 ## Prerequisites
 
 - [Ollama](https://ollama.com) installed and running
-- Hermes-3 pulled: `ollama pull hermes3:8b`
+- Hermes-3 pulled: `ollama pull hermes3:3b` (or `hermes3:8b` for higher quality)
 - Python 3.12+
 
 ## Quick start

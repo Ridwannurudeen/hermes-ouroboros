@@ -1,0 +1,66 @@
+{
+  "v0": {
+    "model": "base_hermes_3_8b",
+    "training_loss": null,
+    "deployed_at": null
+  },
+  "v1": {
+    "model": "hermes_ouroboros_v1",
+    "adapter_path": "C:\\Users\\GUDMAN\\Desktop\\HERMES_OUROBOROS\\models\\adapter_v1",
+    "training_loss": 4.096419453620911,
+    "deployed_at": "2026-03-07T19:10:18.371001+00:00",
+    "inference_target": {
+      "provider": "learned_profile",
+      "model": "learned_profile",
+      "updated_at": "2026-03-09T10:25:02.590521+00:00"
+    }
+  },
+  "v2": {
+    "model": "hermes_ouroboros_v2",
+    "adapter_path": "C:\\Users\\GUDMAN\\Desktop\\HERMES_OUROBOROS\\models\\adapter_v2",
+    "training_loss": 4.092706084251404,
+    "deployed_at": "2026-03-09T10:01:28.209457+00:00",
+    "inference_target": {
+      "provider": "modal_http",
+      "model": "adapter_v2",
+      "updated_at": "2026-03-09T10:06:17.780926+00:00"
+    }
+  },
+  "_meta": {
+    "active_version": "v1",
+    "updated_at": "2026-03-09T12:44:55.941579+00:00"
+  },
+  "v3": {
+    "model": "hermes_ouroboros_v3",
+    "adapter_path": "C:\\Users\\GUDMAN\\Desktop\\HERMES_OUROBOROS\\models\\adapter_v3",
+    "training_loss": 3.2142542600631714,
+    "deployed_at": "2026-03-09T11:20:19.570181+00:00",
+    "inference_target": {
+      "provider": "modal_http",
+      "model": "adapter_v3",
+      "updated_at": "2026-03-09T11:22:19.520830+00:00"
+    }
+  },
+  "v4": {
+    "model": "hermes_ouroboros_v4",
+    "adapter_path": "C:\\Users\\GUDMAN\\Desktop\\HERMES_OUROBOROS\\models\\adapter_v4",
+    "training_loss": 3.280510323388236,
+    "deployed_at": "2026-03-09T11:43:11.498550+00:00",
+    "inference_target": {
+      "provider": "modal_http",
+      "model": "adapter_v4",
+      "updated_at": "2026-03-09T11:45:08.188100+00:00"
+    }
+  },
+  "v5": {
+    "model": "hermes_ouroboros_v5",
+    "adapter_path": "C:\\Users\\GUDMAN\\Desktop\\HERMES_OUROBOROS\\models\\adapter_v5",
+    "training_loss": 2.657344341278076,
+    "deployed_at": "2026-03-09T12:23:49.883972+00:00",
+    "inference_target": {
+      "provider": "modal_http",
+      "model": "adapter_v5",
+      "updated_at": "2026-03-09T14:00:40.705457+00:00"
+    }
+  }
+}

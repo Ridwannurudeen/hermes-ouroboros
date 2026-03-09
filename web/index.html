@@ -1,0 +1,1182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hermes Ouroboros</title>
+    <style>
+      :root {
+        --ink: #1d1915;
+        --muted: #665d54;
+        --line: rgba(29, 25, 21, 0.12);
+        --accent: #b34728;
+        --accent-deep: #7f2f1a;
+        --paper: rgba(255, 251, 244, 0.88);
+        --paper-strong: #fffaf1;
+        --panel-shadow: 0 18px 50px rgba(64, 44, 24, 0.12);
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(179, 71, 40, 0.18), transparent 34%),
+          radial-gradient(circle at bottom right, rgba(71, 106, 90, 0.14), transparent 26%),
+          linear-gradient(135deg, #efe2cb 0%, #faf6ee 56%, #ebe0d0 100%);
+      }
+
+      .shell {
+        width: min(1240px, calc(100vw - 28px));
+        margin: 18px auto 28px;
+        display: grid;
+        grid-template-columns: 1.4fr 0.95fr;
+        gap: 16px;
+      }
+
+      .card {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        box-shadow: var(--panel-shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      .hero,
+      .section,
+      .aside {
+        padding: 22px;
+      }
+
+      .eyebrow {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(179, 71, 40, 0.1);
+        color: var(--accent-deep);
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 14px 0 10px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(34px, 6vw, 58px);
+        line-height: 0.95;
+        letter-spacing: -0.04em;
+      }
+
+      .lede {
+        margin: 0;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.6;
+        max-width: 760px;
+      }
+
+      .grid-hero {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .metric {
+        padding: 14px 16px;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: var(--paper-strong);
+      }
+
+      .metric-label {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .metric-value {
+        margin-top: 6px;
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      .section-title {
+        margin: 0 0 12px;
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+
+      .auth-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .auth-card,
+      .query-panel,
+      .runtime-panel,
+      .history-card {
+        padding: 16px;
+        border-radius: 20px;
+        background: var(--paper-strong);
+        border: 1px solid var(--line);
+      }
+
+      .auth-card h2,
+      .query-panel h2,
+      .history-card h2 {
+        margin: 0 0 10px;
+        font-size: 18px;
+      }
+
+      .mini {
+        margin: 0 0 12px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .field-stack {
+        display: grid;
+        gap: 10px;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        padding: 12px 14px;
+        font: inherit;
+        background: rgba(255, 255, 255, 0.78);
+        color: var(--ink);
+      }
+
+      textarea {
+        min-height: 124px;
+        resize: vertical;
+      }
+
+      .mode-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 12px 0;
+      }
+
+      .mode-row label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.62);
+      }
+
+      .actions {
+        margin-top: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .panel-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 16px;
+        color: #fff9f4;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+      }
+
+      button.secondary {
+        color: var(--ink);
+        background: #f3eadb;
+        border: 1px solid var(--line);
+      }
+
+      button:disabled {
+        opacity: 0.65;
+        cursor: wait;
+      }
+
+      .status {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.6);
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      pre {
+        margin: 0;
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: #241c15;
+        color: #f7f0df;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-family: Consolas, "Courier New", monospace;
+      }
+
+      .runtime-badges,
+      .detail-grid,
+      .agent-grid {
+        display: grid;
+        gap: 10px;
+      }
+
+      .runtime-badges {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-bottom: 12px;
+      }
+
+      .runtime-chip,
+      .detail-card,
+      .agent-card {
+        padding: 14px;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.7);
+      }
+
+      .runtime-chip strong,
+      .detail-card strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 16px;
+      }
+
+      .detail-grid {
+        grid-template-columns: 1.1fr 0.9fr;
+        margin-bottom: 12px;
+      }
+
+      .detail-card p,
+      .agent-card p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      .detail-card .verdict-copy {
+        color: var(--ink);
+      }
+
+      .detail-card .label,
+      .agent-card .label {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .agent-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .agent-card details {
+        margin-top: 10px;
+      }
+
+      .agent-card summary {
+        cursor: pointer;
+        color: var(--accent-deep);
+        font-weight: 700;
+      }
+
+      .agent-card pre {
+        margin-top: 10px;
+        font-size: 12px;
+        max-height: 260px;
+        overflow: auto;
+      }
+
+      .muted-empty {
+        color: var(--muted);
+        padding: 18px;
+        border-radius: 18px;
+        border: 1px dashed var(--line);
+        background: rgba(255, 255, 255, 0.45);
+      }
+
+      .raw-shell {
+        margin-top: 12px;
+      }
+
+      .raw-shell summary {
+        cursor: pointer;
+        color: var(--accent-deep);
+        font-weight: 700;
+      }
+
+      .history-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .history-controls {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .history-filters {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .history-filters select,
+      .history-controls input {
+        width: 100%;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        padding: 10px 12px;
+        font: inherit;
+        background: rgba(255, 255, 255, 0.82);
+      }
+
+      .stat-grid {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: 1fr 1fr;
+        margin-bottom: 14px;
+      }
+
+      .stat-tile {
+        padding: 14px;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.68);
+      }
+
+      .stat-tile strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 18px;
+      }
+
+      .signal-negative strong {
+        color: #9a2f1a;
+      }
+
+      .signal-positive strong {
+        color: #216345;
+      }
+
+      .signal-warn strong {
+        color: #8a5a0a;
+      }
+
+      .note-box {
+        margin-top: 10px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        background: rgba(255, 248, 230, 0.72);
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .history-item {
+        padding: 14px;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.64);
+        cursor: pointer;
+        transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+      }
+
+      .history-item:hover {
+        transform: translateY(-1px);
+        border-color: rgba(179, 71, 40, 0.3);
+      }
+
+      .history-item.active {
+        border-color: rgba(179, 71, 40, 0.45);
+        background: rgba(255, 248, 240, 0.92);
+      }
+
+      .history-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .history-query {
+        margin: 8px 0;
+        font-size: 15px;
+        line-height: 1.45;
+      }
+
+      @media (max-width: 980px) {
+        .shell { grid-template-columns: 1fr; }
+        .grid-hero,
+        .auth-grid { grid-template-columns: 1fr; }
+        .runtime-badges,
+        .detail-grid,
+        .agent-grid,
+        .history-filters { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="card">
+        <div class="hero">
+          <span class="eyebrow">Hermes Ouroboros</span>
+          <h1>The Council Becomes a Product</h1>
+          <p class="lede">
+            Hermes now supports user accounts, cookie-backed sessions, admin token override,
+            trained-path fallback, and per-user history on top of the same multi-agent engine.
+          </p>
+          <div class="grid-hero">
+            <div class="metric">
+              <div class="metric-label">Provider</div>
+              <div class="metric-value" id="providerName">Loading...</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Model</div>
+              <div class="metric-value" id="providerModel">Loading...</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Recent Sessions</div>
+              <div class="metric-value" id="sessionCount">-</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <p class="section-title">Access</p>
+          <div class="auth-grid">
+            <div class="auth-card">
+              <h2>User Session</h2>
+              <p class="mini">Create an account or log in. Query history will be scoped to your user.</p>
+              <div class="field-stack">
+                <input id="authEmail" type="email" placeholder="Email address">
+                <input id="authPassword" type="password" placeholder="Password">
+              </div>
+              <div class="actions">
+                <button id="registerButton">Register</button>
+                <button id="loginButton" class="secondary">Login</button>
+                <button id="logoutButton" class="secondary">Logout</button>
+              </div>
+            </div>
+
+            <div class="auth-card">
+              <h2>Admin Override</h2>
+              <p class="mini">Optional bearer token for admin access to all sessions and direct operator control.</p>
+              <div class="field-stack">
+                <input id="adminToken" type="password" placeholder="Admin token">
+              </div>
+              <div class="actions">
+                <span class="pill" id="authState">Anonymous</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="query-panel">
+            <p class="section-title">Run Query</p>
+            <h2>Dispatch Council</h2>
+            <div class="mode-row">
+              <label><input type="radio" name="mode" value="default" checked> Default council</label>
+              <label><input type="radio" name="mode" value="trained"> Trained path</label>
+            </div>
+            <textarea id="queryInput" placeholder="Ask Hermes a serious question. Example: Is staking ETH lower risk than trading meme coins?"></textarea>
+            <div class="actions">
+              <button id="runButton">Run Query</button>
+              <span class="status" id="statusLine">Ready.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+            <div class="runtime-panel">
+              <p class="section-title">Latest Result</p>
+              <div class="panel-actions">
+                <button id="exportMarkdownButton" class="secondary">Export Markdown</button>
+                <button id="exportJsonButton" class="secondary">Export JSON</button>
+                <button id="shareButton" class="secondary">Create Share Link</button>
+                <button id="copyShareButton" class="secondary">Copy Share Link</button>
+                <button id="revokeShareButton" class="secondary">Disable Share Link</button>
+                <button id="benchmarkReportButton" class="secondary">Benchmark Report</button>
+              </div>
+              <div class="note-box" id="shareStatus">This verdict is private until you publish a share link.</div>
+              <div class="runtime-badges" id="runtimeBox">
+                <div class="muted-empty">No runtime data yet.</div>
+              </div>
+              <div id="resultBox" class="muted-empty">Submit a query to inspect the council verdict.</div>
+            </div>
+        </div>
+      </section>
+
+      <aside class="card aside">
+        <div class="history-card" style="margin-bottom: 16px;">
+          <p class="section-title">Operator Status</p>
+          <h2>Loop Health</h2>
+          <p class="mini">Live training readiness, skill count, and benchmark direction.</p>
+          <div class="stat-grid">
+            <div class="stat-tile">
+              <div class="metric-label">Current Model</div>
+              <strong id="statCurrentModel">-</strong>
+            </div>
+            <div class="stat-tile">
+              <div class="metric-label">Next Trigger</div>
+              <strong id="statNextTrigger">-</strong>
+            </div>
+            <div class="stat-tile">
+              <div class="metric-label">Skills</div>
+              <strong id="statSkills">-</strong>
+            </div>
+            <div class="stat-tile">
+              <div class="metric-label">Last 10 Avg</div>
+              <strong id="statConfidence10">-</strong>
+            </div>
+            <div class="stat-tile" id="benchConfidenceTile">
+              <div class="metric-label">Benchmark Confidence</div>
+              <strong id="statBenchConfidence">-</strong>
+            </div>
+            <div class="stat-tile" id="benchQualityTile">
+              <div class="metric-label">Benchmark Quality</div>
+              <strong id="statBenchQuality">-</strong>
+            </div>
+          </div>
+          <div class="note-box" id="benchmarkNote">Benchmark provenance will appear here once stats load.</div>
+        </div>
+        <div class="history-card">
+          <p class="section-title">Recent Sessions</p>
+          <h2>History</h2>
+          <p class="mini">User accounts see their own sessions. Admin token sees everything.</p>
+          <div class="history-controls">
+            <input id="historySearch" type="search" placeholder="Search session queries">
+            <div class="history-filters">
+              <select id="historyBackend">
+                <option value="all">All backends</option>
+                <option value="openai">OpenAI</option>
+                <option value="trained_fallback">Trained fallback</option>
+                <option value="mock">Mock</option>
+              </select>
+              <select id="historyConflict">
+                <option value="all">All conflict states</option>
+                <option value="conflict">Conflict only</option>
+                <option value="aligned">Aligned only</option>
+              </select>
+            </div>
+          </div>
+          <div class="history-list" id="historyList"></div>
+        </div>
+      </aside>
+    </main>
+
+    <script>
+      const providerName = document.getElementById('providerName');
+      const providerModel = document.getElementById('providerModel');
+      const sessionCount = document.getElementById('sessionCount');
+      const authState = document.getElementById('authState');
+      const statusLine = document.getElementById('statusLine');
+      const runtimeBox = document.getElementById('runtimeBox');
+      const resultBox = document.getElementById('resultBox');
+      const historyList = document.getElementById('historyList');
+      const statCurrentModel = document.getElementById('statCurrentModel');
+      const statNextTrigger = document.getElementById('statNextTrigger');
+      const statSkills = document.getElementById('statSkills');
+      const statConfidence10 = document.getElementById('statConfidence10');
+      const statBenchConfidence = document.getElementById('statBenchConfidence');
+      const statBenchQuality = document.getElementById('statBenchQuality');
+      const benchConfidenceTile = document.getElementById('benchConfidenceTile');
+      const benchQualityTile = document.getElementById('benchQualityTile');
+      const benchmarkNote = document.getElementById('benchmarkNote');
+      const historySearch = document.getElementById('historySearch');
+      const historyBackend = document.getElementById('historyBackend');
+      const historyConflict = document.getElementById('historyConflict');
+      const queryInput = document.getElementById('queryInput');
+      const runButton = document.getElementById('runButton');
+      const exportMarkdownButton = document.getElementById('exportMarkdownButton');
+      const exportJsonButton = document.getElementById('exportJsonButton');
+      const shareButton = document.getElementById('shareButton');
+      const copyShareButton = document.getElementById('copyShareButton');
+      const revokeShareButton = document.getElementById('revokeShareButton');
+      const shareStatus = document.getElementById('shareStatus');
+      const benchmarkReportButton = document.getElementById('benchmarkReportButton');
+      const registerButton = document.getElementById('registerButton');
+      const loginButton = document.getElementById('loginButton');
+      const logoutButton = document.getElementById('logoutButton');
+      const authEmail = document.getElementById('authEmail');
+      const authPassword = document.getElementById('authPassword');
+      const adminToken = document.getElementById('adminToken');
+      let selectedSessionId = null;
+      let currentSession = null;
+      let historySearchTimer = null;
+      let csrfToken = null;
+
+      const ADMIN_TOKEN_KEY = 'hermes_admin_token';
+
+      function currentAdminToken() {
+        return adminToken.value.trim();
+      }
+
+      function headers(extra = {}) {
+        const token = currentAdminToken();
+        const merged = {...extra};
+        if (token) {
+          merged['Authorization'] = `Bearer ${token}`;
+        }
+        if (csrfToken) {
+          merged['X-CSRF-Token'] = csrfToken;
+        }
+        return merged;
+      }
+
+      async function api(path, options = {}) {
+        const finalOptions = {
+          credentials: 'same-origin',
+          ...options,
+          headers: headers(options.headers || {}),
+        };
+        const response = await fetch(path, finalOptions);
+        return response;
+      }
+
+      async function downloadFromApi(path, filename) {
+        const response = await api(path);
+        if (!response.ok) {
+          throw new Error(await response.text());
+        }
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function renderAuthState(meta) {
+        csrfToken = meta.csrf_token || null;
+        if (meta.current_role === 'admin') {
+          authState.textContent = meta.share_links_ready ? 'Admin token active' : 'Admin token active • share links local-only';
+          return;
+        }
+        if (meta.current_user) {
+          authState.textContent = meta.share_links_ready
+            ? `User: ${meta.current_user.email}`
+            : `User: ${meta.current_user.email} • share links local-only`;
+          return;
+        }
+        authState.textContent = meta.share_links_ready ? 'Anonymous' : 'Anonymous • share links local-only';
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#39;');
+      }
+
+      function parseVerdictSections(text) {
+        const normalized = String(text || '');
+        const sections = {};
+        let current = 'body';
+        sections[current] = [];
+        for (const line of normalized.split('\n')) {
+          const match = line.match(/^\s*([A-Za-z ][A-Za-z ]+):\s*$/);
+          if (match) {
+            current = match[1].trim().toLowerCase();
+            if (!sections[current]) {
+              sections[current] = [];
+            }
+            continue;
+          }
+          if (!sections[current]) {
+            sections[current] = [];
+          }
+          sections[current].push(line);
+        }
+        const cooked = {};
+        for (const [key, lines] of Object.entries(sections)) {
+          cooked[key] = lines.join('\n').trim();
+        }
+        return cooked;
+      }
+
+      function runtimeMarkup(runtime, session) {
+        const cards = [
+          ['Mode', runtime.mode || 'n/a'],
+          ['Provider', runtime.provider || 'n/a'],
+          ['Confidence', `${session.confidence_score ?? 'n/a'}/100`],
+        ];
+        return cards.map(([label, value]) => `
+          <div class="runtime-chip">
+            <div class="metric-label">${escapeHtml(label)}</div>
+            <strong>${escapeHtml(value)}</strong>
+          </div>
+        `).join('');
+      }
+
+      function agentCardMarkup(role, response, timing) {
+        const duration = timing && typeof timing.duration_seconds === 'number'
+          ? `${timing.duration_seconds.toFixed(1)}s`
+          : 'n/a';
+        const backend = timing && timing.backend ? timing.backend : 'unknown';
+        return `
+          <div class="agent-card">
+            <div class="label">${escapeHtml(role)}</div>
+            <strong>${escapeHtml(backend)}</strong>
+            <p>${escapeHtml(duration)} • ${escapeHtml(timing?.status || 'unknown')}</p>
+            <details>
+              <summary>Show full response</summary>
+              <pre>${escapeHtml(response || 'No response.')}</pre>
+            </details>
+          </div>
+        `;
+      }
+
+      function renderSessionResult(payload, runtime) {
+        const sections = parseVerdictSections(payload.arbiter_verdict || '');
+        const keyDisagreements = sections['key disagreements'] || payload.conflict_summary || 'No disagreement summary available.';
+        const verdict = sections['verdict'] || payload.arbiter_verdict || 'No verdict returned.';
+        const dissent = sections['dissenting views'] || 'No dissenting views recorded.';
+        const fallbackNote = runtime?.fallback_reason
+          ? `<div class="note-box">${escapeHtml(runtime.fallback_reason)}</div>`
+          : '';
+        const agents = Object.entries(payload.agent_responses || {})
+          .map(([role, response]) => agentCardMarkup(role, response, payload.agent_timings?.[role]))
+          .join('');
+
+        return `
+          <div class="detail-grid">
+            <div class="detail-card">
+              <div class="label">Verdict</div>
+              <strong>${escapeHtml(payload.query || 'Untitled session')}</strong>
+              <p class="verdict-copy">${escapeHtml(verdict)}</p>
+            </div>
+            <div class="detail-card">
+              <div class="label">Conflict</div>
+              <strong>${payload.conflict_detected ? 'Conflict detected' : 'Agents aligned'}</strong>
+              <p>${escapeHtml(keyDisagreements)}</p>
+            </div>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-card">
+              <div class="label">Dissent</div>
+              <strong>Open threads</strong>
+              <p>${escapeHtml(dissent)}</p>
+            </div>
+            <div class="detail-card">
+              <div class="label">Session</div>
+              <strong>${escapeHtml((payload.session_id || '').slice(0, 8))}</strong>
+              <p>${escapeHtml(new Date(payload.timestamp).toLocaleString())}<br>${escapeHtml(String(payload.elapsed_seconds))}s total</p>
+            </div>
+          </div>
+          ${fallbackNote}
+          <div class="agent-grid">
+            ${agents || '<div class="muted-empty">No agent outputs recorded.</div>'}
+          </div>
+          <details class="raw-shell">
+            <summary>Show raw session JSON</summary>
+            <pre>${escapeHtml(JSON.stringify(payload, null, 2))}</pre>
+          </details>
+        `;
+      }
+
+      function sessionMarkup(session) {
+        const when = new Date(session.timestamp).toLocaleString();
+        const confidence = `${session.confidence_score}/100`;
+        const owner = session.owner_email ? `Owner: ${session.owner_email}` : 'Owner: system';
+        const backend = session.backend || 'unknown';
+        return `
+          <div class="history-item ${selectedSessionId === session.session_id ? 'active' : ''}" data-session-id="${session.session_id}">
+            <div class="history-top">
+              <span>${session.session_id.slice(0, 8)}</span>
+              <span>${confidence}</span>
+            </div>
+            <div class="history-query">${session.query}</div>
+            <div class="history-top">
+              <span>${when}</span>
+              <span>${session.elapsed_seconds.toFixed(1)}s</span>
+            </div>
+            <div class="history-top">
+              <span>${owner}</span>
+              <span>${session.conflict_detected ? 'conflict' : 'aligned'}</span>
+            </div>
+            <div class="history-top">
+              <span>${backend}</span>
+              <span>${session.is_shared ? 'shared' : (session.has_skill ? 'skill' : 'private')}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      function updateShareControls(session) {
+        currentSession = session || null;
+        const isShared = Boolean(session && session.share_url);
+        shareButton.disabled = !session || isShared;
+        copyShareButton.disabled = !isShared;
+        revokeShareButton.disabled = !isShared;
+        if (!session) {
+          shareStatus.textContent = 'This verdict is private until you publish a share link.';
+          return;
+        }
+        if (isShared) {
+          shareStatus.textContent = `Public share link is active. Published ${session.shared_at ? new Date(session.shared_at).toLocaleString() : 'now'}.`;
+          return;
+        }
+        shareStatus.textContent = 'This verdict is private until you publish a share link.';
+      }
+
+      async function loadMeta() {
+        const response = await api('/api/meta');
+        const meta = await response.json();
+        providerName.textContent = meta.provider_name;
+        providerModel.textContent = meta.model;
+        sessionCount.textContent = meta.recent_session_count;
+        renderAuthState(meta);
+        if (meta.user_auth_enabled) {
+          statusLine.textContent = `User auth enabled. Query limit: ${meta.rate_limit_requests}/${meta.rate_limit_window_seconds}s`;
+        } else if (meta.admin_token_enabled) {
+          statusLine.textContent = 'Admin token mode enabled.';
+        } else {
+          statusLine.textContent = 'Ready.';
+        }
+        if (!meta.share_links_ready) {
+          shareStatus.textContent = 'Share links work locally, but set HERMES_PUBLIC_BASE_URL before public deployment.';
+        }
+        return meta;
+      }
+
+      async function loadSessions() {
+        const params = new URLSearchParams({
+          limit: '24',
+          q: historySearch.value.trim(),
+          backend: historyBackend.value,
+          conflict: historyConflict.value,
+        });
+        const response = await api(`/api/sessions?${params.toString()}`);
+        if (response.status === 401) {
+          historyList.innerHTML = '<div class="history-item">Log in or enter the admin token to see sessions.</div>';
+          return;
+        }
+        const data = await response.json();
+        historyList.innerHTML = data.sessions.map(sessionMarkup).join('') || '<div class="history-item">No sessions yet.</div>';
+        for (const item of historyList.querySelectorAll('[data-session-id]')) {
+          item.addEventListener('click', () => loadSessionDetail(item.dataset.sessionId));
+        }
+      }
+
+      async function loadStats() {
+        const response = await api('/api/stats');
+        if (response.status === 401) {
+          statCurrentModel.textContent = 'Locked';
+          statNextTrigger.textContent = 'Auth required';
+          statSkills.textContent = '-';
+          statConfidence10.textContent = '-';
+          statBenchConfidence.textContent = '-';
+          statBenchQuality.textContent = '-';
+          benchmarkNote.textContent = 'Operator stats are locked until you log in or provide the admin token.';
+          benchConfidenceTile.className = 'stat-tile';
+          benchQualityTile.className = 'stat-tile';
+          return;
+        }
+        const stats = await response.json();
+        statCurrentModel.textContent = `${stats.training.current_version} -> ${stats.training.next_version}`;
+        statNextTrigger.textContent = stats.training.remaining_until_next_cycle === 0
+          ? 'Ready now'
+          : `${stats.training.remaining_until_next_cycle} HQ left`;
+        statSkills.textContent = String(stats.skills_created);
+        statConfidence10.textContent = `${stats.average_confidence_last_10}/100`;
+        if (stats.benchmark) {
+          const confidenceDelta = Number(stats.benchmark.confidence_delta_pct || 0);
+          const qualityDelta = Number(stats.benchmark.quality_delta_pct || 0);
+          statBenchConfidence.textContent = `${confidenceDelta > 0 ? '+' : ''}${confidenceDelta}%`;
+          statBenchQuality.textContent = `${qualityDelta > 0 ? '+' : ''}${qualityDelta}%`;
+          benchConfidenceTile.className = `stat-tile ${confidenceDelta >= 0 ? 'signal-positive' : 'signal-negative'}`;
+          benchQualityTile.className = `stat-tile ${qualityDelta >= 0 ? 'signal-positive' : 'signal-negative'}`;
+          if (stats.benchmark.proof_status === 'fallback_only') {
+            benchmarkNote.textContent = 'Current trained benchmark is fallback-only. The Modal adapter was unavailable, so this is not proof that the fine-tuned model improved the system.';
+            benchConfidenceTile.className = 'stat-tile signal-warn';
+            benchQualityTile.className = 'stat-tile signal-warn';
+          } else if (stats.benchmark.proof_status === 'mixed') {
+            benchmarkNote.textContent = 'Current trained benchmark mixed true trained calls with fallback calls. Treat the result as partial evidence only.';
+          } else {
+            benchmarkNote.textContent = `Benchmark labels: ${stats.benchmark.v0_label} vs ${stats.benchmark.v1_label}.`;
+          }
+        } else {
+          statBenchConfidence.textContent = 'No data';
+          statBenchQuality.textContent = 'No data';
+          benchmarkNote.textContent = 'No benchmark result files are available yet.';
+          benchConfidenceTile.className = 'stat-tile';
+          benchQualityTile.className = 'stat-tile';
+        }
+      }
+
+      async function loadSessionDetail(sessionId) {
+        selectedSessionId = sessionId;
+        await loadSessions();
+        const response = await api(`/api/sessions/${sessionId}`);
+        if (!response.ok) {
+          statusLine.textContent = await response.text();
+          return;
+        }
+        const payload = await response.json();
+        updateShareControls(payload);
+        const runtime = {
+          mode: 'history',
+          provider: payload.provider_meta?.arbiter?.backend || 'recorded_session',
+          fallback_reason: null,
+        };
+        runtimeBox.innerHTML = runtimeMarkup(runtime, payload);
+        resultBox.innerHTML = renderSessionResult(payload, runtime);
+        statusLine.textContent = `Loaded session ${payload.session_id.slice(0, 8)}.`;
+      }
+
+      async function submitQuery() {
+        const query = queryInput.value.trim();
+        const mode = document.querySelector('input[name="mode"]:checked').value;
+        if (!query) {
+          statusLine.textContent = 'Enter a query first.';
+          return;
+        }
+        runButton.disabled = true;
+        statusLine.textContent = 'Council is running...';
+        runtimeBox.innerHTML = `<div class="muted-empty">Council is running in ${escapeHtml(mode)} mode...</div>`;
+        try {
+          const response = await api('/api/query', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({query, mode}),
+          });
+          if (!response.ok) {
+            throw new Error(await response.text());
+          }
+          const payload = await response.json();
+          selectedSessionId = payload.result.session_id;
+          updateShareControls(payload.result);
+          runtimeBox.innerHTML = runtimeMarkup(payload.runtime, payload.result);
+          resultBox.innerHTML = renderSessionResult(payload.result, payload.runtime);
+          statusLine.textContent = 'Council completed.';
+          await loadMeta();
+          await loadStats();
+          await loadSessions();
+        } catch (error) {
+          runtimeBox.innerHTML = '<div class="muted-empty">Request failed.</div>';
+          resultBox.innerHTML = `<div class="muted-empty">${escapeHtml(String(error))}</div>`;
+          statusLine.textContent = 'Request failed.';
+        } finally {
+          runButton.disabled = false;
+        }
+      }
+
+      async function authRequest(path) {
+        const email = authEmail.value.trim();
+        const password = authPassword.value;
+        const response = await api(path, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({email, password}),
+        });
+        if (!response.ok) {
+          throw new Error(await response.text());
+        }
+        return response.json();
+      }
+
+      async function handleRegister() {
+        try {
+          const payload = await authRequest('/api/register');
+          selectedSessionId = null;
+          authState.textContent = `User: ${payload.user.email}`;
+          statusLine.textContent = 'Account created and logged in.';
+          await loadMeta();
+          await loadStats();
+          await loadSessions();
+        } catch (error) {
+          statusLine.textContent = String(error);
+        }
+      }
+
+      async function handleLogin() {
+        try {
+          const payload = await authRequest('/api/login');
+          selectedSessionId = null;
+          authState.textContent = `User: ${payload.user.email}`;
+          statusLine.textContent = 'Logged in.';
+          await loadMeta();
+          await loadStats();
+          await loadSessions();
+        } catch (error) {
+          statusLine.textContent = String(error);
+        }
+      }
+
+      async function handleLogout() {
+        await api('/api/logout', {method: 'POST'});
+        selectedSessionId = null;
+        csrfToken = null;
+        statusLine.textContent = 'Logged out.';
+        await loadMeta();
+        await loadStats();
+        await loadSessions();
+      }
+
+      async function handleExport(format) {
+        if (!selectedSessionId) {
+          statusLine.textContent = 'Select a session first.';
+          return;
+        }
+        try {
+          const suffix = format === 'json' ? 'json' : 'md';
+          await downloadFromApi(`/api/sessions/${selectedSessionId}/export?format=${format}`, `${selectedSessionId}.${suffix}`);
+          statusLine.textContent = `Exported ${selectedSessionId.slice(0, 8)}.${suffix}`;
+        } catch (error) {
+          statusLine.textContent = String(error);
+        }
+      }
+
+      async function handleCreateShare() {
+        if (!selectedSessionId) {
+          statusLine.textContent = 'Select a session first.';
+          return;
+        }
+        try {
+          const response = await api(`/api/sessions/${selectedSessionId}/share`, {method: 'POST'});
+          if (!response.ok) {
+            throw new Error(await response.text());
+          }
+          const payload = await response.json();
+          currentSession = {...(currentSession || {}), ...payload};
+          updateShareControls(currentSession);
+          await loadSessions();
+          statusLine.textContent = 'Share link created.';
+        } catch (error) {
+          statusLine.textContent = String(error);
+        }
+      }
+
+      async function handleCopyShare() {
+        if (!currentSession || !currentSession.share_url) {
+          statusLine.textContent = 'Create a share link first.';
+          return;
+        }
+        try {
+          await navigator.clipboard.writeText(currentSession.share_url);
+          statusLine.textContent = 'Share link copied.';
+        } catch (error) {
+          statusLine.textContent = String(error);
+        }
+      }
+
+      async function handleRevokeShare() {
+        if (!selectedSessionId || !currentSession || !currentSession.share_url) {
+          statusLine.textContent = 'No active share link to disable.';
+          return;
+        }
+        try {
+          const response = await api(`/api/sessions/${selectedSessionId}/share`, {method: 'DELETE'});
+          if (!response.ok) {
+            throw new Error(await response.text());
+          }
+          const payload = await response.json();
+          currentSession = {...(currentSession || {}), ...payload};
+          updateShareControls(currentSession);
+          await loadSessions();
+          statusLine.textContent = 'Share link disabled.';
+        } catch (error) {
+          statusLine.textContent = String(error);
+        }
+      }
+
+      async function handleBenchmarkReport() {
+        try {
+          await downloadFromApi('/api/report/benchmark', 'hermes_benchmark_report.md');
+          statusLine.textContent = 'Downloaded benchmark report.';
+        } catch (error) {
+          statusLine.textContent = String(error);
+        }
+      }
+
+      runButton.addEventListener('click', submitQuery);
+      exportMarkdownButton.addEventListener('click', () => handleExport('markdown'));
+      exportJsonButton.addEventListener('click', () => handleExport('json'));
+      shareButton.addEventListener('click', handleCreateShare);
+      copyShareButton.addEventListener('click', handleCopyShare);
+      revokeShareButton.addEventListener('click', handleRevokeShare);
+      benchmarkReportButton.addEventListener('click', handleBenchmarkReport);
+      registerButton.addEventListener('click', handleRegister);
+      loginButton.addEventListener('click', handleLogin);
+      logoutButton.addEventListener('click', handleLogout);
+      queryInput.addEventListener('keydown', (event) => {
+        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+          submitQuery();
+        }
+      });
+      adminToken.value = sessionStorage.getItem(ADMIN_TOKEN_KEY) || '';
+      adminToken.addEventListener('change', async () => {
+        const value = adminToken.value.trim();
+        if (value) {
+          sessionStorage.setItem(ADMIN_TOKEN_KEY, value);
+        } else {
+          sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+        }
+        await loadMeta();
+        await loadStats();
+        await loadSessions();
+      });
+      historySearch.addEventListener('input', () => {
+        clearTimeout(historySearchTimer);
+        historySearchTimer = setTimeout(() => {
+          loadSessions().catch(() => {});
+        }, 180);
+      });
+      historyBackend.addEventListener('change', () => {
+        loadSessions().catch(() => {});
+      });
+      historyConflict.addEventListener('change', () => {
+        loadSessions().catch(() => {});
+      });
+
+      loadMeta().then(async () => {
+        updateShareControls(null);
+        await loadStats();
+        await loadSessions();
+      }).catch(() => {});
+    </script>
+  </body>
+</html>

@@ -1,0 +1,27 @@
+provider:
+  name: openai_compatible
+  model: gpt-5-mini
+  base_url: https://api.openai.com/v1
+  api_key_env: OPENAI_API_KEY
+  timeout_seconds: 120
+  temperature: 0.2
+telegram:
+  enabled: false
+  bot_token_env: TELEGRAM_BOT_TOKEN
+  allowed_users_env: TELEGRAM_ALLOWED_USERS
+  poll_interval_seconds: 1.0
+learning:
+  trajectory_dir: trajectories
+  session_dir: sessions
+  models_dir: models
+  base_model: NousResearch/Hermes-3-Llama-3.1-8B
+  auto_train_enabled: true
+  auto_train_min_new_trajectories: 50
+web:
+  token_env: HERMES_WEB_TOKEN
+  rate_limit_requests: 12
+  rate_limit_window_seconds: 60
+  auth_secret_env: HERMES_AUTH_SECRET
+  session_cookie_name: hermes_session
+  session_ttl_days: 30
+  public_base_url:

@@ -1,0 +1,13 @@
+========================================
+HERMES OUROBOROS - LOOP 3 COMPLETE
+========================================
+Trajectories generated:  615
+High-quality kept:       558
+Training examples:       200
+Training steps:          26
+Final training loss:     3.2142542600631714
+Model version:           v3
+Training base model:     NousResearch/Hermes-3-Llama-3.1-8B
+Adapter saved to:        C:\Users\GUDMAN\Desktop\HERMES_OUROBOROS\models\adapter_v3
+Loop mode:               live
+========================================

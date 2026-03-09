@@ -1,0 +1,90 @@
+{
+  "label": "v1_trained_current_path",
+  "generated_at": "2026-03-09T12:53:41.801515+00:00",
+  "metadata": {
+    "configured_provider_name": "openai_compatible",
+    "configured_provider_class": "OpenAICompatibleProvider",
+    "configured_model": "gpt-5-mini",
+    "base_url": "https://api.openai.com/v1",
+    "note": "Active trained-path benchmark after candidate rollback. This file tracks the currently active route only."
+  },
+  "average_confidence": 87.6,
+  "average_response_quality": 100.0,
+  "average_elapsed_seconds": 101.69,
+  "runtime_mode_counts": {
+    "trained_profile": 5
+  },
+  "runtime_provider_counts": {
+    "TrainedFallbackProvider": 5
+  },
+  "agent_backend_counts": {
+    "learned_profile->openai": 25
+  },
+  "results": [
+    {
+      "query": "What are the top 3 risks of investing in DeFi protocols?",
+      "confidence_score": 85,
+      "response_quality_score": 100,
+      "elapsed_seconds": 80.396,
+      "verdict_length": 4572,
+      "session_id": "93429b6a-5474-43ea-95c6-615ae92df83f",
+      "runtime": {
+        "mode": "trained_profile",
+        "provider": "TrainedFallbackProvider",
+        "fallback_reason": null
+      }
+    },
+    {
+      "query": "Explain the difference between L1 and L2 blockchains",
+      "confidence_score": 95,
+      "response_quality_score": 100,
+      "elapsed_seconds": 99.631,
+      "verdict_length": 4245,
+      "session_id": "1fc3debb-5449-4c90-94d1-ad8c27205776",
+      "runtime": {
+        "mode": "trained_profile",
+        "provider": "TrainedFallbackProvider",
+        "fallback_reason": null
+      }
+    },
+    {
+      "query": "What makes a smart contract audit reliable?",
+      "confidence_score": 88,
+      "response_quality_score": 100,
+      "elapsed_seconds": 124.396,
+      "verdict_length": 4642,
+      "session_id": "0e614476-75c1-4407-acf7-2e2d362aaeeb",
+      "runtime": {
+        "mode": "trained_profile",
+        "provider": "TrainedFallbackProvider",
+        "fallback_reason": null
+      }
+    },
+    {
+      "query": "Is dollar-cost averaging a good strategy for crypto?",
+      "confidence_score": 85,
+      "response_quality_score": 100,
+      "elapsed_seconds": 118.839,
+      "verdict_length": 4889,
+      "session_id": "14f32146-dac3-403e-8d6a-f3e92d8a9a0c",
+      "runtime": {
+        "mode": "trained_profile",
+        "provider": "TrainedFallbackProvider",
+        "fallback_reason": null
+      }
+    },
+    {
+      "query": "What is the biggest threat to Ethereum dominance?",
+      "confidence_score": 85,
+      "response_quality_score": 100,
+      "elapsed_seconds": 85.178,
+      "verdict_length": 4752,
+      "session_id": "0ca4fc11-e0e2-492a-960e-88393cdc40f9",
+      "runtime": {
+        "mode": "trained_profile",
+        "provider": "TrainedFallbackProvider",
+        "fallback_reason": null
+      }
+    }
+  ]
+}

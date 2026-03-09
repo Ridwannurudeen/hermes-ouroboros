@@ -1,0 +1,12 @@
+{
+  "base_model": "NousResearch/Hermes-3-Llama-3.1-8B",
+  "training_data": "C:\\Users\\GUDMAN\\Desktop\\HERMES_OUROBOROS\\models\\adapter_v4\\training_payload.json",
+  "output_dir": "C:\\Users\\GUDMAN\\Desktop\\HERMES_OUROBOROS\\models\\adapter_v4",
+  "num_epochs": 2,
+  "learning_rate": 1.5e-05,
+  "lora_r": 16,
+  "lora_alpha": 32,
+  "max_seq_length": 1024,
+  "per_device_train_batch_size": 1,
+  "gradient_accumulation_steps": 16
+}

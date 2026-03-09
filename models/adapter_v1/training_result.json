@@ -1,0 +1,7 @@
+{
+  "adapter_path": "/models/adapter_v1",
+  "final_training_loss": 4.096419453620911,
+  "steps": 4,
+  "dry_run": false,
+  "base_model": "NousResearch/Hermes-3-Llama-3.1-8B"
+}

@@ -1,0 +1,14 @@
+your-domain.example.com {
+    encode zstd gzip
+
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy strict-origin-when-cross-origin
+        X-Frame-Options SAMEORIGIN
+    }
+
+    @api path /api/*
+    reverse_proxy @api hermes-api:8000
+
+    reverse_proxy hermes-api:8000
+}

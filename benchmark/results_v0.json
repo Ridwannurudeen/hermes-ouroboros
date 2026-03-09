@@ -1,0 +1,89 @@
+{
+  "label": "v0_base_live",
+  "generated_at": "2026-03-08T19:10:26.454403+00:00",
+  "metadata": {
+    "provider_name": "openai_compatible",
+    "provider_class": "OpenAICompatibleProvider",
+    "model": "gpt-5-mini",
+    "base_url": "https://api.openai.com/v1"
+  },
+  "average_confidence": 84.6,
+  "average_response_quality": 88.0,
+  "average_elapsed_seconds": 135.07,
+  "runtime_mode_counts": {
+    "default": 5
+  },
+  "runtime_provider_counts": {
+    "OpenAICompatibleProvider": 5
+  },
+  "agent_backend_counts": {
+    "openai": 25
+  },
+  "results": [
+    {
+      "query": "What are the top 3 risks of investing in DeFi protocols?",
+      "confidence_score": 85,
+      "response_quality_score": 100,
+      "elapsed_seconds": 93.579,
+      "verdict_length": 5649,
+      "session_id": "c624d267-3c6e-4e63-9b2d-1b4245f4af53",
+      "runtime": {
+        "mode": "default",
+        "provider": "OpenAICompatibleProvider",
+        "fallback_reason": null
+      }
+    },
+    {
+      "query": "Explain the difference between L1 and L2 blockchains",
+      "confidence_score": 90,
+      "response_quality_score": 80,
+      "elapsed_seconds": 112.25,
+      "verdict_length": 5310,
+      "session_id": "e1d60e72-530b-41b7-bb4b-355c3a84d687",
+      "runtime": {
+        "mode": "default",
+        "provider": "OpenAICompatibleProvider",
+        "fallback_reason": null
+      }
+    },
+    {
+      "query": "What makes a smart contract audit reliable?",
+      "confidence_score": 88,
+      "response_quality_score": 80,
+      "elapsed_seconds": 147.124,
+      "verdict_length": 5086,
+      "session_id": "7421e9a4-081b-4820-8121-3741a9d195ee",
+      "runtime": {
+        "mode": "default",
+        "provider": "OpenAICompatibleProvider",
+        "fallback_reason": null
+      }
+    },
+    {
+      "query": "Is dollar-cost averaging a good strategy for crypto?",
+      "confidence_score": 80,
+      "response_quality_score": 100,
+      "elapsed_seconds": 104.394,
+      "verdict_length": 4975,
+      "session_id": "bf84d949-d4b2-4315-adc1-efe5d7521f04",
+      "runtime": {
+        "mode": "default",
+        "provider": "OpenAICompatibleProvider",
+        "fallback_reason": null
+      }
+    },
+    {
+      "query": "What is the biggest threat to Ethereum dominance?",
+      "confidence_score": 80,
+      "response_quality_score": 80,
+      "elapsed_seconds": 217.997,
+      "verdict_length": 6137,
+      "session_id": "b4a4f673-0e6a-4fe3-83db-aceb59499671",
+      "runtime": {
+        "mode": "default",
+        "provider": "OpenAICompatibleProvider",
+        "fallback_reason": null
+      }
+    }
+  ]
+}

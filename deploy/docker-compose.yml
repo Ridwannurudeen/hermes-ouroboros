@@ -1,0 +1,51 @@
+services:
+  hermes-api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    command: ["python", "-X", "utf8", "main.py", "--api", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8000:8000"
+    volumes:
+      - hermes_logs:/app/logs
+      - hermes_sessions:/app/sessions
+      - hermes_trajectories:/app/trajectories
+      - hermes_skills:/app/skills
+      - hermes_users:/app/users
+      - hermes_models:/app/models
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  hermes-bot:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    command: ["python", "-X", "utf8", "main.py", "--bot"]
+    depends_on:
+      hermes-api:
+        condition: service_healthy
+    volumes:
+      - hermes_logs:/app/logs
+      - hermes_sessions:/app/sessions
+      - hermes_trajectories:/app/trajectories
+      - hermes_skills:/app/skills
+      - hermes_users:/app/users
+      - hermes_models:/app/models
+
+volumes:
+  hermes_logs:
+  hermes_sessions:
+  hermes_trajectories:
+  hermes_skills:
+  hermes_users:
+  hermes_models:

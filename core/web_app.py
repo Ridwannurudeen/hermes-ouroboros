@@ -66,6 +66,7 @@ class HermesWebApp:
         self.api_key_store = ApiKeyStore(self.root)
         self.email_service = EmailService()
         self.api_key_rate_limiter = InMemoryRateLimiter(limit=30, window_seconds=60)
+        self.guest_rate_limiter = InMemoryRateLimiter(limit=5, window_seconds=60)
 
     def build_app(self) -> web.Application:
         app = web.Application(client_max_size=2 * 1024 * 1024, middlewares=[self._security_headers_middleware])
@@ -382,10 +383,12 @@ class HermesWebApp:
         return web.json_response(self._share_payload(session, request))
 
     async def handle_query(self, request: web.Request) -> web.Response:
-        principal = self._require_principal(request)
-        if principal['kind'] != 'api_key':
+        principal = self._resolve_principal(request)
+        if principal is not None and principal['kind'] != 'api_key':
             self._require_same_origin(request)
             self._require_csrf_token(request, principal)
+        elif principal is None:
+            self._require_same_origin(request)
         await self._enforce_rate_limit(principal, request)
         payload = await self._read_json(request)
 
@@ -400,7 +403,7 @@ class HermesWebApp:
             raise web.HTTPBadRequest(text='Field "mode" must be "default" or "trained".')
 
         result, runtime_meta = await self.runtime.run_query(query, mode=mode)
-        if principal['kind'] == 'user':
+        if principal is not None and principal['kind'] == 'user':
             owned = self.session_store.attach_owner(
                 session_id=str(result.get('session_id')),
                 user_id=principal['user']['user_id'],
@@ -412,9 +415,12 @@ class HermesWebApp:
 
     async def handle_query_stream(self, request: web.Request) -> web.StreamResponse:
         """SSE endpoint — streams agent completion events as they happen, then the final result."""
-        principal = self._require_principal(request)
-        self._require_same_origin(request)
-        self._require_csrf_token(request, principal)
+        principal = self._resolve_principal(request)
+        if principal is not None:
+            self._require_same_origin(request)
+            self._require_csrf_token(request, principal)
+        else:
+            self._require_same_origin(request)
         await self._enforce_rate_limit(principal, request)
         payload = await self._read_json(request)
 
@@ -963,7 +969,16 @@ class HermesWebApp:
         if not expected or not candidate or not hmac.compare_digest(candidate, expected):
             raise web.HTTPForbidden(text='Missing or invalid CSRF token.')
 
-    async def _enforce_rate_limit(self, principal: dict[str, Any], request: web.Request) -> None:
+    async def _enforce_rate_limit(self, principal: dict[str, Any] | None, request: web.Request) -> None:
+        if principal is None:
+            identity = f"guest:{self._client_identity(request, fallback='anon')}"
+            allowed, retry_after = await self.guest_rate_limiter.check(identity)
+            if not allowed:
+                raise web.HTTPTooManyRequests(
+                    text=f'Guest rate limit exceeded. Sign up for more queries. Retry in {retry_after}s.',
+                    headers={'Retry-After': str(retry_after)},
+                )
+            return
         if principal['kind'] == 'api_key':
             identity = f"apikey:{principal['key_id']}"
             allowed, retry_after = await self.api_key_rate_limiter.check(identity)

@@ -640,6 +640,9 @@
               </div>
               <div id="registerMsg" class="forgot-msg"></div>
             </div>
+            <div class="note-box" id="guestNote" style="margin-top:12px; font-size:13px; color:var(--muted); text-align:center;">
+              No account needed to try it out. Guests get 5 queries/min. Sign up for higher limits and session history.
+            </div>
 
             <div class="auth-card">
               <h2>Admin Override</h2>
@@ -895,7 +898,7 @@
           authState.classList.add('pill-user');
           return;
         }
-        authState.textContent = meta.share_links_ready ? 'Anonymous' : 'Anonymous • share links local-only';
+        authState.textContent = meta.share_links_ready ? 'Guest · 5 queries/min' : 'Guest · 5 queries/min · share links local-only';
       }
 
       function escapeHtml(value) {

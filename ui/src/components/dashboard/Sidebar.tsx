@@ -23,7 +23,7 @@ interface SidebarProps {
 
 export default function Sidebar({ activePanel, onPanelChange }: SidebarProps) {
   return (
-    <aside className="w-16 lg:w-56 border-r border-white/[0.04] bg-[#06060e]/80 backdrop-blur-2xl flex flex-col relative z-10">
+    <aside className="w-16 lg:w-56 border-r border-white/[0.04] bg-[#06060e] flex flex-col relative z-10">
       {/* Logo */}
       <div className="h-16 flex items-center px-4 border-b border-white/[0.04]">
         <div className="relative">

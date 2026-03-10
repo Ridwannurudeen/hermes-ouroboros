@@ -12,11 +12,11 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children, activePanel, onPanelChange, providerName, model }: DashboardLayoutProps) {
   return (
-    <div className="min-h-screen bg-[#06060e] noise flex relative">
-      {/* Background mesh */}
+    <div className="min-h-screen bg-[#06060e] flex relative">
+      {/* Static background glows */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-600/[0.03] rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-violet-600/[0.03] rounded-full blur-[100px]" />
+        <div className="orb w-[600px] h-[600px] bg-indigo-600/[0.04] top-0 right-0" />
+        <div className="orb w-[500px] h-[500px] bg-violet-600/[0.03] bottom-0 left-0" />
       </div>
 
       <Sidebar activePanel={activePanel} onPanelChange={onPanelChange} />

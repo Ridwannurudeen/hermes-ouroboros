@@ -12,7 +12,7 @@ export default function TopBar({ providerName, model }: TopBarProps) {
   const { currentRole, currentUser } = useAuthStore()
 
   return (
-    <header className="h-16 border-b border-white/[0.04] bg-[#06060e]/60 backdrop-blur-2xl flex items-center justify-between px-6 relative z-10">
+    <header className="h-16 border-b border-white/[0.04] bg-[#06060e] flex items-center justify-between px-6 relative z-10">
       <div className="flex items-center gap-3">
         <Cpu size={14} className="text-white/20" />
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-500/[0.06] border border-indigo-500/[0.1]">

@@ -27,7 +27,7 @@ export default function LandingHero() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-indigo-500/20 bg-indigo-500/[0.06] backdrop-blur-sm"
+            className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-indigo-500/20 bg-indigo-500/[0.06]"
           >
             <Sparkles size={14} className="text-indigo-400" />
             <span className="text-xs font-medium tracking-wide text-indigo-300/90">NousResearch Hackathon 2026</span>

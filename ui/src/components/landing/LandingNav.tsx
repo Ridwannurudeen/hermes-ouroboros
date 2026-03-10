@@ -7,7 +7,7 @@ export default function LandingNav() {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.04] bg-[#06060e]/70 backdrop-blur-2xl"
+      className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.04] bg-[#06060e]/95"
     >
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">

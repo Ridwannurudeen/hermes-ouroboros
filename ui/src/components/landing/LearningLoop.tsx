@@ -13,7 +13,7 @@ export default function LearningLoop() {
   return (
     <section id="self-improvement" className="py-36 px-6 relative overflow-hidden">
       {/* Section glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/[0.03] rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/[0.04] rounded-full pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">

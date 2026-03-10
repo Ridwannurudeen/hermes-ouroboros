@@ -18,7 +18,7 @@ export default function OuroborosRing() {
       <div className="relative">
         {/* Outer glow */}
         <div className="absolute inset-0 scale-150">
-          <div className="w-full h-full rounded-full bg-indigo-500/[0.04] blur-[60px]" />
+          <div className="w-full h-full rounded-full bg-indigo-500/[0.05]" />
         </div>
 
         <svg viewBox="0 0 400 400" className="w-72 h-72 md:w-96 md:h-96 relative">
@@ -96,14 +96,9 @@ export default function OuroborosRing() {
                 {/* Outer glow */}
                 <circle cx={x} cy={y} r="24" fill={agent.glow} opacity="0.15" />
                 {/* Mid glow */}
-                <motion.circle
-                  cx={x} cy={y} r="16"
-                  fill={agent.color} opacity="0.12"
-                  animate={{ r: [16, 20, 16] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: i * 0.5 }}
-                />
+                <circle cx={x} cy={y} r="16" fill={agent.color} opacity="0.12" />
                 {/* Core */}
-                <circle cx={x} cy={y} r="6" fill={agent.color} filter="url(#glow)" />
+                <circle cx={x} cy={y} r="6" fill={agent.color} opacity="0.9" />
                 {/* Inner bright */}
                 <circle cx={x} cy={y} r="2.5" fill="white" opacity="0.8" />
                 {/* Label */}
@@ -123,20 +118,10 @@ export default function OuroborosRing() {
             )
           })}
 
-          {/* Center pulsing core */}
-          <motion.circle
-            cx={cx} cy={cy} r="22"
-            fill="rgba(79,70,229,0.08)"
-            animate={{ r: [22, 28, 22], opacity: [0.08, 0.15, 0.08] }}
-            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          <motion.circle
-            cx={cx} cy={cy} r="12"
-            fill="rgba(79,70,229,0.2)"
-            animate={{ r: [12, 15, 12] }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          <circle cx={cx} cy={cy} r="5" fill="#4F46E5" filter="url(#glow)" />
+          {/* Center core */}
+          <circle cx={cx} cy={cy} r="22" fill="rgba(79,70,229,0.08)" />
+          <circle cx={cx} cy={cy} r="12" fill="rgba(79,70,229,0.2)" />
+          <circle cx={cx} cy={cy} r="5" fill="#4F46E5" opacity="0.9" />
           <circle cx={cx} cy={cy} r="2" fill="white" opacity="0.9" />
         </svg>
       </div>

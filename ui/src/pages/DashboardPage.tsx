@@ -1,0 +1,175 @@
+import { useState, useEffect, useCallback } from 'react'
+import DashboardLayout from '../components/dashboard/DashboardLayout'
+import QueryPanel from '../components/dashboard/QueryPanel'
+import AgentProgressGrid from '../components/dashboard/AgentProgressGrid'
+import ResultPanel from '../components/dashboard/ResultPanel'
+import SessionHistory from '../components/dashboard/SessionHistory'
+import StatsPanel from '../components/dashboard/StatsPanel'
+import ModelTimeline from '../components/dashboard/ModelTimeline'
+import ComparisonPanel from '../components/dashboard/ComparisonPanel'
+import SkillsBrowser from '../components/dashboard/SkillsBrowser'
+import ShareControls from '../components/dashboard/ShareControls'
+import ExportControls from '../components/dashboard/ExportControls'
+import ApiKeysPanel from '../components/dashboard/ApiKeysPanel'
+import AuthPanel from '../components/dashboard/AuthPanel'
+import GlassCard from '../components/ui/GlassCard'
+import StatTile from '../components/ui/StatTile'
+import { useMeta } from '../hooks/useMeta'
+import { useStats } from '../hooks/useStats'
+import { useLoopStatus } from '../hooks/useLoopStatus'
+import { useSessions } from '../hooks/useSessions'
+import { useSSE } from '../hooks/useSSE'
+import { useSessionStore } from '../store/session'
+
+export default function DashboardPage() {
+  const [activePanel, setActivePanel] = useState('query')
+  const meta = useMeta()
+  const stats = useStats()
+  const loopStatus = useLoopStatus()
+  const { sessions, loading: sessionsLoading, fetchSessions } = useSessions()
+  const sse = useSSE()
+  const { setSelectedSession, setCurrentSession } = useSessionStore()
+
+  useEffect(() => {
+    if (meta.data) {
+      fetchSessions()
+    }
+  }, [meta.data, fetchSessions])
+
+  const handleRefresh = useCallback(() => {
+    meta.refetch()
+    stats.refetch()
+    loopStatus.refetch()
+    fetchSessions()
+  }, [meta, stats, loopStatus, fetchSessions])
+
+  const handleQuery = useCallback(async (query: string, mode: string) => {
+    await sse.startQuery(query, mode)
+  }, [sse])
+
+  // When SSE finishes, update state and refresh
+  useEffect(() => {
+    if (sse.finalPayload) {
+      const result = sse.finalPayload.result
+      setSelectedSession(result.session_id)
+      setCurrentSession(result)
+      handleRefresh()
+    }
+  }, [sse.finalPayload, setSelectedSession, setCurrentSession, handleRefresh])
+
+  const providerName = meta.data?.provider_name || '...'
+  const model = meta.data?.model || '...'
+  const examples = meta.data?.examples || []
+
+  return (
+    <DashboardLayout
+      activePanel={activePanel}
+      onPanelChange={setActivePanel}
+      providerName={providerName}
+      model={model}
+    >
+      {activePanel === 'query' && (
+        <div className="space-y-6 max-w-4xl">
+          {/* Hero stats */}
+          {meta.data && (
+            <div className="grid grid-cols-3 gap-3">
+              <StatTile label="Provider" value={providerName} delay={0} />
+              <StatTile label="Sessions" value={meta.data.session_count} delay={0.1} />
+              <StatTile label="Model" value={model.split('/').pop() || model} delay={0.2} />
+            </div>
+          )}
+
+          {/* Query input */}
+          <QueryPanel
+            examples={examples}
+            isStreaming={sse.isStreaming}
+            elapsed={sse.elapsed}
+            onSubmit={handleQuery}
+          />
+
+          {/* Agent progress */}
+          {(sse.isStreaming || Object.keys(sse.completedAgents).length > 0) && (
+            <div>
+              <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3 px-1">
+                Agent Progress ({Object.keys(sse.completedAgents).length}/4 complete)
+              </h3>
+              <AgentProgressGrid
+                completedAgents={sse.completedAgents}
+                isStreaming={sse.isStreaming}
+              />
+            </div>
+          )}
+
+          {/* Error */}
+          {sse.error && (
+            <GlassCard className="p-5 border-rose-500/30">
+              <p className="text-sm text-rose-400">{sse.error}</p>
+            </GlassCard>
+          )}
+
+          {/* Result */}
+          {sse.finalPayload && (
+            <ResultPanel result={sse.finalPayload.result} />
+          )}
+        </div>
+      )}
+
+      {activePanel === 'history' && (
+        <div className="max-w-2xl">
+          <SessionHistory
+            sessions={sessions}
+            loading={sessionsLoading}
+            onSearch={(q) => fetchSessions({ q })}
+            onRefresh={() => fetchSessions()}
+          />
+        </div>
+      )}
+
+      {activePanel === 'stats' && (
+        <div className="max-w-3xl">
+          <StatsPanel stats={stats.data} />
+        </div>
+      )}
+
+      {activePanel === 'loop' && (
+        <div className="max-w-2xl">
+          <ModelTimeline loopStatus={loopStatus.data} />
+        </div>
+      )}
+
+      {activePanel === 'comparison' && (
+        <div className="max-w-3xl">
+          <ComparisonPanel />
+        </div>
+      )}
+
+      {activePanel === 'skills' && (
+        <div className="max-w-2xl">
+          <SkillsBrowser />
+        </div>
+      )}
+
+      {activePanel === 'share' && (
+        <div className="max-w-lg">
+          <ShareControls />
+        </div>
+      )}
+
+      {activePanel === 'export' && (
+        <div className="max-w-lg">
+          <ExportControls />
+        </div>
+      )}
+
+      {activePanel === 'keys' && (
+        <div className="max-w-lg">
+          <ApiKeysPanel />
+        </div>
+      )}
+
+      {activePanel === 'auth' && (
+        <AuthPanel onRefresh={handleRefresh} />
+      )}
+    </DashboardLayout>
+  )
+}

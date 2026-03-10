@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    @apply bg-slate-950 text-white font-sans;
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-white/10 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-white/20;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl;
+  }
+  .glass-hover {
+    @apply glass transition-all duration-300 hover:bg-white/[0.08] hover:border-white/15;
+  }
+  .glow-ring {
+    @apply ring-2 ring-brand-500/60 shadow-[0_0_30px_rgba(99,102,241,0.25)];
+  }
+  .gradient-bg {
+    background: linear-gradient(135deg, #020617 0%, #0f172a 50%, #020617 100%);
+  }
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-400 via-violet-400 to-brand-400;
+  }
+}

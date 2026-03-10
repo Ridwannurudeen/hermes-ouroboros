@@ -18,3 +18,7 @@ models/adapter_v*_dry_run/
 deploy/.data/
 data/
 backups/
+ui/node_modules/
+ui/dist/
+web/dist/
+ui/tsconfig.tsbuildinfo

@@ -102,9 +102,19 @@ class HermesWebApp:
                 web.get('/api/skills', self.handle_skills_list),
             ]
         )
+        # SPA routes — serve React index.html for /app and /app/*
+        app.router.add_get('/app', self.handle_index)
+        app.router.add_get('/app/{rest:.*}', self.handle_index)
+        # Serve built React assets
+        dist_dir = self.root / 'web' / 'dist'
+        if dist_dir.is_dir():
+            app.router.add_static('/assets/', dist_dir / 'assets')
         return app
 
     async def handle_index(self, request: web.Request) -> web.StreamResponse:
+        dist_index = self.root / 'web' / 'dist' / 'index.html'
+        if dist_index.is_file():
+            return web.FileResponse(dist_index)
         return web.FileResponse(self.root / 'web' / 'index.html')
 
     async def handle_share_page(self, request: web.Request) -> web.Response:

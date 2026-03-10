@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hermes Ouroboros API Documentation</title>
+  <style>
+    :root { --ink: #1d1915; --muted: #665d54; --accent: #b34728; --accent-deep: #7f2f1a; --line: rgba(29,25,21,0.12); --paper: rgba(255,251,244,0.92); }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; color: var(--ink); font-family: 'Trebuchet MS', 'Segoe UI', sans-serif; background: linear-gradient(135deg, #efe2cb 0%, #faf6ee 56%, #ebe0d0 100%); }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 28px 20px 60px; }
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); margin-bottom: 28px; }
+    nav a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    nav a:hover { text-decoration: underline; }
+    h1 { font-family: Georgia, serif; font-size: 36px; margin: 0 0 8px; letter-spacing: -0.03em; }
+    h2 { font-family: Georgia, serif; font-size: 22px; margin: 32px 0 12px; padding-top: 18px; border-top: 1px solid var(--line); }
+    h3 { font-size: 16px; margin: 20px 0 8px; color: var(--accent-deep); }
+    p, li { color: var(--muted); line-height: 1.65; font-size: 15px; }
+    code { font-family: Consolas, 'Courier New', monospace; font-size: 13px; background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 4px; }
+    pre { background: #241c15; color: #f7f0df; padding: 16px; border-radius: 14px; overflow-x: auto; font-size: 13px; line-height: 1.5; }
+    pre code { background: none; padding: 0; }
+    .method { display: inline-block; font-weight: 700; font-size: 12px; padding: 3px 8px; border-radius: 6px; margin-right: 6px; color: #fff; }
+    .method.get { background: #216345; } .method.post { background: var(--accent); } .method.delete { background: #8b1a1a; }
+    .endpoint { font-family: Consolas, monospace; font-size: 14px; font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); font-size: 14px; }
+    th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .card { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; padding: 18px; margin: 14px 0; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div><strong>Hermes Ouroboros</strong> &mdash; API Docs</div>
+    <div><a href="/">Home</a> &middot; <a href="/app">Dashboard</a></div>
+  </nav>
+  <h1>API Reference</h1>
+  <p>The Hermes Ouroboros API lets you submit queries to the multi-agent council and retrieve results programmatically.</p>
+  <p><strong>Base URL:</strong> <code>https://hermes-ouroboros.online</code></p>
+
+  <h2>Authentication</h2>
+  <p>Three auth methods are supported:</p>
+  <table>
+    <tr><th>Method</th><th>Header</th><th>Use Case</th></tr>
+    <tr><td>API Key</td><td><code>X-API-Key: ho_xxx...</code></td><td>Programmatic access (recommended)</td></tr>
+    <tr><td>Admin Token</td><td><code>Authorization: Bearer &lt;token&gt;</code></td><td>Admin access to all sessions</td></tr>
+    <tr><td>Session Cookie</td><td><code>Cookie: hermes_session=...</code></td><td>Browser-based (dashboard)</td></tr>
+  </table>
+  <p>To get an API key, log in to the <a href="/app">dashboard</a> and create one in the API Keys section.</p>
+
+  <h2>Endpoints</h2>
+
+  <h3><span class="method post">POST</span> <span class="endpoint">/api/query</span></h3>
+  <p>Submit a question to the council. Returns the full verdict with all agent responses.</p>
+  <div class="card">
+    <strong>Request:</strong>
+    <pre><code>curl -X POST https://hermes-ouroboros.online/api/query \
+  -H "X-API-Key: ho_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "What are the tradeoffs of proof-of-stake vs proof-of-work?", "mode": "default"}'</code></pre>
+    <strong>Response:</strong>
+    <pre><code>{
+  "runtime": { "backend": "openai_compatible", "provider": "NousResearch", "model": "Hermes-4-70B" },
+  "result": {
+    "session_id": "abc-123",
+    "query": "What are the tradeoffs...",
+    "confidence_score": 87,
+    "conflict_detected": true,
+    "arbiter_verdict": "The Arbiter's synthesized analysis...",
+    "agent_responses": {
+      "advocate": "...", "skeptic": "...", "oracle": "...",
+      "contrarian": "...", "arbiter": "..."
+    }
+  }
+}</code></pre>
+  </div>
+
+  <h3><span class="method post">POST</span> <span class="endpoint">/api/query/stream</span></h3>
+  <p>Same as <code>/api/query</code> but returns Server-Sent Events (SSE) as each agent completes.</p>
+  <div class="card">
+    <pre><code>curl -N -X POST https://hermes-ouroboros.online/api/query/stream \
+  -H "X-API-Key: ho_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Explain zero-knowledge proofs", "mode": "default"}'
+
+# Events:
+# data: {"type":"agent_complete","role":"advocate","duration_seconds":3.2,"preview":"..."}
+# data: {"type":"agent_complete","role":"skeptic",...}
+# ...
+# data: {"type":"final","result":{...},"runtime":{...}}</code></pre>
+  </div>
+
+  <h3><span class="method get">GET</span> <span class="endpoint">/api/health</span></h3>
+  <p>Health check. No auth required.</p>
+  <pre><code>{"status": "ok"}</code></pre>
+
+  <h3><span class="method get">GET</span> <span class="endpoint">/api/loop/status</span></h3>
+  <p>Returns the Ouroboros DPO training loop status. No auth required.</p>
+
+  <h3><span class="method get">GET</span> <span class="endpoint">/api/sessions</span></h3>
+  <p>List your sessions (requires auth). Supports query params: <code>limit</code>, <code>q</code>, <code>backend</code>, <code>conflict</code>.</p>
+
+  <h3><span class="method get">GET</span> <span class="endpoint">/api/sessions/{id}</span></h3>
+  <p>Get a full session by ID (requires auth, scoped to owner unless admin).</p>
+
+  <h2>API Keys</h2>
+
+  <h3><span class="method post">POST</span> <span class="endpoint">/api/keys</span></h3>
+  <p>Create a new API key (requires session auth, max 5 per user).</p>
+  <pre><code>curl -X POST https://hermes-ouroboros.online/api/keys \
+  -H "Cookie: hermes_session=..." \
+  -H "X-CSRF-Token: ..." \
+  -H "Content-Type: application/json" \
+  -d '{"label": "my-app"}'
+
+# Response: {"key_id": "abc", "api_key": "ho_xxx...", "label": "my-app"}</code></pre>
+  <p><strong>Important:</strong> The full API key is only shown once at creation time. Store it securely.</p>
+
+  <h3><span class="method get">GET</span> <span class="endpoint">/api/keys</span></h3>
+  <p>List your API keys (prefix, label, usage stats).</p>
+
+  <h3><span class="method delete">DELETE</span> <span class="endpoint">/api/keys/{key_id}</span></h3>
+  <p>Revoke an API key.</p>
+
+  <h2>Rate Limits</h2>
+  <table>
+    <tr><th>Auth Method</th><th>Limit</th></tr>
+    <tr><td>API Key</td><td>30 requests / minute per key</td></tr>
+    <tr><td>User Session</td><td>12 requests / minute per user</td></tr>
+    <tr><td>Auth endpoints</td><td>8 attempts / 15 minutes</td></tr>
+  </table>
+
+  <h2>Python Example</h2>
+  <pre><code>import requests
+
+API_KEY = "ho_your_key_here"
+BASE = "https://hermes-ouroboros.online"
+
+resp = requests.post(f"{BASE}/api/query", json={
+    "query": "Should Ethereum switch to a different VM?",
+    "mode": "default",
+}, headers={"X-API-Key": API_KEY})
+
+data = resp.json()
+print(f"Confidence: {data['result']['confidence_score']}")
+print(f"Verdict: {data['result']['arbiter_verdict'][:200]}...")</code></pre>
+
+  <h2>JavaScript Example</h2>
+  <pre><code>const resp = await fetch('https://hermes-ouroboros.online/api/query', {
+  method: 'POST',
+  headers: { 'X-API-Key': 'ho_your_key_here', 'Content-Type': 'application/json' },
+  body: JSON.stringify({ query: 'Explain DeFi composability risks', mode: 'default' }),
+});
+const { result } = await resp.json();
+console.log('Verdict:', result.arbiter_verdict);</code></pre>
+
+  <p style="margin-top:40px; color:var(--muted); font-size:13px; text-align:center;">Built for the NousResearch Hermes Agent Hackathon &middot; <a href="https://github.com/Ridwannurudeen/hermes-ouroboros" style="color:var(--accent)">GitHub</a></p>
+</div>
+</body>
+</html>

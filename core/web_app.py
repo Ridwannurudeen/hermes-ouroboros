@@ -17,6 +17,8 @@ from core.runtime_router import RuntimeRouter
 from core.settings import AppSettings, env_value
 from core.session_store import SessionStore
 from core.user_store import UserStore
+from core.api_key_store import ApiKeyStore
+from core.email_service import EmailService
 from learning.atropos_runner import get_training_status
 from learning.preference_extractor import build_dpo_dataset
 from learning.trajectory_stats import build_stats
@@ -61,6 +63,9 @@ class HermesWebApp:
             window_seconds=settings.web.rate_limit_window_seconds,
         )
         self.auth_rate_limiter = InMemoryRateLimiter(limit=8, window_seconds=15 * 60)
+        self.api_key_store = ApiKeyStore(self.root)
+        self.email_service = EmailService()
+        self.api_key_rate_limiter = InMemoryRateLimiter(limit=30, window_seconds=60)
 
     def build_app(self) -> web.Application:
         app = web.Application(client_max_size=2 * 1024 * 1024, middlewares=[self._security_headers_middleware])
@@ -85,6 +90,12 @@ class HermesWebApp:
                 web.get('/api/loop/status', self.handle_loop_status),
                 web.post('/api/query', self.handle_query),
                 web.post('/api/query/stream', self.handle_query_stream),
+                web.get('/api/verify-email', self.handle_verify_email),
+                web.post('/api/forgot-password', self.handle_forgot_password),
+                web.post('/api/reset-password', self.handle_reset_password),
+                web.post('/api/keys', self.handle_create_api_key),
+                web.get('/api/keys', self.handle_list_api_keys),
+                web.delete('/api/keys/{key_id}', self.handle_revoke_api_key),
             ]
         )
         return app
@@ -109,7 +120,7 @@ class HermesWebApp:
         sessions = self.session_store.get_recent_sessions(n=25)
         return web.json_response(
             {
-                'provider_name': self.settings.provider.name,
+                'provider_name': 'NousResearch' if 'nousresearch' in (self.settings.provider.base_url or '').lower() else self.settings.provider.name,
                 'model': self.settings.provider.model,
                 'base_url': self.settings.provider.base_url,
                 'telegram_enabled': self.settings.telegram.enabled,
@@ -153,6 +164,14 @@ class HermesWebApp:
             user = self.user_store.create_user(email=email, password=password)
         except ValueError as exc:
             raise web.HTTPConflict(text=str(exc)) from exc
+        verification_token = user.pop('verification_token', None)
+        if self.email_service.enabled and verification_token:
+            self.email_service.send_verification_email(email, verification_token)
+            return web.json_response({
+                'user': user,
+                'message': 'Check your email to verify your account.',
+                'verification_required': True,
+            }, status=201)
         response = web.json_response({'user': user})
         self._set_user_cookie(request, response, user['user_id'])
         return response
@@ -168,6 +187,8 @@ class HermesWebApp:
         user = self.user_store.authenticate(email=email, password=password)
         if user is None:
             raise web.HTTPUnauthorized(text='Invalid email or password.')
+        if self.email_service.enabled and not user.get('verified', True):
+            raise web.HTTPForbidden(text='Please verify your email before logging in.')
         response = web.json_response({'user': user})
         self._set_user_cookie(request, response, user['user_id'])
         return response
@@ -362,8 +383,9 @@ class HermesWebApp:
 
     async def handle_query(self, request: web.Request) -> web.Response:
         principal = self._require_principal(request)
-        self._require_same_origin(request)
-        self._require_csrf_token(request, principal)
+        if principal['kind'] != 'api_key':
+            self._require_same_origin(request)
+            self._require_csrf_token(request, principal)
         await self._enforce_rate_limit(principal, request)
         payload = await self._read_json(request)
 
@@ -872,10 +894,25 @@ class HermesWebApp:
         ]
         return '\n'.join(lines)
 
+    def _resolve_api_key_principal(self, request: web.Request) -> dict[str, Any] | None:
+        api_key = request.headers.get('X-API-Key', '').strip()
+        if not api_key:
+            return None
+        record = self.api_key_store.resolve_key(api_key)
+        if record is None:
+            return None
+        user = self.user_store.get_user(record['user_id'])
+        if user is None:
+            return None
+        return {'kind': 'api_key', 'user': user, 'key_id': record['key_id']}
+
     def _resolve_principal(self, request: web.Request) -> dict[str, Any] | None:
         admin_principal = self._resolve_admin_principal(request)
         if admin_principal is not None:
             return admin_principal
+        api_key_principal = self._resolve_api_key_principal(request)
+        if api_key_principal is not None:
+            return api_key_principal
         return self._resolve_user_principal(request)
 
     def _require_principal(self, request: web.Request) -> dict[str, Any]:
@@ -927,6 +964,15 @@ class HermesWebApp:
             raise web.HTTPForbidden(text='Missing or invalid CSRF token.')
 
     async def _enforce_rate_limit(self, principal: dict[str, Any], request: web.Request) -> None:
+        if principal['kind'] == 'api_key':
+            identity = f"apikey:{principal['key_id']}"
+            allowed, retry_after = await self.api_key_rate_limiter.check(identity)
+            if not allowed:
+                raise web.HTTPTooManyRequests(
+                    text=f'API key rate limit exceeded. Retry in {retry_after} seconds.',
+                    headers={'Retry-After': str(retry_after)},
+                )
+            return
         if principal['kind'] == 'user':
             identity = f"user:{principal['user']['user_id']}"
         else:
@@ -1032,6 +1078,97 @@ class HermesWebApp:
                 'status': timing.get('status'),
             }
         return sanitized
+
+
+
+    async def handle_verify_email(self, request: web.Request) -> web.Response:
+        token = request.query.get('token', '').strip()
+        if not token:
+            raise web.HTTPBadRequest(text='Missing verification token.')
+        user = self.user_store.verify_email(token)
+        if user is None:
+            raise web.HTTPBadRequest(text='Invalid or expired verification token.')
+        response = web.json_response({'user': user, 'message': 'Email verified successfully.'})
+        self._set_user_cookie(request, response, user['user_id'])
+        return response
+
+    async def handle_forgot_password(self, request: web.Request) -> web.Response:
+        if not self.email_service.enabled:
+            raise web.HTTPServiceUnavailable(text='Email service not configured.')
+        self._require_same_origin(request)
+        payload = await self._read_json(request)
+        email = str(payload.get('email') or '').strip()
+        await self._enforce_auth_rate_limit(request, email)
+        if not is_valid_email(email):
+            raise web.HTTPBadRequest(text='Provide a valid email address.')
+        token = self.user_store.create_reset_token(email)
+        if token:
+            self.email_service.send_password_reset_email(email, token)
+        return web.json_response({'message': 'If that email exists, a reset link has been sent.'})
+
+    async def handle_reset_password(self, request: web.Request) -> web.Response:
+        self._require_same_origin(request)
+        payload = await self._read_json(request)
+        token = str(payload.get('token') or '').strip()
+        password = str(payload.get('password') or '').strip()
+        if not token:
+            raise web.HTTPBadRequest(text='Missing reset token.')
+        password_error = validate_password(password)
+        if password_error:
+            raise web.HTTPBadRequest(text=password_error)
+        success = self.user_store.reset_password(token, password)
+        if not success:
+            raise web.HTTPBadRequest(text='Invalid or expired reset token.')
+        return web.json_response({'message': 'Password reset successfully. You can now log in.'})
+
+    async def handle_create_api_key(self, request: web.Request) -> web.Response:
+        principal = self._require_principal(request)
+        if principal['kind'] not in ('user', 'admin'):
+            raise web.HTTPForbidden(text='API keys can only be created by logged-in users.')
+        if principal['kind'] == 'user':
+            self._require_same_origin(request)
+            self._require_csrf_token(request, principal)
+        payload = await self._read_json(request)
+        label = str(payload.get('label') or '').strip()
+        user_id = principal['user']['user_id'] if principal['kind'] == 'user' else str(payload.get('user_id') or '')
+        if not user_id:
+            raise web.HTTPBadRequest(text='user_id is required for admin key creation.')
+        existing = self.api_key_store.list_keys(user_id)
+        if len(existing) >= 5:
+            raise web.HTTPConflict(text='Maximum 5 API keys per user.')
+        result = self.api_key_store.create_key(user_id=user_id, label=label)
+        return web.json_response(result, status=201)
+
+    async def handle_list_api_keys(self, request: web.Request) -> web.Response:
+        principal = self._require_principal(request)
+        if principal['kind'] == 'user':
+            user_id = principal['user']['user_id']
+        elif principal['kind'] == 'admin':
+            user_id = request.query.get('user_id', '')
+            if not user_id:
+                raise web.HTTPBadRequest(text='user_id query param required for admin.')
+        else:
+            raise web.HTTPForbidden(text='Not allowed.')
+        keys = self.api_key_store.list_keys(user_id)
+        return web.json_response({'keys': keys})
+
+    async def handle_revoke_api_key(self, request: web.Request) -> web.Response:
+        principal = self._require_principal(request)
+        if principal['kind'] == 'user':
+            self._require_same_origin(request)
+            self._require_csrf_token(request, principal)
+            user_id = principal['user']['user_id']
+        elif principal['kind'] == 'admin':
+            user_id = request.query.get('user_id', '')
+            if not user_id:
+                raise web.HTTPBadRequest(text='user_id query param required for admin.')
+        else:
+            raise web.HTTPForbidden(text='Not allowed.')
+        key_id = request.match_info['key_id']
+        revoked = self.api_key_store.revoke_key(key_id, user_id)
+        if not revoked:
+            raise web.HTTPNotFound(text='API key not found or already revoked.')
+        return web.json_response({'ok': True, 'key_id': key_id})
 
 
 async def run_api_server(

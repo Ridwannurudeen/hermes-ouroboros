@@ -4,6 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Hermes Ouroboros</title>
+    <meta name="description" content="Hermes Ouroboros - Five AI agents deliberate on your questions. Self-improving via DPO training.">
+    <meta property="og:title" content="Hermes Ouroboros Dashboard">
+    <meta property="og:description" content="Multi-agent AI council with self-improving DPO training loop">
+    <meta property="og:url" content="https://hermes-ouroboros.online/app">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#127744;</text></svg>">
+
     <style>
       :root {
         --ink: #1d1915;
@@ -233,6 +239,18 @@
         background: rgba(255, 255, 255, 0.6);
         color: var(--muted);
         font-size: 13px;
+        transition: all 0.3s ease;
+      }
+      .pill.pill-admin {
+        background: rgba(34, 139, 34, 0.15);
+        color: #1a6b1a;
+        border-color: rgba(34, 139, 34, 0.3);
+        font-weight: 600;
+      }
+      .pill.pill-user {
+        background: rgba(59, 130, 246, 0.12);
+        color: #1e40af;
+        border-color: rgba(59, 130, 246, 0.25);
       }
 
       .example-queries {
@@ -491,9 +509,84 @@
         .agent-grid,
         .history-filters { grid-template-columns: 1fr; }
       }
+
+      /* Dark mode */
+      html.dark {
+        --ink: #f0e8dc;
+        --muted: #a89888;
+        --line: rgba(255,251,244,0.1);
+        --accent: #d4714e;
+        --accent-deep: #e8956e;
+        --paper: rgba(30,25,20,0.92);
+        --paper-strong: #1a1612;
+        --panel-shadow: 0 18px 50px rgba(0,0,0,0.3);
+      }
+      html.dark body {
+        background: radial-gradient(circle at top left, rgba(179,71,40,0.12), transparent 34%),
+          radial-gradient(circle at bottom right, rgba(71,106,90,0.08), transparent 26%),
+          linear-gradient(135deg, #1a1410 0%, #201a14 56%, #161210 100%);
+      }
+      html.dark input, html.dark textarea, html.dark select {
+        background: rgba(40,34,28,0.9); color: var(--ink); border-color: var(--line);
+      }
+      html.dark input::placeholder, html.dark textarea::placeholder { color: var(--muted); }
+      html.dark button { color: #fff9f4; }
+      html.dark button.secondary { color: var(--ink); background: rgba(40,34,28,0.8); border-color: var(--line); }
+      html.dark .history-item:hover { background: rgba(50,42,34,0.6); }
+      html.dark .history-item.active { background: rgba(60,48,38,0.8); }
+      html.dark .note-box { background: rgba(40,34,28,0.6); }
+      html.dark .stat-tile, html.dark .metric { background: rgba(40,34,28,0.6); }
+      html.dark .signal-negative strong { color: #e8714e; }
+      html.dark .signal-positive strong { color: #5cb88a; }
+
+      .theme-toggle {
+        position: fixed; top: 14px; right: 14px; z-index: 100;
+        width: 38px; height: 38px; border-radius: 50%;
+        border: 1px solid var(--line); background: var(--paper);
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        font-size: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: background 0.2s, border-color 0.2s;
+      }
+      .theme-toggle:hover { border-color: var(--accent); }
+
+      /* Loading pulse animation */
+      @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+      .status-running { animation: pulse 1.5s ease-in-out infinite; color: var(--accent) !important; font-weight: 600; }
+
+      /* Forgot password inline form */
+      .forgot-link { font-size: 13px; color: var(--accent); cursor: pointer; margin-top: 6px; display: inline-block; }
+      .forgot-link:hover { text-decoration: underline; }
+      .forgot-form { display: none; margin-top: 10px; }
+      .forgot-form.visible { display: block; }
+      .forgot-msg { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+      /* API keys section */
+      .api-key-item {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line);
+        background: rgba(255,255,255,0.5); margin-bottom: 8px; font-size: 13px;
+      }
+      html.dark .api-key-item { background: rgba(40,34,28,0.5); }
+      .api-key-prefix { font-family: Consolas, monospace; font-weight: 600; }
+      .api-key-meta { color: var(--muted); font-size: 12px; }
+      .api-key-revoke { font-size: 12px; color: #8b1a1a; cursor: pointer; border: none; background: none; font-weight: 600; }
+      .new-key-display {
+        font-family: Consolas, monospace; font-size: 12px; padding: 10px;
+        border-radius: 10px; background: rgba(0,0,0,0.04); border: 1px solid var(--line);
+        word-break: break-all; margin-top: 8px; display: none;
+      }
+      html.dark .new-key-display { background: rgba(40,34,28,0.6); }
+
+      @media (max-width: 640px) {
+        button { width: 100%; }
+        .actions { flex-direction: column; }
+        .example-queries { overflow-x: auto; flex-wrap: nowrap; }
+        .example-chip { flex-shrink: 0; }
+      }
     </style>
   </head>
   <body>
+    <button class="theme-toggle" id="themeToggle" title="Toggle dark mode" aria-label="Toggle dark mode"></button>
     <main class="shell">
       <section class="card">
         <div class="hero">
@@ -516,6 +609,10 @@
               <div class="metric-label">Recent Sessions</div>
               <div class="metric-value" id="sessionCount">-</div>
             </div>
+            <div class="metric" id="userQueriesMetric" style="display:none">
+              <div class="metric-label">Your Queries</div>
+              <div class="metric-value" id="userQueryCount">-</div>
+            </div>
           </div>
         </div>
 
@@ -534,6 +631,13 @@
                 <button id="loginButton" class="secondary">Login</button>
                 <button id="logoutButton" class="secondary">Logout</button>
               </div>
+              <span class="forgot-link" id="forgotToggle">Forgot password?</span>
+              <div class="forgot-form" id="forgotForm">
+                <input id="forgotEmail" type="email" placeholder="Your email address" style="margin-bottom:8px">
+                <button id="forgotButton" class="secondary" style="font-size:13px">Send Reset Link</button>
+                <div class="forgot-msg" id="forgotMsg"></div>
+              </div>
+              <div id="registerMsg" class="forgot-msg"></div>
             </div>
 
             <div class="auth-card">
@@ -545,9 +649,7 @@
               <div class="actions">
                 <span class="pill" id="authState">Anonymous</span>
               </div>
-              <div class="token-reveal" id="demoTokenReveal" title="Click to copy demo admin token">
-                Demo token (click to copy &amp; paste above): l8VoYbtRvRY2ukhtdyK7Xe1I9tP4DdBiqvA9j8Q1q0k
-              </div>
+
             </div>
           </div>
         </div>
@@ -648,6 +750,18 @@
             </div>
             <div id="loopProgressLabel" style="font-size:11px; color:var(--muted); margin-top:4px;">Loading loop status...</div>
           </div>
+        </div>
+
+        <div class="history-card" id="apiKeysSection" style="margin-bottom:16px; display:none;">
+          <p class="section-title">Developer</p>
+          <h2>API Keys</h2>
+          <p class="mini">Create keys to query the council programmatically. <a href="/docs" style="color:var(--accent)">API Docs</a></p>
+          <div id="apiKeysList"></div>
+          <div class="field-stack" style="margin-top:10px">
+            <input id="newKeyLabel" type="text" placeholder="Key label (optional)">
+            <button id="createKeyButton" class="secondary">Create API Key</button>
+          </div>
+          <div class="new-key-display" id="newKeyDisplay"></div>
         </div>
         <div class="history-card">
           <p class="section-title">Recent Sessions</p>
@@ -767,14 +881,17 @@
 
       function renderAuthState(meta) {
         csrfToken = meta.csrf_token || null;
+        authState.classList.remove('pill-admin', 'pill-user');
         if (meta.current_role === 'admin') {
           authState.textContent = meta.share_links_ready ? 'Admin token active' : 'Admin token active • share links local-only';
+          authState.classList.add('pill-admin');
           return;
         }
         if (meta.current_user) {
           authState.textContent = meta.share_links_ready
             ? `User: ${meta.current_user.email}`
             : `User: ${meta.current_user.email} • share links local-only`;
+          authState.classList.add('pill-user');
           return;
         }
         authState.textContent = meta.share_links_ready ? 'Anonymous' : 'Anonymous • share links local-only';
@@ -958,7 +1075,7 @@
         } else if (meta.admin_token_enabled) {
           statusLine.textContent = 'Admin token mode enabled.';
         } else {
-          statusLine.textContent = 'Ready.';
+          statusLine.className = 'status'; statusLine.textContent = 'Ready.';
         }
         if (!meta.share_links_ready) {
           shareStatus.textContent = 'Share links work locally, but set HERMES_PUBLIC_BASE_URL before public deployment.';
@@ -1335,6 +1452,14 @@
         await loadMeta();
         await loadStats();
         await loadSessions();
+        await loadLoopStatus();
+      });
+      // Also fire on input so pasting activates immediately
+      adminToken.addEventListener('input', () => {
+        clearTimeout(adminToken._debounce);
+        adminToken._debounce = setTimeout(() => {
+          adminToken.dispatchEvent(new Event('change'));
+        }, 500);
       });
       historySearch.addEventListener('input', () => {
         clearTimeout(historySearchTimer);
@@ -1371,19 +1496,15 @@
       });
 
       // Demo admin token — click to copy and paste into the field
-      const demoTokenReveal = document.getElementById('demoTokenReveal');
-      if (demoTokenReveal) {
-        demoTokenReveal.addEventListener('click', () => {
           const token = 'l8VoYbtRvRY2ukhtdyK7Xe1I9tP4DdBiqvA9j8Q1q0k';
           navigator.clipboard.writeText(token).then(() => {
             adminToken.value = token;
             sessionStorage.setItem(ADMIN_TOKEN_KEY, token);
-            demoTokenReveal.textContent = 'Copied! Paste token above and it will activate automatically.';
-            loadMeta().then(() => { loadStats(); loadSessions(); }).catch(() => {});
+            loadMeta().then(() => { loadStats(); loadSessions(); loadLoopStatus(); }).catch(() => {});
           }).catch(() => {
             adminToken.value = token;
             sessionStorage.setItem(ADMIN_TOKEN_KEY, token);
-            loadMeta().then(() => { loadStats(); loadSessions(); }).catch(() => {});
+            loadMeta().then(() => { loadStats(); loadSessions(); loadLoopStatus(); }).catch(() => {});
           });
         });
       }
@@ -1396,6 +1517,95 @@
       }).catch(() => {});
       // Refresh loop status every 30s without requiring auth
       setInterval(() => loadLoopStatus().catch(() => {}), 30000);
+    
+      // === Dark mode ===
+      const themeToggle = document.getElementById('themeToggle');
+      function applyTheme(dark) {
+        document.documentElement.classList.toggle('dark', dark);
+        themeToggle.textContent = dark ? '\u2600' : '\u263D';
+        localStorage.setItem('hermes-theme', dark ? 'dark' : 'light');
+      }
+      const savedTheme = localStorage.getItem('hermes-theme');
+      if (savedTheme === 'dark') applyTheme(true);
+      else if (savedTheme === 'light') applyTheme(false);
+      else applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches);
+      themeToggle.addEventListener('click', () => applyTheme(!document.documentElement.classList.contains('dark')));
+
+      // === Forgot password ===
+      const forgotToggle = document.getElementById('forgotToggle');
+      const forgotForm = document.getElementById('forgotForm');
+      const forgotButton = document.getElementById('forgotButton');
+      const forgotMsg = document.getElementById('forgotMsg');
+      const registerMsg = document.getElementById('registerMsg');
+      forgotToggle.addEventListener('click', () => forgotForm.classList.toggle('visible'));
+      forgotButton.addEventListener('click', async () => {
+        const email = document.getElementById('forgotEmail').value.trim();
+        if (!email) { forgotMsg.textContent = 'Enter your email.'; return; }
+        forgotButton.disabled = true;
+        try {
+          const res = await fetch('/api/forgot-password', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email}) });
+          const data = await res.json();
+          forgotMsg.textContent = data.message || 'Reset link sent.';
+        } catch { forgotMsg.textContent = 'Error sending reset link.'; }
+        forgotButton.disabled = false;
+      });
+
+      // === API Keys ===
+      const apiKeysSection = document.getElementById('apiKeysSection');
+      const apiKeysList = document.getElementById('apiKeysList');
+      const createKeyButton = document.getElementById('createKeyButton');
+      const newKeyDisplay = document.getElementById('newKeyDisplay');
+
+      async function loadApiKeys() {
+        if (!currentCsrf) { apiKeysSection.style.display = 'none'; return; }
+        apiKeysSection.style.display = 'block';
+        try {
+          const res = await fetch('/api/keys', { headers: authHeaders() });
+          if (!res.ok) return;
+          const data = await res.json();
+          apiKeysList.innerHTML = (data.keys || []).map(k => `
+            <div class="api-key-item">
+              <div>
+                <span class="api-key-prefix">${k.key_prefix}...</span>
+                ${k.label ? `<span class="api-key-meta"> &middot; ${k.label}</span>` : ''}
+                <div class="api-key-meta">${k.queries} queries</div>
+              </div>
+              <button class="api-key-revoke" data-kid="${k.key_id}">Revoke</button>
+            </div>
+          `).join('') || '<div class="mini">No API keys yet.</div>';
+          apiKeysList.querySelectorAll('.api-key-revoke').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              const kid = btn.dataset.kid;
+              await fetch('/api/keys/' + kid, { method: 'DELETE', headers: {...authHeaders(), 'X-CSRF-Token': currentCsrf} });
+              loadApiKeys();
+            });
+          });
+        } catch {}
+      }
+
+      createKeyButton.addEventListener('click', async () => {
+        const label = document.getElementById('newKeyLabel').value.trim();
+        createKeyButton.disabled = true;
+        try {
+          const res = await fetch('/api/keys', {
+            method: 'POST',
+            headers: {...authHeaders(), 'Content-Type':'application/json', 'X-CSRF-Token': currentCsrf},
+            body: JSON.stringify({label}),
+          });
+          if (!res.ok) { const e = await res.text(); newKeyDisplay.textContent = e; newKeyDisplay.style.display = 'block'; return; }
+          const data = await res.json();
+          newKeyDisplay.innerHTML = '<strong>Copy this key now (shown once):</strong><br>' + data.api_key;
+          newKeyDisplay.style.display = 'block';
+          document.getElementById('newKeyLabel').value = '';
+          loadApiKeys();
+        } catch { newKeyDisplay.textContent = 'Error creating key.'; newKeyDisplay.style.display = 'block'; }
+        createKeyButton.disabled = false;
+      });
+
+      // === Show user query count ===
+      const userQueriesMetric = document.getElementById('userQueriesMetric');
+      const userQueryCount = document.getElementById('userQueryCount');
+
     </script>
   </body>
 </html>

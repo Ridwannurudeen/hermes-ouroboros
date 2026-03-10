@@ -16,3 +16,5 @@ skills/
 users/
 models/adapter_v*_dry_run/
 deploy/.data/
+data/
+backups/

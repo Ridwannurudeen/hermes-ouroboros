@@ -12,12 +12,12 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
-      - hermes_logs:/app/logs
-      - hermes_sessions:/app/sessions
-      - hermes_trajectories:/app/trajectories
-      - hermes_skills:/app/skills
-      - hermes_users:/app/users
-      - hermes_models:/app/models
+      - /opt/hermes/data/logs:/app/logs
+      - /opt/hermes/data/sessions:/app/sessions
+      - /opt/hermes/data/trajectories:/app/trajectories
+      - /opt/hermes/data/skills:/app/skills
+      - /opt/hermes/data/users:/app/users
+      - /opt/hermes/data/models:/app/models
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/api/health"]
       interval: 30s
@@ -39,17 +39,9 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
-      - hermes_logs:/app/logs
-      - hermes_sessions:/app/sessions
-      - hermes_trajectories:/app/trajectories
-      - hermes_skills:/app/skills
-      - hermes_users:/app/users
-      - hermes_models:/app/models
-
-volumes:
-  hermes_logs:
-  hermes_sessions:
-  hermes_trajectories:
-  hermes_skills:
-  hermes_users:
-  hermes_models:
+      - /opt/hermes/data/logs:/app/logs
+      - /opt/hermes/data/sessions:/app/sessions
+      - /opt/hermes/data/trajectories:/app/trajectories
+      - /opt/hermes/data/skills:/app/skills
+      - /opt/hermes/data/users:/app/users
+      - /opt/hermes/data/models:/app/models

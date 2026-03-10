@@ -12,13 +12,16 @@ interface GlassCardProps {
 export default function GlassCard({ children, className = '', glow, hover, delay = 0 }: GlassCardProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay }}
+      transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
       className={`
-        bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl
-        ${glow ? 'ring-2 ring-brand-500/60 shadow-[0_0_30px_rgba(99,102,241,0.25)]' : ''}
-        ${hover ? 'transition-all duration-300 hover:bg-white/[0.08] hover:border-white/15' : ''}
+        rounded-[20px] border
+        ${glow
+          ? 'bg-white/[0.04] border-indigo-500/20 shadow-[0_0_40px_rgba(99,102,241,0.12),0_0_80px_rgba(99,102,241,0.04)] backdrop-blur-xl'
+          : 'bg-white/[0.02] border-white/[0.04] backdrop-blur-xl'
+        }
+        ${hover ? 'shine transition-all duration-400 hover:bg-white/[0.04] hover:border-white/[0.08] cursor-pointer' : ''}
         ${className}
       `}
     >

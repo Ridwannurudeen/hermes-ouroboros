@@ -12,26 +12,29 @@ export default function TopBar({ providerName, model }: TopBarProps) {
   const { currentRole, currentUser } = useAuthStore()
 
   return (
-    <header className="h-16 border-b border-white/10 bg-black/20 backdrop-blur-xl flex items-center justify-between px-6">
+    <header className="h-16 border-b border-white/[0.04] bg-[#06060e]/60 backdrop-blur-2xl flex items-center justify-between px-6 relative z-10">
       <div className="flex items-center gap-3">
-        <Cpu size={16} className="text-white/40" />
-        <Pill variant="info">{providerName}</Pill>
-        <span className="text-xs text-white/40 font-mono">{model}</span>
+        <Cpu size={14} className="text-white/20" />
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-500/[0.06] border border-indigo-500/[0.1]">
+          <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+          <span className="text-[11px] font-medium text-indigo-300/80">{providerName}</span>
+        </div>
+        <span className="text-[11px] text-white/20 font-mono">{model}</span>
       </div>
 
       <div className="flex items-center gap-3">
         {currentRole === 'admin' && (
           <Pill variant="warning">
-            <Shield size={12} className="mr-1" /> Admin
+            <Shield size={11} className="mr-1" /> Admin
           </Pill>
         )}
         {currentRole === 'user' && currentUser && (
           <Pill variant="success">
-            <User size={12} className="mr-1" /> {currentUser}
+            <User size={11} className="mr-1" /> {currentUser}
           </Pill>
         )}
         {!currentRole && (
-          <Pill variant="default">Guest</Pill>
+          <span className="text-[11px] text-white/15 font-medium">Guest</span>
         )}
         <ThemeToggle />
       </div>

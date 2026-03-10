@@ -652,6 +652,7 @@
               </div>
               <div class="actions">
                 <span class="pill" id="authState">Anonymous</span>
+                <button id="demoTokenBtn" class="token-reveal" title="Auto-fill demo admin token for judges">Demo Token</button>
               </div>
 
             </div>
@@ -1688,6 +1689,9 @@
       });
 
       // Demo admin token — click to copy and paste into the field
+      const demoTokenBtn = document.getElementById('demoTokenBtn');
+      if (demoTokenBtn) {
+        demoTokenBtn.addEventListener('click', () => {
           const token = 'l8VoYbtRvRY2ukhtdyK7Xe1I9tP4DdBiqvA9j8Q1q0k';
           navigator.clipboard.writeText(token).then(() => {
             adminToken.value = token;

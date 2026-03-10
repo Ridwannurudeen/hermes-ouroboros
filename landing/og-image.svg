@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#efe2cb"/>
+      <stop offset="56%" style="stop-color:#faf6ee"/>
+      <stop offset="100%" style="stop-color:#ebe0d0"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="20%" cy="30%" r="40%">
+      <stop offset="0%" style="stop-color:rgba(179,71,40,0.15)"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="80%" cy="70%" r="35%">
+      <stop offset="0%" style="stop-color:rgba(71,106,90,0.1)"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow1)"/>
+  <rect width="1200" height="630" fill="url(#glow2)"/>
+
+  <!-- Ouroboros circle -->
+  <circle cx="600" cy="260" r="120" fill="none" stroke="#b34728" stroke-width="4" opacity="0.3"/>
+  <circle cx="600" cy="260" r="100" fill="none" stroke="#b34728" stroke-width="2" opacity="0.15"/>
+  
+  <!-- Snake head indicator -->
+  <circle cx="600" cy="140" r="12" fill="#b34728" opacity="0.5"/>
+  
+  <!-- 5 agent dots on the circle -->
+  <circle cx="714" cy="197" r="8" fill="#b34728" opacity="0.6"/>
+  <circle cx="674" cy="374" r="8" fill="#7f2f1a" opacity="0.6"/>
+  <circle cx="526" cy="374" r="8" fill="#476a5a" opacity="0.6"/>
+  <circle cx="486" cy="197" r="8" fill="#665d54" opacity="0.6"/>
+  <circle cx="600" cy="380" r="10" fill="#b34728" opacity="0.7"/>
+  
+  <!-- Center icon -->
+  <text x="600" y="275" text-anchor="middle" font-size="60" opacity="0.8">&#127744;</text>
+  
+  <!-- Title -->
+  <text x="600" y="440" text-anchor="middle" font-family="Georgia, serif" font-size="48" fill="#1d1915" letter-spacing="-1">Hermes Ouroboros</text>
+  
+  <!-- Subtitle -->
+  <text x="600" y="480" text-anchor="middle" font-family="Trebuchet MS, sans-serif" font-size="20" fill="#665d54">Multi-Agent AI Council with Self-Improving DPO Training</text>
+  
+  <!-- Agent labels -->
+  <text x="600" y="520" text-anchor="middle" font-family="Trebuchet MS, sans-serif" font-size="14" fill="#b34728" letter-spacing="3">ADVOCATE &#183; SKEPTIC &#183; ORACLE &#183; CONTRARIAN &#183; ARBITER</text>
+  
+  <!-- Bottom bar -->
+  <rect x="0" y="610" width="1200" height="20" fill="#b34728" opacity="0.8"/>
+  
+  <!-- URL -->
+  <text x="600" y="595" text-anchor="middle" font-family="Consolas, monospace" font-size="14" fill="#665d54">hermes-ouroboros.online</text>
+</svg>

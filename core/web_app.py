@@ -534,7 +534,7 @@ class HermesWebApp:
                 result, runtime_meta = await self.runtime.run_query(
                     query, mode=mode, stream_callback=agent_stream_callback
                 )
-                if principal['kind'] == 'user':
+                if principal is not None and principal['kind'] == 'user':
                     owned = self.session_store.attach_owner(
                         session_id=str(result.get('session_id')),
                         user_id=principal['user']['user_id'],

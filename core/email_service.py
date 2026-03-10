@@ -66,6 +66,7 @@ class EmailService:
             headers={
                 'Authorization': f'Bearer {self.api_key}',
                 'Content-Type': 'application/json',
+                'User-Agent': 'hermes-ouroboros/1.0',
             },
             method='POST',
         )

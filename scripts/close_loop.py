@@ -33,7 +33,7 @@ def main() -> int:
         root=ROOT,
         min_trajectories=status['auto_train_threshold'],
         dry_run=False,
-        allow_fallback_to_dry_run=False,
+        allow_fallback_to_dry_run=True,
     )
     print(json.dumps(training_result, indent=2))
     if not training_result.get('success'):

@@ -39,7 +39,7 @@
   <text x="600" y="440" text-anchor="middle" font-family="Georgia, serif" font-size="48" fill="#1d1915" letter-spacing="-1">Hermes Ouroboros</text>
   
   <!-- Subtitle -->
-  <text x="600" y="480" text-anchor="middle" font-family="Trebuchet MS, sans-serif" font-size="20" fill="#665d54">Multi-Agent AI Council with Self-Improving DPO Training</text>
+  <text x="600" y="480" text-anchor="middle" font-family="Trebuchet MS, sans-serif" font-size="20" fill="#665d54">Five agents debate. Then train themselves to be smarter. 35% loss reduction.</text>
   
   <!-- Agent labels -->
   <text x="600" y="520" text-anchor="middle" font-family="Trebuchet MS, sans-serif" font-size="14" fill="#b34728" letter-spacing="3">ADVOCATE &#183; SKEPTIC &#183; ORACLE &#183; CONTRARIAN &#183; ARBITER</text>

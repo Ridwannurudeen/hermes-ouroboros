@@ -11,6 +11,7 @@ from agents import ARBITER_AGENT
 from core.agent_launcher import AgentLauncher
 from core.arbiter_prompt import build_arbiter_prompt
 from core.conflict_resolver import ConflictResolver
+from core.web_search import EvidenceGatherer
 from core.session_store import SessionStore
 from core.settings import load_settings
 from core.skill_creator import SkillCreator
@@ -39,8 +40,13 @@ class MasterOrchestrator:
         self._append_log(f'{timestamp} | {session_id} | RECEIVED | {query}')
 
         try:
+            print('Gathering web evidence...')
+            try:
+                evidence = await EvidenceGatherer().gather(query)
+            except Exception:
+                evidence = None
             print('Agents dispatched... waiting for responses...')
-            agent_responses, agent_timings = await self.agent_launcher.launch_agents(query, stream_callback=stream_callback)
+            agent_responses, agent_timings = await self.agent_launcher.launch_agents(query, stream_callback=stream_callback, evidence=evidence)
             conflict = await self.conflict_resolver.resolve(query, agent_responses)
             arbiter_prompt = self._build_arbiter_prompt(query, agent_responses, conflict)
             arbiter_verdict = await self.provider.generate(
@@ -67,6 +73,7 @@ class MasterOrchestrator:
                 'conflict_summary': conflict.conflict_summary,
                 'additional_research': conflict.additional_research,
                 'agent_timings': agent_timings,
+                'web_evidence': evidence.to_dict() if evidence and not evidence.is_empty() else None,
                 'provider_meta': {
                     'research': conflict.additional_research_meta,
                     'arbiter': arbiter_meta,

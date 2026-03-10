@@ -30,21 +30,32 @@ class SkillCreator:
         additional_research = str(session_result.get('additional_research') or '')
         oracle = str(session_result.get('agent_responses', {}).get('oracle', ''))
         skeptic = str(session_result.get('agent_responses', {}).get('skeptic', ''))
+        session_id = str(session_result.get('session_id', 'unknown'))
+        confidence = int(session_result.get('confidence_score', -1))
 
         topic = self._infer_topic(query)
         evidence_block = self._pick_evidence(additional_research or oracle)
         pitfalls = self._pick_pitfalls(conflict_summary, skeptic)
         reasoning_pattern = self._first_meaningful_sentence(verdict) or conflict_summary or query
+        keywords = self._topic_keywords(query, topic)
 
         return (
-            f'# Skill: Reasoning about {topic}\n'
-            '## When to use this skill\n'
-            f'When asked about {self._topic_keywords(query, topic)}\n'
-            '## Key reasoning pattern\n'
-            f'{reasoning_pattern}\n'
-            '## Evidence that matters\n'
-            f'{evidence_block}\n'
-            '## Pitfalls to avoid\n'
+            f'---\n'
+            f'name: reasoning-{topic.lower().replace(" ", "-")[:40]}\n'
+            f'description: Adversarial council reasoning about {keywords}\n'
+            f'author: hermes-ouroboros\n'
+            f'version: 1.0\n'
+            f'session_id: {session_id[:8]}\n'
+            f'confidence: {confidence}\n'
+            f'---\n\n'
+            f'# Skill: Reasoning about {topic}\n\n'
+            f'## When to use this skill\n'
+            f'When asked about {keywords}\n\n'
+            f'## Key reasoning pattern\n'
+            f'{reasoning_pattern}\n\n'
+            f'## Evidence that matters\n'
+            f'{evidence_block}\n\n'
+            f'## Pitfalls to avoid\n'
             f'{pitfalls}\n'
         )
 

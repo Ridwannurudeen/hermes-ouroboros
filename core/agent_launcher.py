@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from typing import Awaitable, Callable
 
 from agents import COUNCIL_AGENTS, AgentDefinition
+from core.web_search import EvidenceBundle
 from providers import MockCouncilProvider
 
 StreamCallback = Callable[[str, str, dict[str, object]], Awaitable[None] | None]
@@ -22,9 +23,10 @@ class AgentLauncher:
         self,
         query: str,
         stream_callback: StreamCallback | None = None,
+        evidence: EvidenceBundle | None = None,
     ) -> tuple[dict[str, str], dict[str, dict[str, object]]]:
         tasks = [
-            asyncio.create_task(self._run_agent(agent, query, stream_callback))
+            asyncio.create_task(self._run_agent(agent, query, stream_callback, evidence=evidence))
             for agent in COUNCIL_AGENTS
         ]
         completed = await asyncio.gather(*tasks)
@@ -37,22 +39,28 @@ class AgentLauncher:
         agent: AgentDefinition,
         query: str,
         stream_callback: StreamCallback | None,
+        evidence: EvidenceBundle | None = None,
     ) -> tuple[str, str, dict[str, object]]:
         start = datetime.now(timezone.utc)
         meta: dict[str, object] = {
             'start_time': start.isoformat(),
             'status': 'ok',
         }
+        augmented_query = query
+        if evidence and not evidence.is_empty():
+            evidence_text = evidence.format_for_role(agent.role)
+            if evidence_text:
+                augmented_query = f"{query}\n\n---\nWEB EVIDENCE (cite URLs where relevant):\n{evidence_text}"
         try:
             if self._semaphore is None:
                 response = await asyncio.wait_for(
-                    self.provider.generate(agent.role, agent.system_prompt, query),
+                    self.provider.generate(agent.role, agent.system_prompt, augmented_query),
                     timeout=self.timeout_seconds,
                 )
             else:
                 async with self._semaphore:
                     response = await asyncio.wait_for(
-                        self.provider.generate(agent.role, agent.system_prompt, query),
+                        self.provider.generate(agent.role, agent.system_prompt, augmented_query),
                         timeout=self.timeout_seconds,
                     )
         except asyncio.TimeoutError:

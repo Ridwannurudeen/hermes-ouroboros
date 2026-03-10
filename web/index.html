@@ -754,6 +754,46 @@
             </div>
             <div id="loopProgressLabel" style="font-size:11px; color:var(--muted); margin-top:4px;">Loading loop status...</div>
           </div>
+
+          <!-- Training Loss Chart -->
+          <div style="margin-top:16px; padding:14px; border-radius:16px; border:1px solid var(--line); background:rgba(71,106,90,0.05);">
+            <div class="metric-label" style="margin-bottom:8px;">Training Loss Curve</div>
+            <div id="lossChartContainer" style="width:100%; height:160px; position:relative;">
+              <div class="muted-empty" style="font-size:12px;">Loading training data...</div>
+            </div>
+          </div>
+
+          <!-- Model Version Timeline -->
+          <div style="margin-top:12px; padding:14px; border-radius:16px; border:1px solid var(--line); background:rgba(179,71,40,0.04);">
+            <div class="metric-label" style="margin-bottom:8px;">Model Version Timeline</div>
+            <div id="modelTimeline" style="display:flex; gap:6px; overflow-x:auto; padding-bottom:4px;">
+              <div class="muted-empty" style="font-size:12px;">Loading...</div>
+            </div>
+          </div>
+
+          <!-- DPO Export -->
+          <div style="margin-top:12px; padding:14px; border-radius:16px; border:1px solid var(--line); background:rgba(179,71,40,0.04);">
+            <div class="metric-label" style="margin-bottom:8px;">DPO Dataset</div>
+            <p style="font-size:12px; color:var(--muted); margin:0 0 8px;">Export training pairs in HuggingFace JSONL format.</p>
+            <button id="exportDpoButton" class="secondary" style="font-size:12px; padding:6px 12px;">Export DPO Dataset (JSONL)</button>
+          </div>
+        </div>
+
+        <!-- Before/After Comparison -->
+        <div class="history-card" id="comparisonSection" style="margin-bottom:16px; display:none;">
+          <p class="section-title">Evidence</p>
+          <h2>Does Training Help?</h2>
+          <p class="mini">Pre-computed benchmark: base model vs trained model on identical questions.</p>
+          <div id="comparisonSummary" style="margin:10px 0;"></div>
+          <div id="comparisonCards" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+
+        <!-- Skills Browser -->
+        <div class="history-card" id="skillsSection" style="margin-bottom:16px; display:none;">
+          <p class="section-title">Auto-Skills</p>
+          <h2>Learned Skills</h2>
+          <p class="mini">High-confidence debates auto-generate reasoning skills.</p>
+          <div id="skillsList"></div>
         </div>
 
         <div class="history-card" id="apiKeysSection" style="margin-bottom:16px; display:none;">
@@ -968,6 +1008,28 @@
         `;
       }
 
+      function renderWebEvidence(evidence) {
+        if (!evidence) return '';
+        const all = [
+          ...(evidence.general || []).map(e => ({...e, type: 'General'})),
+          ...(evidence.counter || []).map(e => ({...e, type: 'Counter'})),
+          ...(evidence.statistical || []).map(e => ({...e, type: 'Data'})),
+        ];
+        if (all.length === 0) return '';
+        const links = all.slice(0, 12).map(e =>
+          `<a href="${escapeHtml(e.url)}" target="_blank" rel="noopener" style="display:block; padding:6px 0; border-bottom:1px solid var(--line); text-decoration:none; color:var(--ink);">
+            <span style="font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--accent); margin-right:6px;">${escapeHtml(e.type)}</span>
+            <strong style="font-size:13px;">${escapeHtml(e.title)}</strong>
+            <span style="display:block; font-size:12px; color:var(--muted); margin-top:2px;">${escapeHtml((e.snippet || '').slice(0, 120))}</span>
+          </a>`
+        ).join('');
+        return `
+          <div style="margin-top:12px; padding:14px 16px; border-radius:14px; border:1px solid var(--line); background:rgba(71,106,90,0.06);">
+            <span style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);">Web Sources (${all.length})</span>
+            <div style="margin-top:8px;">${links}</div>
+          </div>`;
+      }
+
       function renderSessionResult(payload, runtime) {
         const sections = parseVerdictSections(payload.arbiter_verdict || '');
         const keyDisagreements = sections['key disagreements'] || payload.conflict_summary || 'No disagreement summary available.';
@@ -1011,10 +1073,11 @@
           </div>
           ${(payload.dpo_pairs_count > 0) ? `
           <div style="margin-top:12px; padding:12px 16px; border-radius:14px; border:1px solid var(--line); background:rgba(179,71,40,0.06);">
-            <span style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);">⟳ DPO Pairs Extracted</span>
+            <span style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);">DPO Pairs Extracted</span>
             <strong style="display:block; margin-top:4px; font-size:15px;">${payload.dpo_pairs_count} preference pair${payload.dpo_pairs_count === 1 ? '' : 's'} captured</strong>
             <p style="margin:4px 0 0; font-size:13px; color:var(--muted);">The Arbiter's verdict created ${payload.dpo_pairs_count} chosen/rejected training pair${payload.dpo_pairs_count === 1 ? '' : 's'} from this debate. These feed the next fine-tuning cycle.</p>
           </div>` : ''}
+          ${renderWebEvidence(payload.web_evidence)}
           <details class="raw-shell">
             <summary>Show raw session JSON</summary>
             <pre>${escapeHtml(JSON.stringify(payload, null, 2))}</pre>
@@ -1172,9 +1235,131 @@
               ? `Training threshold met — next cycle ready (${threshold} sessions)`
               : `${newHq} / ${threshold} sessions until next training cycle`;
           }
+          // Render training loss chart and model timeline from model_history
+          const history = data.model_history || [];
+          renderLossChart(history);
+          renderModelTimeline(history);
         } catch (e) {
           if (loopProgressLabel) loopProgressLabel.textContent = 'Loop status unavailable.';
         }
+      }
+
+      function renderLossChart(history) {
+        const container = document.getElementById('lossChartContainer');
+        if (!container) return;
+        const points = history.filter(m => m.loss != null).map((m, i) => ({
+          version: m.name.replace('adapter_', ''),
+          loss: m.loss,
+          index: i
+        }));
+        if (points.length < 2) {
+          container.innerHTML = '<div class="muted-empty" style="font-size:12px;">Not enough training data to chart.</div>';
+          return;
+        }
+        const w = container.clientWidth || 280;
+        const h = 150;
+        const pad = {top: 20, right: 30, bottom: 25, left: 40};
+        const minLoss = Math.min(...points.map(p => p.loss)) * 0.9;
+        const maxLoss = Math.max(...points.map(p => p.loss)) * 1.05;
+        const xScale = (i) => pad.left + (i / (points.length - 1)) * (w - pad.left - pad.right);
+        const yScale = (v) => pad.top + (1 - (v - minLoss) / (maxLoss - minLoss)) * (h - pad.top - pad.bottom);
+        const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i).toFixed(1)} ${yScale(p.loss).toFixed(1)}`).join(' ');
+        const dots = points.map((p, i) =>
+          `<circle cx="${xScale(i).toFixed(1)}" cy="${yScale(p.loss).toFixed(1)}" r="4" fill="var(--accent)" />
+           <text x="${xScale(i).toFixed(1)}" y="${(yScale(p.loss) - 8).toFixed(1)}" text-anchor="middle" font-size="10" fill="var(--ink)">${p.loss.toFixed(2)}</text>
+           <text x="${xScale(i).toFixed(1)}" y="${(h - 5).toFixed(1)}" text-anchor="middle" font-size="9" fill="var(--muted)">${p.version}</text>`
+        ).join('');
+        const firstLoss = points[0].loss;
+        const lastLoss = points[points.length - 1].loss;
+        const improvement = ((firstLoss - lastLoss) / firstLoss * 100).toFixed(0);
+        container.innerHTML = `
+          <div style="text-align:center; font-size:12px; font-weight:700; color:var(--accent); margin-bottom:4px;">
+            ${improvement}% loss reduction (${firstLoss.toFixed(2)} to ${lastLoss.toFixed(2)})
+          </div>
+          <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="display:block;">
+            <path d="${pathD}" fill="none" stroke="var(--accent)" stroke-width="2" />
+            ${dots}
+          </svg>`;
+      }
+
+      function renderModelTimeline(history) {
+        const container = document.getElementById('modelTimeline');
+        if (!container || !history.length) return;
+        container.innerHTML = history.map(m => {
+          const isDryRun = m.dry_run;
+          const bg = isDryRun ? 'rgba(102,93,84,0.1)' : 'rgba(46,125,50,0.1)';
+          const border = isDryRun ? 'var(--line)' : 'rgba(46,125,50,0.3)';
+          const label = isDryRun ? 'dry-run' : 'promoted';
+          return `<div style="flex:0 0 auto; padding:8px 10px; border-radius:10px; border:1px solid ${border}; background:${bg}; font-size:11px; text-align:center; min-width:70px;">
+            <strong style="display:block; font-size:13px;">${escapeHtml(m.name.replace('adapter_', ''))}</strong>
+            <span style="color:var(--muted);">loss: ${m.loss != null ? m.loss.toFixed(3) : '?'}</span><br>
+            <span style="font-size:10px; color:${isDryRun ? 'var(--muted)' : '#2e7d32'};">${label}</span>
+          </div>`;
+        }).join('');
+      }
+
+      async function loadComparison() {
+        try {
+          const response = await fetch('/api/compare/benchmark');
+          if (!response.ok) return;
+          const data = await response.json();
+          if (!data.available || !data.comparisons?.length) return;
+          const section = document.getElementById('comparisonSection');
+          if (section) section.style.display = '';
+          const summary = document.getElementById('comparisonSummary');
+          if (summary) {
+            const deltaColor = data.avg_quality_delta >= 0 ? '#2e7d32' : '#c62828';
+            summary.innerHTML = `
+              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                <div class="stat-tile" style="padding:10px;">
+                  <div class="metric-label">Avg Confidence Delta</div>
+                  <strong style="color:${data.avg_confidence_delta >= 0 ? '#2e7d32' : '#c62828'};">${data.avg_confidence_delta >= 0 ? '+' : ''}${data.avg_confidence_delta}</strong>
+                </div>
+                <div class="stat-tile" style="padding:10px;">
+                  <div class="metric-label">Avg Quality Delta</div>
+                  <strong style="color:${deltaColor};">${data.avg_quality_delta >= 0 ? '+' : ''}${data.avg_quality_delta}</strong>
+                </div>
+                <div class="stat-tile" style="padding:10px;">
+                  <div class="metric-label">Questions Improved</div>
+                  <strong>${data.improvement_pct}%</strong>
+                </div>
+              </div>`;
+          }
+          const cards = document.getElementById('comparisonCards');
+          if (cards) {
+            cards.innerHTML = data.comparisons.map(c => {
+              const color = c.quality_delta > 0 ? '#2e7d32' : (c.quality_delta < 0 ? '#c62828' : 'var(--muted)');
+              return `<div style="padding:10px 12px; border-radius:12px; border:1px solid var(--line); background:var(--paper-strong);">
+                <div style="font-size:13px; font-weight:600; margin-bottom:4px;">${escapeHtml(c.query)}</div>
+                <div style="display:flex; gap:16px; font-size:12px; color:var(--muted);">
+                  <span>Base: ${c.base_confidence}/100 conf, ${c.base_quality} quality</span>
+                  <span>Trained: ${c.trained_confidence}/100 conf, ${c.trained_quality} quality</span>
+                  <span style="color:${color}; font-weight:700;">${c.quality_delta >= 0 ? '+' : ''}${c.quality_delta} quality</span>
+                </div>
+              </div>`;
+            }).join('');
+          }
+        } catch (e) {}
+      }
+
+      async function loadSkills() {
+        try {
+          const response = await fetch('/api/skills');
+          if (!response.ok) return;
+          const data = await response.json();
+          if (!data.skills?.length) return;
+          const section = document.getElementById('skillsSection');
+          if (section) section.style.display = '';
+          const list = document.getElementById('skillsList');
+          if (list) {
+            list.innerHTML = data.skills.map(s =>
+              `<div style="padding:8px 10px; border-radius:10px; border:1px solid var(--line); background:var(--paper-strong); margin-bottom:6px; font-size:13px;">
+                <strong>${escapeHtml(s.title)}</strong>
+                <span style="float:right; font-size:11px; color:var(--muted);">${s.filename}</span>
+              </div>`
+            ).join('');
+          }
+        } catch (e) {}
       }
 
       async function loadSessionDetail(sessionId) {
@@ -1433,6 +1618,9 @@
       runButton.addEventListener('click', submitQuery);
       exportMarkdownButton.addEventListener('click', () => handleExport('markdown'));
       exportJsonButton.addEventListener('click', () => handleExport('json'));
+      document.getElementById('exportDpoButton')?.addEventListener('click', () => {
+        window.open('/api/export/dpo?format=jsonl', '_blank');
+      });
       shareButton.addEventListener('click', handleCreateShare);
       copyShareButton.addEventListener('click', handleCopyShare);
       revokeShareButton.addEventListener('click', handleRevokeShare);
@@ -1518,6 +1706,8 @@
         await loadStats();
         await loadSessions();
         await loadLoopStatus();
+        loadComparison().catch(() => {});
+        loadSkills().catch(() => {});
       }).catch(() => {});
       // Refresh loop status every 30s without requiring auth
       setInterval(() => loadLoopStatus().catch(() => {}), 30000);

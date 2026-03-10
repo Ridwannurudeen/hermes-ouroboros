@@ -97,6 +97,9 @@ class HermesWebApp:
                 web.post('/api/keys', self.handle_create_api_key),
                 web.get('/api/keys', self.handle_list_api_keys),
                 web.delete('/api/keys/{key_id}', self.handle_revoke_api_key),
+                web.get('/api/compare/benchmark', self.handle_compare_benchmark),
+                web.get('/api/export/dpo', self.handle_export_dpo),
+                web.get('/api/skills', self.handle_skills_list),
             ]
         )
         return app
@@ -361,6 +364,80 @@ class HermesWebApp:
             },
             'model_history': model_versions,
         })
+
+    async def handle_compare_benchmark(self, request: web.Request) -> web.Response:
+        """Pre-computed benchmark comparison: v0 (base) vs latest trained results."""
+        v0_path = self.root / 'benchmark' / 'results_v0.json'
+        # Try v5 first (latest), fall back to v1
+        latest_path = self.root / 'benchmark' / 'results_v5.json'
+        if not latest_path.exists():
+            latest_path = self.root / 'benchmark' / 'results_v1.json'
+        if not v0_path.exists() or not latest_path.exists():
+            return web.json_response({'available': False, 'comparisons': []})
+        v0 = json.loads(v0_path.read_text(encoding='utf-8'))
+        latest = json.loads(latest_path.read_text(encoding='utf-8'))
+        comparisons = []
+        v0_results = {r['query']: r for r in v0.get('results', [])}
+        for trained_r in latest.get('results', []):
+            query = trained_r['query']
+            base_r = v0_results.get(query)
+            if base_r:
+                comparisons.append({
+                    'query': query,
+                    'base_confidence': base_r.get('confidence_score', 0),
+                    'trained_confidence': trained_r.get('confidence_score', 0),
+                    'delta': trained_r.get('confidence_score', 0) - base_r.get('confidence_score', 0),
+                    'base_quality': base_r.get('response_quality_score', 0),
+                    'trained_quality': trained_r.get('response_quality_score', 0),
+                    'quality_delta': trained_r.get('response_quality_score', 0) - base_r.get('response_quality_score', 0),
+                })
+        avg_delta = round(sum(c['delta'] for c in comparisons) / max(1, len(comparisons)), 1) if comparisons else 0
+        avg_quality_delta = round(sum(c['quality_delta'] for c in comparisons) / max(1, len(comparisons)), 1) if comparisons else 0
+        improved = sum(1 for c in comparisons if c['delta'] > 0 or c['quality_delta'] > 0)
+        return web.json_response({
+            'available': True,
+            'v0_label': v0.get('label', 'base'),
+            'trained_label': latest.get('label', 'trained'),
+            'avg_confidence_delta': avg_delta,
+            'avg_quality_delta': avg_quality_delta,
+            'improvement_pct': round(improved / max(1, len(comparisons)) * 100, 1),
+            'comparisons': comparisons,
+        })
+
+    async def handle_export_dpo(self, request: web.Request) -> web.Response:
+        """Export DPO dataset as JSONL (HuggingFace standard)."""
+        pairs = build_dpo_dataset(self.root)
+        fmt = request.query.get('format', 'jsonl')
+        if fmt == 'jsonl':
+            lines = []
+            for pair in pairs:
+                lines.append(json.dumps({
+                    'prompt': pair.get('prompt', ''),
+                    'chosen': pair.get('chosen', ''),
+                    'rejected': pair.get('rejected', ''),
+                }, ensure_ascii=False))
+            content = '\n'.join(lines)
+            return web.Response(
+                text=content,
+                content_type='application/jsonl',
+                headers={'Content-Disposition': 'attachment; filename="hermes_dpo_dataset.jsonl"'},
+            )
+        return web.json_response(pairs)
+
+    async def handle_skills_list(self, request: web.Request) -> web.Response:
+        """List auto-created skills."""
+        skills_dir = self.root / 'skills'
+        skills = []
+        if skills_dir.exists():
+            for path in sorted(skills_dir.glob('auto_*.md')):
+                content = path.read_text(encoding='utf-8')
+                first_line = content.split('\n', 1)[0].strip().lstrip('#').strip()
+                skills.append({
+                    'filename': path.name,
+                    'title': first_line or path.stem,
+                    'size_bytes': path.stat().st_size,
+                })
+        return web.json_response({'skills': skills, 'total': len(skills)})
 
     async def handle_create_share(self, request: web.Request) -> web.Response:
         principal = self._require_principal(request)

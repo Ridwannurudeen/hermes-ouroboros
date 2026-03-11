@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import DashboardLayout from '../components/dashboard/DashboardLayout'
 import QueryPanel from '../components/dashboard/QueryPanel'
 import AgentProgressGrid from '../components/dashboard/AgentProgressGrid'
@@ -30,26 +30,38 @@ export default function DashboardPage() {
   const sse = useSSE()
   const { setSelectedSession, setCurrentSession } = useSessionStore()
 
+  // Store refetch functions in refs to keep callbacks stable
+  const metaRefetchRef = useRef(meta.refetch)
+  const statsRefetchRef = useRef(stats.refetch)
+  const loopRefetchRef = useRef(loopStatus.refetch)
+  const fetchSessionsRef = useRef(fetchSessions)
+  metaRefetchRef.current = meta.refetch
+  statsRefetchRef.current = stats.refetch
+  loopRefetchRef.current = loopStatus.refetch
+  fetchSessionsRef.current = fetchSessions
+
   useEffect(() => {
     if (meta.data) {
-      fetchSessions()
+      fetchSessionsRef.current()
     }
-  }, [meta.data, fetchSessions])
+  }, [meta.data])
 
   const handleRefresh = useCallback(() => {
-    meta.refetch()
-    stats.refetch()
-    loopStatus.refetch()
-    fetchSessions()
-  }, [meta, stats, loopStatus, fetchSessions])
+    metaRefetchRef.current()
+    statsRefetchRef.current()
+    loopRefetchRef.current()
+    fetchSessionsRef.current()
+  }, [])
 
   const handleQuery = useCallback(async (query: string, mode: string) => {
     await sse.startQuery(query, mode)
-  }, [sse])
+  }, [sse.startQuery])
 
   // When SSE finishes, update state and refresh
+  const prevFinalRef = useRef(sse.finalPayload)
   useEffect(() => {
-    if (sse.finalPayload) {
+    if (sse.finalPayload && sse.finalPayload !== prevFinalRef.current) {
+      prevFinalRef.current = sse.finalPayload
       const result = sse.finalPayload.result
       setSelectedSession(result.session_id)
       setCurrentSession(result)

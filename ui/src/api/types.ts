@@ -85,6 +85,32 @@ export interface VerdictSections {
   misleading_factor?: number
 }
 
+export interface EvidenceItem {
+  title: string
+  url: string
+  snippet: string
+}
+
+export interface WebEvidence {
+  general: EvidenceItem[]
+  counter: EvidenceItem[]
+  statistical: EvidenceItem[]
+}
+
+export interface LoopStatusData {
+  generation: number
+  trajectories_total: number
+  trajectories_new: number
+  min_for_training: number
+  ready: boolean
+  last_trained: string | null
+  model_active: string
+  status: string
+  current_version?: string
+  total_dpo_pairs?: number
+  sessions_total?: number
+}
+
 export interface SessionResult {
   session_id: string
   timestamp: string
@@ -108,6 +134,7 @@ export interface SessionResult {
   skill_path: string | null
   share_id?: string | null
   dpo_pairs_created?: number
+  web_evidence?: WebEvidence | null
 }
 
 export interface SessionSummary {

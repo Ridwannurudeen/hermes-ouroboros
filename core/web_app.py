@@ -91,6 +91,7 @@ class HermesWebApp:
                 web.get('/api/loop/status', self.handle_loop_status),
                 web.post('/api/query', self.handle_query),
                 web.post('/api/query/stream', self.handle_query_stream),
+                web.post('/api/query/solo', self.handle_solo_query),
                 web.get('/api/verify-email', self.handle_verify_email),
                 web.post('/api/forgot-password', self.handle_forgot_password),
                 web.post('/api/reset-password', self.handle_reset_password),
@@ -105,6 +106,7 @@ class HermesWebApp:
         # SPA routes — serve React index.html for /app and /app/*
         app.router.add_get('/app', self.handle_index)
         app.router.add_get('/app/{rest:.*}', self.handle_index)
+        app.router.add_get('/verdict/{rest:.*}', self.handle_index)
         # Serve built React assets
         dist_dir = self.root / 'web' / 'dist'
         if dist_dir.is_dir():
@@ -582,6 +584,40 @@ class HermesWebApp:
         except asyncio.TimeoutError:
             await response.write(b'data: {"type":"error","message":"stream timeout"}\n\n')
         return response
+
+    async def handle_solo_query(self, request: web.Request) -> web.Response:
+        """Single-model response for head-to-head comparison with the full council."""
+        principal = self._resolve_principal(request)
+        if principal is not None:
+            self._require_same_origin(request)
+            self._require_csrf_token(request, principal)
+        else:
+            self._require_same_origin(request)
+        await self._enforce_rate_limit(principal, request)
+        payload = await self._read_json(request)
+
+        query = str(payload.get('query') or '').strip()
+        if not query:
+            raise web.HTTPBadRequest(text='Field "query" is required.')
+        if len(query) > 4000:
+            raise web.HTTPBadRequest(text='Field "query" must be 4000 characters or fewer.')
+
+        solo_system_prompt = (
+            'You are a helpful AI assistant. Analyze the following question or claim thoroughly. '
+            'Provide your honest assessment with key arguments for and against. Be concise but comprehensive.'
+        )
+
+        import time
+        t0 = time.monotonic()
+        try:
+            response_text = await self.orchestrator.provider.generate(
+                'solo', solo_system_prompt, query,
+            )
+        except Exception as exc:
+            raise web.HTTPInternalServerError(text=f'Solo generation failed: {exc}') from exc
+        elapsed = round(time.monotonic() - t0, 2)
+
+        return web.json_response({'response': response_text, 'elapsed_seconds': elapsed})
 
     async def _read_json(self, request: web.Request) -> dict[str, Any]:
         try:

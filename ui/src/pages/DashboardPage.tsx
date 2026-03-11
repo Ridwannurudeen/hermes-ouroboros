@@ -22,11 +22,14 @@ import { useLoopStatus } from '../hooks/useLoopStatus'
 import { useSessions } from '../hooks/useSessions'
 import { useSSE } from '../hooks/useSSE'
 import { useSessionStore } from '../store/session'
+import { apiPost } from '../api/client'
 import type { AnalysisMode } from '../api/types'
 
 export default function DashboardPage() {
   const [activePanel, setActivePanel] = useState('query')
   const [currentAnalysisMode, setCurrentAnalysisMode] = useState<AnalysisMode>('red_team')
+  const [soloResult, setSoloResult] = useState<{ response: string; elapsed_seconds: number } | null>(null)
+  const [soloLoading, setSoloLoading] = useState(false)
   const meta = useMeta()
   const stats = useStats()
   const loopStatus = useLoopStatus()
@@ -57,9 +60,28 @@ export default function DashboardPage() {
     fetchSessionsRef.current()
   }, [])
 
-  const handleQuery = useCallback(async (query: string, mode: string, analysisMode: AnalysisMode = 'default') => {
+  const handleQuery = useCallback(async (query: string, mode: string, analysisMode: AnalysisMode = 'default', compare?: boolean) => {
     setCurrentAnalysisMode(analysisMode)
-    await sse.startQuery(query, mode, analysisMode)
+    setSoloResult(null)
+    setSoloLoading(false)
+
+    // Start council SSE
+    const councilPromise = sse.startQuery(query, mode, analysisMode)
+
+    // If compare mode, also fire solo query in parallel
+    if (compare) {
+      setSoloLoading(true)
+      apiPost<{ response: string; elapsed_seconds: number }>('/api/query/solo', { query })
+        .then((res) => {
+          setSoloResult(res)
+          setSoloLoading(false)
+        })
+        .catch(() => {
+          setSoloLoading(false)
+        })
+    }
+
+    await councilPromise
   }, [sse.startQuery])
 
   // When SSE finishes, update state and refresh
@@ -133,7 +155,12 @@ export default function DashboardPage() {
 
           {/* Result */}
           {sse.finalPayload && (
-            <ResultPanel result={sse.finalPayload.result} />
+            <ResultPanel
+              result={sse.finalPayload.result}
+              soloResult={soloResult}
+              soloLoading={soloLoading}
+              loopStatus={loopStatus.data}
+            />
           )}
         </div>
       )}

@@ -62,7 +62,7 @@ export function useSSE() {
   }, [])
 
   const startQuery = useCallback(
-    async (query: string, mode: string) => {
+    async (query: string, mode: string, analysisMode: string = 'default') => {
       abort()
 
       streamingTextRef.current = {}
@@ -93,7 +93,7 @@ export function useSSE() {
           method: 'POST',
           headers,
           credentials: 'same-origin',
-          body: JSON.stringify({ query, mode }),
+          body: JSON.stringify({ query, mode, analysis_mode: analysisMode }),
         })
 
         if (!response.ok) {

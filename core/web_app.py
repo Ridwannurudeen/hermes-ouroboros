@@ -489,7 +489,13 @@ class HermesWebApp:
         if mode not in {'default', 'trained'}:
             raise web.HTTPBadRequest(text='Field "mode" must be "default" or "trained".')
 
-        result, runtime_meta = await self.runtime.run_query(query, mode=mode)
+        analysis_mode = str(payload.get('analysis_mode') or 'default').strip().lower()
+        if analysis_mode not in {'default', 'red_team', 'verify', 'research'}:
+            raise web.HTTPBadRequest(text='Field "analysis_mode" must be "default", "red_team", "verify", or "research".')
+
+        result, runtime_meta = await self.runtime.run_query(
+            query, mode=mode, analysis_mode=analysis_mode,
+        )
         if principal is not None and principal['kind'] == 'user':
             owned = self.session_store.attach_owner(
                 session_id=str(result.get('session_id')),
@@ -521,6 +527,10 @@ class HermesWebApp:
         if mode not in {'default', 'trained'}:
             raise web.HTTPBadRequest(text='Field "mode" must be "default" or "trained".')
 
+        analysis_mode = str(payload.get('analysis_mode') or 'default').strip().lower()
+        if analysis_mode not in {'default', 'red_team', 'verify', 'research'}:
+            raise web.HTTPBadRequest(text='Field "analysis_mode" must be "default", "red_team", "verify", or "research".')
+
         response = web.StreamResponse()
         response.headers['Content-Type'] = 'text/event-stream'
         response.headers['Cache-Control'] = 'no-cache'
@@ -545,7 +555,8 @@ class HermesWebApp:
         async def run_council() -> None:
             try:
                 result, runtime_meta = await self.runtime.run_query(
-                    query, mode=mode, stream_callback=agent_stream_callback, token_callback=agent_token_callback
+                    query, mode=mode, stream_callback=agent_stream_callback,
+                    token_callback=agent_token_callback, analysis_mode=analysis_mode,
                 )
                 if principal is not None and principal['kind'] == 'user':
                     owned = self.session_store.attach_owner(

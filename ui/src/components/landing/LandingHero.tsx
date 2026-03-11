@@ -1,7 +1,13 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowRight, Sparkles, Shield, Search, BarChart3 } from 'lucide-react'
 import OuroborosRing from './OuroborosRing'
+
+const MODES = [
+  { icon: Shield, label: 'Red Team', desc: 'Stress-test any idea', color: 'text-rose-400', border: 'border-rose-500/20' },
+  { icon: Search, label: 'Verify', desc: 'Fact-check any claim', color: 'text-amber-400', border: 'border-amber-500/20' },
+  { icon: BarChart3, label: 'Research', desc: 'Deep-dive analysis', color: 'text-violet-400', border: 'border-violet-500/20' },
+]
 
 export default function LandingHero() {
   return (
@@ -38,7 +44,7 @@ export default function LandingHero() {
             className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-indigo-500/20 bg-indigo-500/[0.06]"
           >
             <Sparkles size={14} className="text-indigo-400" />
-            <span className="text-xs font-medium tracking-wide text-indigo-300/90">NousResearch Hackathon 2026</span>
+            <span className="text-xs font-medium tracking-wide text-indigo-300/90">Powered by Hermes-3 on NousResearch</span>
           </motion.div>
 
           {/* Title */}
@@ -49,7 +55,7 @@ export default function LandingHero() {
               transition={{ delay: 0.4, duration: 0.8 }}
               className="block text-[clamp(2.8rem,7vw,6.5rem)] text-white text-glow"
             >
-              The AI That Debugs
+              Adversarial
             </motion.span>
             <motion.span
               initial={{ opacity: 0, y: 30 }}
@@ -57,7 +63,7 @@ export default function LandingHero() {
               transition={{ delay: 0.6, duration: 0.8 }}
               className="block text-[clamp(2.8rem,7vw,6.5rem)] gradient-text mt-2"
             >
-              Its Own Brain.
+              Intelligence Engine
             </motion.span>
           </h1>
 
@@ -67,24 +73,48 @@ export default function LandingHero() {
             transition={{ delay: 0.8, duration: 0.8 }}
             className="text-lg md:text-xl text-white/35 max-w-2xl mx-auto leading-relaxed font-light"
           >
-            Five adversarial agents debate your hardest questions.{' '}
-            <span className="text-white/60 font-normal">Every disagreement becomes training data. Every cycle, the council gets sharper.</span>
+            Five AI agents that <span className="text-white/60 font-normal">argue, fact-check, and stress-test</span> your thinking.{' '}
+            Red team any idea. Verify any claim. Research any topic.
             <br className="hidden md:block" />
-            <span className="text-indigo-300/40">No human in the loop.</span>
+            <span className="text-indigo-300/40">Then watch the verdict form in real-time.</span>
           </motion.p>
+
+          {/* Mode cards */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9, duration: 0.8 }}
+            className="flex justify-center gap-4 flex-wrap"
+          >
+            {MODES.map((m, i) => (
+              <motion.div
+                key={m.label}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1 + i * 0.1, duration: 0.5 }}
+                className={`flex items-center gap-3 px-5 py-3 rounded-xl border ${m.border} bg-white/[0.02]`}
+              >
+                <m.icon size={16} className={m.color} />
+                <div className="text-left">
+                  <p className={`text-xs font-bold uppercase tracking-wider ${m.color}`}>{m.label}</p>
+                  <p className="text-[10px] text-white/30">{m.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
 
           {/* CTAs */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.8 }}
+            transition={{ delay: 1.2, duration: 0.8 }}
             className="flex items-center justify-center gap-4 pt-2"
           >
             <Link
               to="/app"
               className="group btn-glow flex items-center gap-2.5 px-8 py-4 text-white rounded-2xl text-base font-semibold tracking-wide"
             >
-              Try the Council
+              Launch HERMES
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
             </Link>
             <a

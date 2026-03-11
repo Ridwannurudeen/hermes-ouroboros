@@ -4,32 +4,32 @@ import { MessageSquare, Users, Scale, Zap } from 'lucide-react'
 const STEPS = [
   {
     icon: MessageSquare,
-    title: 'Ask Anything',
-    desc: 'Submit a question to the council. Complex, nuanced, controversial — the harder, the better.',
+    title: 'Choose Your Mode',
+    desc: 'Red Team a startup idea. Verify a viral claim. Research a market thesis. Pick your lens — the agents adapt their entire approach.',
     gradient: 'from-indigo-500 to-blue-500',
     glow: 'rgba(99,102,241,0.15)',
     accent: '#818cf8',
   },
   {
     icon: Users,
-    title: 'Agents Deliberate',
-    desc: 'Five adversarial minds with incompatible worldviews debate in parallel — citing live web evidence, attacking assumptions, stress-testing every conclusion.',
+    title: 'Two Rounds of Debate',
+    desc: 'Round 1: Four agents analyze independently with live web evidence. Round 2: They see each other\'s arguments and write rebuttals. Real adversarial pressure.',
     gradient: 'from-violet-500 to-purple-500',
     glow: 'rgba(139,92,246,0.15)',
     accent: '#a78bfa',
   },
   {
     icon: Scale,
-    title: 'Verdict Rendered',
-    desc: 'The Arbiter weighs all perspectives, detects conflicts, and delivers a confidence-scored verdict.',
+    title: 'HERMES Verdict',
+    desc: 'The Arbiter synthesizes everything: a HERMES Score, thinking traps detected, blind spots uncovered, a premortem, and a concrete next action.',
     gradient: 'from-emerald-500 to-teal-500',
     glow: 'rgba(16,185,129,0.15)',
     accent: '#34d399',
   },
   {
     icon: Zap,
-    title: 'Self-Improvement',
-    desc: 'The Arbiter delivers its verdict — but that is not the end. Every disagreement becomes a DPO training pair. The losers teach the winners. Five cycles in, 35% sharper — zero human labels.',
+    title: 'Self-Improvement Loop',
+    desc: 'Every disagreement becomes a DPO training pair. The council fine-tunes itself on its own debate data. Zero human labels — autonomous improvement.',
     gradient: 'from-amber-500 to-orange-500',
     glow: 'rgba(245,158,11,0.15)',
     accent: '#fbbf24',
@@ -52,7 +52,7 @@ export default function HowItWorks() {
         >
           <p className="section-label text-indigo-400/60 mb-4">Process</p>
           <h2 className="font-display text-4xl md:text-6xl font-bold text-white tracking-tight mb-5">How It Works</h2>
-          <p className="text-white/30 text-lg max-w-xl mx-auto leading-relaxed">From question to self-improving verdict in four steps.</p>
+          <p className="text-white/30 text-lg max-w-xl mx-auto leading-relaxed">From question to adversarial verdict in four steps.</p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">

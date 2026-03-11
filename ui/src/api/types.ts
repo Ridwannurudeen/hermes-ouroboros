@@ -58,17 +58,51 @@ export interface AgentTiming {
   status: 'ok' | 'error' | 'timeout'
 }
 
+export type AnalysisMode = 'default' | 'red_team' | 'verify' | 'research'
+
+export interface VerdictSections {
+  verdict_label?: string
+  hermes_score?: number
+  confidence?: number
+  fatal_flaws?: string
+  key_strengths?: string
+  fix_or_die?: string
+  thinking_traps?: string
+  blind_spots?: string
+  premortem?: string
+  action_items?: string
+  key_evidence_for?: string
+  key_evidence_against?: string
+  missing_context?: string
+  source_credibility?: string
+  bull_case_summary?: string
+  bear_case_summary?: string
+  key_uncertainties?: string
+  dissenting_views?: string
+  survival_probability?: number
+  failure_probability?: number
+  factual_accuracy?: number
+  misleading_factor?: number
+}
+
 export interface SessionResult {
   session_id: string
   timestamp: string
   query: string
-  verdict: string
+  analysis_mode?: AnalysisMode
+  arbiter_verdict: string
+  /** @deprecated alias for arbiter_verdict */
+  verdict?: string
   confidence_score: number
+  hermes_score?: number
+  verdict_sections?: VerdictSections
   conflict_detected: boolean
   conflict_summary: string
   dissent_summary: string
   agent_responses: Record<string, string>
+  round2_responses?: Record<string, string> | null
   agent_timings: Record<string, AgentTiming>
+  round2_timings?: Record<string, AgentTiming> | null
   additional_research: string
   backend: string
   skill_path: string | null
@@ -80,10 +114,12 @@ export interface SessionSummary {
   session_id: string
   timestamp: string
   query: string
-  verdict: string
+  arbiter_verdict?: string
+  verdict?: string
   confidence_score: number
   conflict_detected: boolean
   backend: string
+  analysis_mode?: AnalysisMode
 }
 
 export interface SSEAgentEvent {
@@ -148,3 +184,48 @@ export const AGENT_META: Record<AgentRole, { label: string; color: string; descr
   contrarian: { label: 'Contrarian', color: 'rose', description: 'Challenges the majority view' },
   arbiter: { label: 'Arbiter', color: 'emerald', description: 'Final judgment and verdict' },
 }
+
+export const MODE_AGENT_LABELS: Record<AnalysisMode, Record<AgentRole, string>> = {
+  default: {
+    advocate: 'Advocate',
+    skeptic: 'Skeptic',
+    oracle: 'Oracle',
+    contrarian: 'Contrarian',
+    arbiter: 'Arbiter',
+  },
+  red_team: {
+    advocate: 'Strengths',
+    skeptic: 'Fatal Flaws',
+    oracle: 'Data Check',
+    contrarian: 'Blind Spots',
+    arbiter: 'Verdict',
+  },
+  verify: {
+    advocate: 'Evidence For',
+    skeptic: 'Evidence Against',
+    oracle: 'Source Check',
+    contrarian: 'Missing Context',
+    arbiter: 'Verdict',
+  },
+  research: {
+    advocate: 'Bull Case',
+    skeptic: 'Bear Case',
+    oracle: 'Data Analysis',
+    contrarian: 'Alt Perspective',
+    arbiter: 'Assessment',
+  },
+}
+
+export interface ModeInfo {
+  key: AnalysisMode
+  label: string
+  tagline: string
+  icon: string
+  color: string
+}
+
+export const ANALYSIS_MODES: ModeInfo[] = [
+  { key: 'red_team', label: 'Red Team', tagline: 'Stress-test any idea', icon: 'shield', color: 'rose' },
+  { key: 'verify', label: 'Verify', tagline: 'Fact-check any claim', icon: 'search', color: 'amber' },
+  { key: 'research', label: 'Research', tagline: 'Deep-dive analysis', icon: 'chart', color: 'violet' },
+]

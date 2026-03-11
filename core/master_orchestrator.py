@@ -11,6 +11,8 @@ from agents import ARBITER_AGENT
 from core.agent_launcher import AgentLauncher
 from core.arbiter_prompt import build_arbiter_prompt
 from core.conflict_resolver import ConflictResolver
+from core.mode_prompts import get_arbiter_prompt
+from core.verdict_parser import parse_verdict
 from core.web_search import EvidenceGatherer
 from core.session_store import SessionStore
 from core.settings import load_settings
@@ -33,52 +35,93 @@ class MasterOrchestrator:
         self.trajectory_logger = TrajectoryLogger(self.root)
         self.skill_creator = SkillCreator(self.root)
 
-    async def run_query(self, query: str, stream_callback=None, token_callback=None) -> dict[str, Any]:
+    async def run_query(self, query: str, stream_callback=None, token_callback=None,
+                        analysis_mode: str = 'default') -> dict[str, Any]:
         session_id = str(uuid.uuid4())
         timestamp = datetime.now(timezone.utc).isoformat()
         started = datetime.now(timezone.utc)
-        self._append_log(f'{timestamp} | {session_id} | RECEIVED | {query}')
+        self._append_log(f'{timestamp} | {session_id} | RECEIVED | mode={analysis_mode} | {query}')
 
         try:
+            # Gather web evidence
             print('Gathering web evidence...')
             try:
                 evidence = await EvidenceGatherer().gather(query)
             except Exception:
                 evidence = None
-            print('Agents dispatched... waiting for responses...')
+
+            # Round 1: all agents respond in parallel
+            print('Round 1: Agents dispatched...')
             agent_responses, agent_timings = await self.agent_launcher.launch_agents(
-                query, stream_callback=stream_callback, token_callback=token_callback, evidence=evidence
+                query, stream_callback=stream_callback, token_callback=token_callback,
+                evidence=evidence, analysis_mode=analysis_mode,
             )
+
+            # Round 2: agents see each other's Round 1 and rebut (for non-default modes)
+            round2_responses: dict[str, str] | None = None
+            round2_timings: dict[str, dict[str, object]] | None = None
+            if analysis_mode != 'default':
+                print('Round 2: Rebuttal phase...')
+                round2_responses, round2_timings = await self.agent_launcher.launch_round2(
+                    query, agent_responses, stream_callback=stream_callback,
+                    token_callback=token_callback, analysis_mode=analysis_mode,
+                )
+
+            # Conflict resolution
             conflict = await self.conflict_resolver.resolve(query, agent_responses)
-            arbiter_prompt = self._build_arbiter_prompt(query, agent_responses, conflict)
+
+            # Build arbiter prompt with mode-awareness and optional Round 2
+            arbiter_user_prompt = build_arbiter_prompt(
+                query=query,
+                agent_responses=agent_responses,
+                additional_research=conflict.additional_research,
+                analysis_mode=analysis_mode,
+                round2_responses=round2_responses,
+            )
+
+            # Get mode-specific arbiter system prompt (or fall back to base)
+            arbiter_system_prompt = get_arbiter_prompt(analysis_mode) or ARBITER_AGENT.system_prompt
+
             arbiter_context = {
                 'conflict_summary': conflict.conflict_summary,
                 'additional_research': conflict.additional_research or '',
             }
             if token_callback and hasattr(self.provider, 'generate_stream'):
-                arbiter_verdict = await self._stream_arbiter(arbiter_prompt, arbiter_context, token_callback)
+                arbiter_verdict = await self._stream_arbiter(
+                    arbiter_user_prompt, arbiter_context, token_callback,
+                    arbiter_system_prompt=arbiter_system_prompt,
+                )
             else:
                 arbiter_verdict = await self.provider.generate(
                     'arbiter',
-                    ARBITER_AGENT.system_prompt,
-                    arbiter_prompt,
+                    arbiter_system_prompt,
+                    arbiter_user_prompt,
                     context=arbiter_context,
                 )
             arbiter_meta = self._consume_provider_diagnostics()
             confidence_score = self._parse_confidence(arbiter_verdict)
+            hermes_score = self._parse_hermes_score(arbiter_verdict)
+            verdict_sections = parse_verdict(arbiter_verdict)
+            if hermes_score == -1 and 'hermes_score' in verdict_sections:
+                hermes_score = verdict_sections['hermes_score']
             elapsed_seconds = round((datetime.now(timezone.utc) - started).total_seconds(), 3)
             session_result: dict[str, Any] = {
                 'query': query,
                 'timestamp': timestamp,
                 'session_id': session_id,
+                'analysis_mode': analysis_mode,
                 'agent_responses': agent_responses,
+                'round2_responses': round2_responses,
                 'arbiter_verdict': arbiter_verdict,
                 'confidence_score': confidence_score,
+                'hermes_score': hermes_score,
                 'elapsed_seconds': elapsed_seconds,
                 'conflict_detected': conflict.conflict_detected,
                 'conflict_summary': conflict.conflict_summary,
                 'additional_research': conflict.additional_research,
                 'agent_timings': agent_timings,
+                'round2_timings': round2_timings,
+                'verdict_sections': verdict_sections,
                 'web_evidence': evidence.to_dict() if evidence and not evidence.is_empty() else None,
                 'provider_meta': {
                     'research': conflict.additional_research_meta,
@@ -88,7 +131,6 @@ class MasterOrchestrator:
             skill_path = self.skill_creator.maybe_create_skill(session_result)
             if skill_path:
                 session_result['skill_path'] = skill_path
-            # Extract DPO preference pairs from this session's debate
             dpo_pairs = extract_preference_pairs(session_result)
             if dpo_pairs:
                 session_result['dpo_pairs_count'] = len(dpo_pairs)
@@ -97,7 +139,8 @@ class MasterOrchestrator:
             trajectory_count = self.trajectory_logger.log_session(session_result)
             self._append_log(
                 f"{datetime.now(timezone.utc).isoformat()} | {session_id} | COMPLETE | "
-                f"confidence={confidence_score} | conflict={conflict.conflict_detected} | "
+                f"mode={analysis_mode} | confidence={confidence_score} | hermes={hermes_score} | "
+                f"conflict={conflict.conflict_detected} | "
                 f"trajectories={trajectory_count} | skill={'yes' if skill_path else 'no'} | session={session_path.name}"
             )
             return session_result
@@ -108,14 +151,18 @@ class MasterOrchestrator:
                 'query': query,
                 'timestamp': timestamp,
                 'session_id': session_id,
+                'analysis_mode': analysis_mode,
                 'agent_responses': {},
+                'round2_responses': None,
                 'arbiter_verdict': f'[ERROR] {exc}',
                 'confidence_score': -1,
+                'hermes_score': -1,
                 'elapsed_seconds': elapsed_seconds,
                 'conflict_detected': False,
                 'conflict_summary': 'Pipeline failed before conflict analysis.',
                 'additional_research': None,
                 'agent_timings': {},
+                'round2_timings': None,
             }
 
     async def _stream_arbiter(
@@ -123,10 +170,12 @@ class MasterOrchestrator:
         arbiter_prompt: str,
         context: dict[str, str],
         token_callback,
+        arbiter_system_prompt: str | None = None,
     ) -> str:
+        system_prompt = arbiter_system_prompt or ARBITER_AGENT.system_prompt
         chunks: list[str] = []
         async for token in self.provider.generate_stream(
-            'arbiter', ARBITER_AGENT.system_prompt, arbiter_prompt, context=context
+            'arbiter', system_prompt, arbiter_prompt, context=context
         ):
             chunks.append(token)
             maybe = token_callback('arbiter', token)
@@ -159,13 +208,6 @@ class MasterOrchestrator:
             )
             return MockCouncilProvider()
 
-    def _build_arbiter_prompt(self, query: str, agent_responses: dict[str, str], conflict: Any) -> str:
-        return build_arbiter_prompt(
-            query=query,
-            agent_responses=agent_responses,
-            additional_research=conflict.additional_research,
-        )
-
     def _parse_confidence(self, verdict: str) -> int:
         ten_scale = re.search(r'(\d{1,2})\s*/\s*10\b', verdict, flags=re.IGNORECASE)
         if ten_scale:
@@ -183,6 +225,17 @@ class MasterOrchestrator:
                 return int(match.group(1))
         self._append_log(f'{datetime.now(timezone.utc).isoformat()} | WARN | Could not parse confidence from verdict')
         return -1
+
+    def _parse_hermes_score(self, verdict: str) -> int:
+        patterns = (
+            r'HERMES\s+SCORE\s*[:=]\s*\[?\s*(\d{1,3})\s*\]?',
+            r'HERMES\s+SCORE\s*[:=]\s*(\d{1,3})',
+        )
+        for pattern in patterns:
+            match = re.search(pattern, verdict, flags=re.IGNORECASE)
+            if match:
+                return min(int(match.group(1)), 100)
+        return self._parse_confidence(verdict)
 
 
 def run_sync(query: str, root: str | Path = '.') -> dict[str, Any]:

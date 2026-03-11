@@ -22,9 +22,11 @@ import { useLoopStatus } from '../hooks/useLoopStatus'
 import { useSessions } from '../hooks/useSessions'
 import { useSSE } from '../hooks/useSSE'
 import { useSessionStore } from '../store/session'
+import type { AnalysisMode } from '../api/types'
 
 export default function DashboardPage() {
   const [activePanel, setActivePanel] = useState('query')
+  const [currentAnalysisMode, setCurrentAnalysisMode] = useState<AnalysisMode>('red_team')
   const meta = useMeta()
   const stats = useStats()
   const loopStatus = useLoopStatus()
@@ -55,8 +57,9 @@ export default function DashboardPage() {
     fetchSessionsRef.current()
   }, [])
 
-  const handleQuery = useCallback(async (query: string, mode: string) => {
-    await sse.startQuery(query, mode)
+  const handleQuery = useCallback(async (query: string, mode: string, analysisMode: AnalysisMode = 'default') => {
+    setCurrentAnalysisMode(analysisMode)
+    await sse.startQuery(query, mode, analysisMode)
   }, [sse.startQuery])
 
   // When SSE finishes, update state and refresh
@@ -117,6 +120,7 @@ export default function DashboardPage() {
               streamingText={sse.streamingText}
               completedAgents={sse.completedAgents}
               isStreaming={sse.isStreaming}
+              analysisMode={currentAnalysisMode}
             />
           )}
 

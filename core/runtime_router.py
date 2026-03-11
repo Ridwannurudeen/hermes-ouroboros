@@ -20,25 +20,38 @@ class RuntimeRouter:
         self._trained_backend_retry_at: datetime | None = None
         self._trained_backend_reason: str | None = None
 
-    async def run_query(self, query: str, mode: str = 'default', stream_callback=None, token_callback=None) -> tuple[dict[str, Any], dict[str, Any]]:
+    async def run_query(self, query: str, mode: str = 'default', stream_callback=None,
+                        token_callback=None, analysis_mode: str = 'default') -> tuple[dict[str, Any], dict[str, Any]]:
         normalized_mode = mode.strip().lower()
         if normalized_mode == 'trained':
-            return await self._run_trained_query(query, stream_callback=stream_callback, token_callback=token_callback)
+            return await self._run_trained_query(
+                query, stream_callback=stream_callback, token_callback=token_callback,
+                analysis_mode=analysis_mode,
+            )
 
-        result = await self.orchestrator.run_query(query, stream_callback=stream_callback, token_callback=token_callback)
+        result = await self.orchestrator.run_query(
+            query, stream_callback=stream_callback, token_callback=token_callback,
+            analysis_mode=analysis_mode,
+        )
         return result, {
             'mode': 'default',
+            'analysis_mode': analysis_mode,
             'provider': type(self.orchestrator.provider).__name__,
             'fallback_reason': None,
         }
 
-    async def _run_trained_query(self, query: str, stream_callback=None, token_callback=None) -> tuple[dict[str, Any], dict[str, Any]]:
+    async def _run_trained_query(self, query: str, stream_callback=None, token_callback=None,
+                                analysis_mode: str = 'default') -> tuple[dict[str, Any], dict[str, Any]]:
         latest_target = self._latest_trained_target()
         if latest_target and latest_target.get('provider') == 'learned_profile':
             profile_orchestrator = self._get_orchestrator('learned_profile', self.settings.provider.model)
-            result = await profile_orchestrator.run_query(query, stream_callback=stream_callback, token_callback=token_callback)
+            result = await profile_orchestrator.run_query(
+                query, stream_callback=stream_callback, token_callback=token_callback,
+                analysis_mode=analysis_mode,
+            )
             return result, {
                 'mode': 'trained_profile',
+                'analysis_mode': analysis_mode,
                 'provider': type(profile_orchestrator.provider).__name__,
                 'fallback_reason': None,
             }
@@ -53,12 +66,16 @@ class RuntimeRouter:
                 fallback_reason = f'Trained Modal backend unavailable: {exc}'
 
         if fallback_reason is None and trained_orchestrator is not None:
-            result = await trained_orchestrator.run_query(query, stream_callback=stream_callback, token_callback=token_callback)
+            result = await trained_orchestrator.run_query(
+                query, stream_callback=stream_callback, token_callback=token_callback,
+                analysis_mode=analysis_mode,
+            )
             trained_error = self._trained_error_message(result)
             if trained_error is None:
                 self._clear_trained_backend_status()
                 return result, {
                     'mode': 'trained_modal',
+                    'analysis_mode': analysis_mode,
                     'provider': type(trained_orchestrator.provider).__name__,
                     'fallback_reason': None,
                 }
@@ -69,9 +86,13 @@ class RuntimeRouter:
         self._mark_trained_backend_unavailable(fallback_reason)
 
         fallback_orchestrator = self._get_orchestrator('trained_fallback', self.settings.provider.model)
-        result = await fallback_orchestrator.run_query(query, stream_callback=stream_callback, token_callback=token_callback)
+        result = await fallback_orchestrator.run_query(
+            query, stream_callback=stream_callback, token_callback=token_callback,
+            analysis_mode=analysis_mode,
+        )
         return result, {
             'mode': 'trained_fallback',
+            'analysis_mode': analysis_mode,
             'provider': type(fallback_orchestrator.provider).__name__,
             'fallback_reason': fallback_reason,
         }

@@ -18,11 +18,11 @@ export default function LandingNav() {
               <span className="text-white font-bold text-sm">H</span>
             </div>
           </div>
-          <span className="font-display font-bold text-white/90 text-lg tracking-tight">Ouroboros</span>
+          <span className="font-display font-bold text-white/90 text-lg tracking-tight">HERMES</span>
         </div>
 
         <div className="hidden md:flex items-center gap-8">
-          {['How It Works', 'Agents', 'Self-Improvement', 'Results'].map((item) => (
+          {['How It Works', 'Agents', 'Modes', 'Results'].map((item) => (
             <a
               key={item}
               href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
@@ -37,7 +37,7 @@ export default function LandingNav() {
           to="/app"
           className="btn-glow px-5 py-2 text-white rounded-xl text-sm font-semibold tracking-wide"
         >
-          Launch App
+          Launch HERMES
         </Link>
       </div>
     </motion.nav>

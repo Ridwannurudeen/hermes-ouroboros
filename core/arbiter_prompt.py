@@ -2,9 +2,19 @@ from __future__ import annotations
 
 from typing import Mapping
 
+from core.mode_prompts import MODE_AGENT_LABELS
+
 
 MAX_REPORT_CHARS = 900
 MAX_RESEARCH_CHARS = 600
+
+# Report labels per mode — falls back to default role names
+_DEFAULT_LABELS = {
+    'advocate': 'ADVOCATE',
+    'skeptic': 'SKEPTIC',
+    'oracle': 'ORACLE',
+    'contrarian': 'CONTRARIAN',
+}
 
 
 def build_arbiter_prompt(
@@ -13,26 +23,35 @@ def build_arbiter_prompt(
     additional_research: str | None = None,
     max_report_chars: int = MAX_REPORT_CHARS,
     max_research_chars: int = MAX_RESEARCH_CHARS,
+    analysis_mode: str = 'default',
+    round2_responses: Mapping[str, str] | None = None,
 ) -> str:
+    mode_labels = MODE_AGENT_LABELS.get(analysis_mode, _DEFAULT_LABELS)
     research_block = ''
     if additional_research:
         research_block = f'\nADDITIONAL RESEARCH:\n{_trim_block(additional_research, max_research_chars)}\n'
-    return (
-        f'QUERY: {query}\n\n'
-        f"ADVOCATE REPORT:\n{_trim_block(agent_responses.get('advocate', ''), max_report_chars)}\n\n"
-        f"SKEPTIC REPORT:\n{_trim_block(agent_responses.get('skeptic', ''), max_report_chars)}\n\n"
-        f"ORACLE REPORT:\n{_trim_block(agent_responses.get('oracle', ''), max_report_chars)}\n\n"
-        f"CONTRARIAN REPORT:\n{_trim_block(agent_responses.get('contrarian', ''), max_report_chars)}\n"
-        f'{research_block}\n'
-        'Your task: Review all four reports and render your verdict.\n'
-        'Respond using this exact structure:\n'
-        'Key Disagreements:\n'
-        'Evidence Weighing:\n'
-        'Final Verdict:\n'
-        'Confidence Score: <0-100>\n'
-        'Dissenting Views:\n'
-        'Use the full 0-100 confidence scale. If the evidence clearly supports one answer, do not default to 70.'
+
+    parts = [f'QUERY: {query}\n']
+    for role in ('advocate', 'skeptic', 'oracle', 'contrarian'):
+        label = mode_labels.get(role, role.upper())
+        text = agent_responses.get(role, '')
+        parts.append(f'{label.upper()} REPORT:\n{_trim_block(text, max_report_chars)}\n')
+
+    if round2_responses:
+        parts.append('--- ROUND 2 REBUTTALS ---\n')
+        for role in ('advocate', 'skeptic', 'oracle', 'contrarian'):
+            label = mode_labels.get(role, role.upper())
+            text = round2_responses.get(role, '')
+            if text:
+                parts.append(f'{label.upper()} REBUTTAL:\n{_trim_block(text, max_report_chars)}\n')
+
+    parts.append(research_block)
+    parts.append(
+        'Your task: Review all reports (and rebuttals if present) and render your verdict.\n'
+        'Use the exact structure specified in your system prompt.\n'
+        'Use the full 0-100 scale. If the evidence clearly supports one answer, do not default to 70.'
     )
+    return '\n'.join(parts)
 
 
 def _trim_block(text: str, max_chars: int) -> str:

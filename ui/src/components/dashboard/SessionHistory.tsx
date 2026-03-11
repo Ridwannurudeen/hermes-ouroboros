@@ -94,7 +94,7 @@ export default function SessionHistory({ sessions, loading, onSearch, onRefresh 
         <GlassCard className="p-4">
           <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Session Detail</h4>
           <p className="text-sm text-white/80 mb-2">{detail.query}</p>
-          <p className="text-xs text-white/50 leading-relaxed line-clamp-4">{detail.verdict}</p>
+          <p className="text-xs text-white/50 leading-relaxed line-clamp-4">{detail.arbiter_verdict || detail.verdict || ''}</p>
           <div className="flex items-center gap-2 mt-3">
             <Pill variant="info">{detail.confidence_score}%</Pill>
             <span className="text-[10px] text-white/30 font-mono">{detail.backend}</span>

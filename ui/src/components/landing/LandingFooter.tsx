@@ -13,7 +13,7 @@ export default function LandingFooter() {
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center opacity-70 shadow-lg shadow-indigo-500/20">
               <span className="text-white font-bold text-xs">H</span>
             </div>
-            <span className="font-display font-bold text-white/50 tracking-tight">Hermes Ouroboros</span>
+            <span className="font-display font-bold text-white/50 tracking-tight">HERMES — Adversarial Intelligence Engine</span>
           </div>
 
           <div className="flex items-center gap-8 text-[13px] text-white/20">

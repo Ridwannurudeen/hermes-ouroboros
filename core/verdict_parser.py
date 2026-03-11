@@ -13,7 +13,7 @@ from typing import Any
 # Sections we look for in verdict text.  Key = output field name,
 # value = regex pattern that captures everything after the header.
 _SECTION_PATTERNS: list[tuple[str, str]] = [
-    ('verdict_label', r'VERDICT\s*[:=]\s*\[?\s*([A-Z /]+?)\s*\]?\s*[\(\n]'),
+    ('verdict_label', r'VERDICT\s*[:=]\s*(?:\[([A-Z /]+?)\]|([A-Z][A-Z /]+?)(?:\s*[\(\n\—\-]|\s{2,}))'),
     ('hermes_score', r'HERMES\s+SCORE\s*[:=]\s*\[?\s*(\d{1,3})\s*\]?'),
     ('confidence', r'CONFIDENCE\s*[:=]\s*\[?\s*(\d{1,3})\s*\]?'),
     ('survival_probability', r'SURVIVAL\s+PROBABILITY\s*[:=]\s*\[?\s*(\d{1,3})\s*\]?'),
@@ -59,7 +59,10 @@ def parse_verdict(verdict: str) -> dict[str, Any]:
     for field, pattern in _SECTION_PATTERNS:
         match = re.search(pattern, verdict, re.IGNORECASE)
         if match:
-            val = match.group(1).strip()
+            # Pick the first non-None group (some patterns have alternation with multiple groups)
+            val = next((g for g in match.groups() if g is not None), '').strip()
+            if not val:
+                continue
             if field in ('hermes_score', 'confidence', 'survival_probability',
                          'failure_probability', 'factual_accuracy', 'misleading_factor'):
                 try:

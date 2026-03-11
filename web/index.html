@@ -584,6 +584,258 @@
         .example-queries { overflow-x: auto; flex-wrap: nowrap; }
         .example-chip { flex-shrink: 0; }
       }
+
+      /* ===== Council Ring Visualization ===== */
+      .council-ring-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 16px 0;
+      }
+      .council-ring-svg {
+        width: 280px;
+        height: 280px;
+      }
+      @media (max-width: 640px) {
+        .council-ring-svg { width: 220px; height: 220px; }
+      }
+      .council-ring-status {
+        margin-top: 10px;
+        font-size: 13px;
+        color: var(--muted);
+        text-align: center;
+        font-weight: 600;
+        min-height: 20px;
+      }
+      /* Idle decorative rotation */
+      @keyframes ring-idle-spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      .cr-idle-ring {
+        transform-origin: 140px 140px;
+        animation: ring-idle-spin 30s linear infinite;
+      }
+      /* Agent spinner — dashed ring around each node */
+      @keyframes agent-spin {
+        from { stroke-dashoffset: 0; }
+        to { stroke-dashoffset: -44; }
+      }
+      .cr-spinner {
+        fill: none;
+        stroke-width: 2;
+        stroke-dasharray: 8 6;
+        animation: agent-spin 1s linear infinite;
+      }
+      /* Agent node pop on complete */
+      @keyframes agent-pop {
+        0% { transform: scale(1); }
+        40% { transform: scale(1.35); }
+        100% { transform: scale(1); }
+      }
+      .cr-node-pop {
+        animation: agent-pop 0.45s ease-out;
+      }
+      /* Burst ring on agent complete */
+      @keyframes burst-out {
+        0% { r: 18; opacity: 0.7; stroke-width: 3; }
+        100% { r: 34; opacity: 0; stroke-width: 0.5; }
+      }
+      .cr-burst {
+        fill: none;
+        animation: burst-out 0.6s ease-out forwards;
+      }
+      /* Arbiter synthesis pulse */
+      @keyframes synthesis-pulse {
+        0%, 100% { r: 22; opacity: 0.25; }
+        50% { r: 30; opacity: 0.5; }
+      }
+      .cr-synth-ring {
+        fill: none;
+        stroke: #3d5a80;
+        stroke-width: 1.5;
+        animation: synthesis-pulse 1.2s ease-in-out infinite;
+      }
+      /* Arbiter final halo */
+      @keyframes halo-glow {
+        0%, 100% { r: 26; opacity: 0.35; }
+        50% { r: 32; opacity: 0.55; }
+      }
+      .cr-halo {
+        fill: none;
+        stroke: #3d5a80;
+        stroke-width: 2;
+        animation: halo-glow 2s ease-in-out infinite;
+      }
+      /* Connection lines */
+      .cr-line {
+        stroke-width: 1.5;
+        stroke: var(--line);
+        transition: stroke 0.4s, opacity 0.4s;
+        opacity: 0.3;
+      }
+      .cr-line-active {
+        opacity: 0.8;
+        stroke-dasharray: none;
+      }
+      .cr-line-aligned { stroke: #2e7d32; opacity: 0.7; }
+      .cr-line-conflict { stroke: #d4930a; opacity: 0.7; }
+      /* Node labels */
+      .cr-label {
+        font-size: 10px;
+        fill: var(--muted);
+        text-anchor: middle;
+        pointer-events: none;
+      }
+      .cr-duration {
+        font-size: 9px;
+        fill: var(--muted);
+        text-anchor: middle;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .cr-duration.visible { opacity: 1; }
+
+      /* ===== Benchmark Visualization ===== */
+      .bench-summary-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+      @media (max-width: 640px) {
+        .bench-summary-cards { grid-template-columns: 1fr; }
+      }
+      .bench-summary-card {
+        padding: 14px 16px;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        background: var(--paper-strong);
+        border-left: 4px solid #2e7d32;
+      }
+      .bench-summary-card.negative { border-left-color: #c62828; }
+      .bench-summary-value {
+        font-size: 28px;
+        font-weight: 800;
+        color: #2e7d32;
+        line-height: 1.1;
+      }
+      .bench-summary-card.negative .bench-summary-value { color: #c62828; }
+      .bench-summary-label {
+        font-size: 12px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-top: 4px;
+      }
+      html.dark .bench-summary-card { background: rgba(40,34,28,0.6); }
+      html.dark .bench-summary-value { color: #5cb88a; }
+      html.dark .bench-summary-card.negative .bench-summary-value { color: #e8714e; }
+
+      .bench-rings {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin: 20px 0;
+      }
+      @media (max-width: 640px) {
+        .bench-rings { gap: 20px; }
+      }
+      .bench-ring-item { text-align: center; }
+      .bench-ring-label {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .bench-ring-svg {
+        width: 110px;
+        height: 110px;
+      }
+      .bench-ring-track {
+        fill: none;
+        stroke: var(--line);
+        stroke-width: 8;
+      }
+      .bench-ring-fill {
+        fill: none;
+        stroke-width: 8;
+        stroke-linecap: round;
+        transition: stroke-dashoffset 1.2s ease-out;
+      }
+      .bench-ring-text {
+        font-size: 20px;
+        font-weight: 800;
+        fill: var(--ink);
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+
+      .bench-question {
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: var(--paper-strong);
+        margin-bottom: 10px;
+      }
+      html.dark .bench-question { background: rgba(40,34,28,0.6); }
+      .bench-q-text {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        line-height: 1.4;
+      }
+      .bench-bar-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 5px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .bench-bar-label {
+        width: 70px;
+        flex-shrink: 0;
+        text-align: right;
+      }
+      .bench-bar-track {
+        flex: 1;
+        height: 14px;
+        border-radius: 7px;
+        background: var(--line);
+        position: relative;
+        overflow: hidden;
+      }
+      .bench-bar-fill {
+        height: 100%;
+        border-radius: 7px;
+        width: 0%;
+        transition: width 1s ease-out;
+      }
+      .bench-bar-base { background: #9e9e9e; }
+      .bench-bar-trained { background: #2e7d32; }
+      html.dark .bench-bar-trained { background: #5cb88a; }
+      .bench-bar-score {
+        width: 30px;
+        flex-shrink: 0;
+        font-weight: 700;
+        font-size: 12px;
+      }
+      .bench-delta-pill {
+        display: inline-block;
+        padding: 2px 7px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        margin-left: 4px;
+      }
+      .bench-delta-positive { background: rgba(46,125,50,0.12); color: #2e7d32; }
+      .bench-delta-negative { background: rgba(198,40,40,0.12); color: #c62828; }
+      .bench-delta-zero { background: rgba(0,0,0,0.06); color: var(--muted); }
+      html.dark .bench-delta-positive { background: rgba(92,184,138,0.15); color: #5cb88a; }
+      html.dark .bench-delta-negative { background: rgba(232,113,78,0.15); color: #e8714e; }
     </style>
   </head>
   <body>
@@ -1299,6 +1551,95 @@
         }).join('');
       }
 
+      function animateCountUp(el, target, suffix = '', duration = 1200) {
+        const start = performance.now();
+        const isNeg = target < 0;
+        const abs = Math.abs(target);
+        function tick(now) {
+          const t = Math.min((now - start) / duration, 1);
+          const ease = 1 - Math.pow(1 - t, 3);
+          const val = (ease * abs).toFixed(1);
+          el.textContent = (isNeg ? '-' : '+') + val + suffix;
+          if (t < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
+
+      function benchProgressRing(id, score, maxScore, color, label) {
+        const r = 42, circ = 2 * Math.PI * r;
+        const offset = circ - (score / maxScore) * circ;
+        return `<div class="bench-ring-item">
+          <svg class="bench-ring-svg" viewBox="0 0 110 110">
+            <circle cx="55" cy="55" r="${r}" class="bench-ring-track"/>
+            <circle cx="55" cy="55" r="${r}" class="bench-ring-fill" stroke="${color}"
+              stroke-dasharray="${circ}" stroke-dashoffset="${circ}"
+              transform="rotate(-90 55 55)" data-target-offset="${offset}" data-circ="${circ}"/>
+            <text x="55" y="55" class="bench-ring-text">${score}</text>
+          </svg>
+          <div class="bench-ring-label">${label}</div>
+        </div>`;
+      }
+
+      function deltaPill(val) {
+        if (val > 0) return `<span class="bench-delta-pill bench-delta-positive">+${val}</span>`;
+        if (val < 0) return `<span class="bench-delta-pill bench-delta-negative">${val}</span>`;
+        return `<span class="bench-delta-pill bench-delta-zero">0</span>`;
+      }
+
+      function benchBarComparison(comparisons) {
+        return comparisons.map(c => {
+          const confDelta = c.trained_confidence - c.base_confidence;
+          const qualDelta = c.quality_delta;
+          return `<div class="bench-question">
+            <div class="bench-q-text">${escapeHtml(c.query)}</div>
+            <div class="bench-bar-row">
+              <div class="bench-bar-label">Confidence</div>
+              <div class="bench-bar-track">
+                <div class="bench-bar-fill bench-bar-base" data-width="${c.base_confidence}%" style="position:absolute;height:100%;"></div>
+                <div class="bench-bar-fill bench-bar-trained" data-width="${c.trained_confidence}%" style="position:absolute;height:50%;top:25%;border-radius:4px;"></div>
+              </div>
+              <div class="bench-bar-score">${c.trained_confidence}</div>
+              ${deltaPill(confDelta)}
+            </div>
+            <div class="bench-bar-row">
+              <div class="bench-bar-label">Quality</div>
+              <div class="bench-bar-track">
+                <div class="bench-bar-fill bench-bar-base" data-width="${c.base_quality}%" style="position:absolute;height:100%;"></div>
+                <div class="bench-bar-fill bench-bar-trained" data-width="${c.trained_quality}%" style="position:absolute;height:50%;top:25%;border-radius:4px;"></div>
+              </div>
+              <div class="bench-bar-score">${c.trained_quality}</div>
+              ${deltaPill(qualDelta)}
+            </div>
+          </div>`;
+        }).join('');
+      }
+
+      function triggerBenchAnimations(container) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            // Animate count-up values
+            container.querySelectorAll('[data-countup]').forEach(el => {
+              const val = parseFloat(el.dataset.countup);
+              const suffix = el.dataset.suffix || '';
+              animateCountUp(el, val, suffix);
+            });
+            // Animate ring fills
+            container.querySelectorAll('.bench-ring-fill').forEach(ring => {
+              const target = parseFloat(ring.dataset.targetOffset);
+              setTimeout(() => { ring.style.strokeDashoffset = target; }, 100);
+            });
+            // Animate bar widths
+            container.querySelectorAll('.bench-bar-fill').forEach(bar => {
+              const w = bar.dataset.width;
+              setTimeout(() => { bar.style.width = w; }, 150);
+            });
+            observer.disconnect();
+          });
+        }, { threshold: 0.2 });
+        observer.observe(container);
+      }
+
       async function loadComparison() {
         try {
           const response = await fetch('/api/compare/benchmark');
@@ -1307,39 +1648,44 @@
           if (!data.available || !data.comparisons?.length) return;
           const section = document.getElementById('comparisonSection');
           if (section) section.style.display = '';
+
           const summary = document.getElementById('comparisonSummary');
           if (summary) {
-            const deltaColor = data.avg_quality_delta >= 0 ? '#2e7d32' : '#c62828';
+            const confNeg = data.avg_confidence_delta < 0;
+            const qualNeg = data.avg_quality_delta < 0;
             summary.innerHTML = `
-              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-                <div class="stat-tile" style="padding:10px;">
-                  <div class="metric-label">Avg Confidence Delta</div>
-                  <strong style="color:${data.avg_confidence_delta >= 0 ? '#2e7d32' : '#c62828'};">${data.avg_confidence_delta >= 0 ? '+' : ''}${data.avg_confidence_delta}</strong>
+              <div class="bench-summary-cards">
+                <div class="bench-summary-card ${confNeg ? 'negative' : ''}">
+                  <div class="bench-summary-value" data-countup="${data.avg_confidence_delta}" data-suffix="%">+0.0%</div>
+                  <div class="bench-summary-label">Confidence Delta</div>
                 </div>
-                <div class="stat-tile" style="padding:10px;">
-                  <div class="metric-label">Avg Quality Delta</div>
-                  <strong style="color:${deltaColor};">${data.avg_quality_delta >= 0 ? '+' : ''}${data.avg_quality_delta}</strong>
+                <div class="bench-summary-card ${qualNeg ? 'negative' : ''}">
+                  <div class="bench-summary-value" data-countup="${data.avg_quality_delta}" data-suffix="%">+0.0%</div>
+                  <div class="bench-summary-label">Quality Delta</div>
                 </div>
-                <div class="stat-tile" style="padding:10px;">
-                  <div class="metric-label">Questions Improved</div>
-                  <strong>${data.improvement_pct}%</strong>
+                <div class="bench-summary-card">
+                  <div class="bench-summary-value" data-countup="${data.improvement_pct}" data-suffix="%">0.0%</div>
+                  <div class="bench-summary-label">Questions Improved</div>
                 </div>
+              </div>
+              <div class="bench-rings">
+                ${(() => {
+                  const cs = data.comparisons;
+                  const avgBase = Math.round(cs.reduce((s,c) => s + c.base_confidence, 0) / cs.length);
+                  const avgTrained = Math.round(cs.reduce((s,c) => s + c.trained_confidence, 0) / cs.length);
+                  return benchProgressRing('base', avgBase, 100, '#9e9e9e', 'Base Model') +
+                         benchProgressRing('trained', avgTrained, 100, '#2e7d32', 'Trained Model');
+                })()}
               </div>`;
           }
+
           const cards = document.getElementById('comparisonCards');
           if (cards) {
-            cards.innerHTML = data.comparisons.map(c => {
-              const color = c.quality_delta > 0 ? '#2e7d32' : (c.quality_delta < 0 ? '#c62828' : 'var(--muted)');
-              return `<div style="padding:10px 12px; border-radius:12px; border:1px solid var(--line); background:var(--paper-strong);">
-                <div style="font-size:13px; font-weight:600; margin-bottom:4px;">${escapeHtml(c.query)}</div>
-                <div style="display:flex; gap:16px; font-size:12px; color:var(--muted);">
-                  <span>Base: ${c.base_confidence}/100 conf, ${c.base_quality} quality</span>
-                  <span>Trained: ${c.trained_confidence}/100 conf, ${c.trained_quality} quality</span>
-                  <span style="color:${color}; font-weight:700;">${c.quality_delta >= 0 ? '+' : ''}${c.quality_delta} quality</span>
-                </div>
-              </div>`;
-            }).join('');
+            cards.innerHTML = benchBarComparison(data.comparisons);
           }
+
+          // Trigger scroll-based animations
+          triggerBenchAnimations(section);
         } catch (e) {}
       }
 
@@ -1390,15 +1736,128 @@
         contrarian: 'Contrarian — paradigm challenger',
       };
 
+      /* ===== Council Ring Visualization ===== */
+      const councilRing = (() => {
+        const CX = 140, CY = 140, R = 95;
+        const AGENTS = {
+          advocate:   { angle: -90,  color: '#b34728', label: 'Advocate' },
+          skeptic:    { angle: 0,    color: '#2d6a4f', label: 'Skeptic' },
+          oracle:     { angle: 180,  color: '#5e548e', label: 'Oracle' },
+          contrarian: { angle: 90,   color: '#bc6c25', label: 'Contrarian' },
+        };
+        const ARBITER_COLOR = '#3d5a80';
+        const NODE_R = 16;
+        let _completed = {};
+        let _container = null;
+
+        function pos(angleDeg) {
+          const rad = (angleDeg * Math.PI) / 180;
+          return { x: CX + R * Math.cos(rad), y: CY + R * Math.sin(rad) };
+        }
+
+        function linesBetween(roles) {
+          const lines = [];
+          for (let i = 0; i < roles.length; i++) {
+            for (let j = i + 1; j < roles.length; j++) {
+              const a = pos(AGENTS[roles[i]].angle);
+              const b = pos(AGENTS[roles[j]].angle);
+              lines.push(`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" class="cr-line" data-line="${roles[i]}-${roles[j]}"/>`);
+            }
+          }
+          return lines.join('');
+        }
+
+        function nodeMarkup(role, cfg, done) {
+          const p = pos(cfg.angle);
+          const fill = done ? cfg.color : 'none';
+          const strokeW = done ? 0 : 2;
+          const popClass = done ? 'cr-node-pop' : '';
+          const dur = done?.duration_seconds;
+          let extra = '';
+          if (!done) {
+            extra = `<circle cx="${p.x}" cy="${p.y}" r="22" class="cr-spinner" stroke="${cfg.color}" opacity="0.5"/>`;
+          } else {
+            extra = `<circle cx="${p.x}" cy="${p.y}" r="18" class="cr-burst" stroke="${cfg.color}"/>`;
+          }
+          return `
+            ${extra}
+            <g class="${popClass}" style="transform-origin:${p.x}px ${p.y}px">
+              <circle cx="${p.x}" cy="${p.y}" r="${NODE_R}" fill="${fill}" stroke="${cfg.color}" stroke-width="${strokeW}" opacity="${done ? 1 : 0.5}"/>
+            </g>
+            <text x="${p.x}" y="${p.y + NODE_R + 14}" class="cr-label">${cfg.label}</text>
+            <text x="${p.x}" y="${p.y + NODE_R + 25}" class="cr-duration ${dur != null ? 'visible' : ''}">${dur != null ? dur.toFixed(1) + 's' : ''}</text>`;
+        }
+
+        function arbiterMarkup(state) {
+          let extra = '';
+          if (state === 'synthesizing') {
+            extra = `<circle cx="${CX}" cy="${CY}" r="26" class="cr-synth-ring"/>
+                     <circle cx="${CX}" cy="${CY}" r="20" class="cr-synth-ring" style="animation-delay:0.3s"/>`;
+          } else if (state === 'final') {
+            extra = `<circle cx="${CX}" cy="${CY}" r="28" class="cr-halo"/>`;
+          }
+          const fill = state === 'final' ? ARBITER_COLOR : 'none';
+          const strokeW = state === 'final' ? 0 : 2;
+          return `
+            ${extra}
+            <circle cx="${CX}" cy="${CY}" r="18" fill="${fill}" stroke="${ARBITER_COLOR}" stroke-width="${strokeW}" opacity="${state === 'idle' ? 0.4 : 1}"/>
+            <text x="${CX}" y="${CY + 4}" class="cr-label" style="font-weight:700; font-size:11px; fill:${state === 'final' ? '#fff' : 'var(--muted)'}">Arbiter</text>`;
+        }
+
+        function idleRing() {
+          return `<circle cx="${CX}" cy="${CY}" r="${R + 20}" fill="none" stroke="var(--line)" stroke-width="1" stroke-dasharray="6 8" class="cr-idle-ring"/>`;
+        }
+
+        function render(state, conflict) {
+          const roles = Object.keys(AGENTS);
+          const doneCount = Object.keys(_completed).length;
+          const arbiterState = state === 'final' ? 'final' : (doneCount === 4 ? 'synthesizing' : (doneCount > 0 ? 'running' : 'idle'));
+
+          let svg = `<svg class="council-ring-svg" viewBox="0 0 280 280">`;
+          svg += idleRing();
+          svg += linesBetween(roles);
+          for (const [role, cfg] of Object.entries(AGENTS)) {
+            svg += nodeMarkup(role, cfg, _completed[role]);
+          }
+          svg += arbiterMarkup(arbiterState);
+          svg += `</svg>`;
+
+          // Update connection lines for completed agents
+          let statusText = '';
+          if (state === 'idle') statusText = '';
+          else if (state === 'final') statusText = conflict ? 'Conflict detected — verdict delivered' : 'Council aligned — verdict delivered';
+          else if (doneCount === 4) statusText = 'Arbiter synthesizing...';
+          else if (doneCount > 0) statusText = `${doneCount}/4 agents complete — council deliberating...`;
+          else statusText = 'Council deliberating...';
+
+          return `<div class="council-ring-wrap">${svg}<div class="council-ring-status">${statusText}</div></div>`;
+        }
+
+        return {
+          init() {
+            _completed = {};
+            return render('running', false);
+          },
+          agentDone(role, event) {
+            _completed[role] = event;
+            return render('running', false);
+          },
+          finalize(conflict) {
+            return render('final', conflict);
+          }
+        };
+      })();
+
       function agentProgressMarkup(completedAgents) {
+        // Legacy fallback — now using councilRing
         const allRoles = ['advocate', 'skeptic', 'oracle', 'contrarian'];
         return `<div style="display:flex; flex-direction:column; gap:6px; padding:4px 0;">
           ${allRoles.map(role => {
             const done = completedAgents[role];
             const label = AGENT_LABELS[role] || role;
             const status = done
-              ? `<span style="color:#2e7d32;">✓ ${done.duration_seconds?.toFixed(1)}s</span>`
-              : `<span style="color:var(--muted);">…running</span>`;
+              ? `<span style="color:#2e7d32;">&#10003; ${done.duration_seconds?.toFixed(1)}s</span>`
+              : `<span style="color:var(--muted);">&#8230;running</span>`;
             return `<div style="display:flex; justify-content:space-between; font-size:13px; padding:6px 10px; border-radius:10px; background:${done ? 'rgba(46,125,50,0.07)' : 'rgba(0,0,0,0.03)'}; border:1px solid var(--line);">
               <span>${escapeHtml(label)}</span>${status}</div>`;
           }).join('')}
@@ -1420,7 +1879,7 @@
         }, 1000);
         statusLine.textContent = 'Council convening... (CPU inference, ~5-10 min on demo server)';
         const completedAgents = {};
-        runtimeBox.innerHTML = agentProgressMarkup(completedAgents);
+        runtimeBox.innerHTML = councilRing.init();
         resultBox.innerHTML = '<div class="muted-empty">Waiting for agents... Each agent runs in parallel — results stream in as they complete.</div>';
 
         try {
@@ -1454,7 +1913,7 @@
                 completedAgents[event.role] = event;
                 const count = Object.keys(completedAgents).length;
                 statusLine.textContent = `${count}/4 agents complete...`;
-                runtimeBox.innerHTML = agentProgressMarkup(completedAgents);
+                runtimeBox.innerHTML = councilRing.agentDone(event.role, event);
               } else if (event.type === 'final') {
                 finalPayload = event;
               } else if (event.type === 'error') {
@@ -1467,7 +1926,8 @@
           const {result, runtime} = finalPayload;
           selectedSessionId = result.session_id;
           updateShareControls(result);
-          runtimeBox.innerHTML = runtimeMarkup(runtime, result);
+          const isConflict = result.conflict_detected === true;
+          runtimeBox.innerHTML = councilRing.finalize(isConflict) + runtimeMarkup(runtime, result);
           resultBox.innerHTML = renderSessionResult(result, runtime);
           clearInterval(timerInterval);
           statusLine.textContent = `Council completed. Confidence: ${result.confidence_score}/100`;

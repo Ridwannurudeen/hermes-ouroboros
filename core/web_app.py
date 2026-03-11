@@ -539,10 +539,13 @@ class HermesWebApp:
             }
             await event_queue.put(event)
 
+        async def agent_token_callback(role: str, token: str) -> None:
+            await event_queue.put({'type': 'agent_token', 'role': role, 'token': token})
+
         async def run_council() -> None:
             try:
                 result, runtime_meta = await self.runtime.run_query(
-                    query, mode=mode, stream_callback=agent_stream_callback
+                    query, mode=mode, stream_callback=agent_stream_callback, token_callback=agent_token_callback
                 )
                 if principal is not None and principal['kind'] == 'user':
                     owned = self.session_store.attach_owner(

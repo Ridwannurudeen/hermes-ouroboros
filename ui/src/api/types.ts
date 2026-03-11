@@ -105,7 +105,13 @@ export interface SSEErrorEvent {
   message: string
 }
 
-export type SSEEvent = SSEAgentEvent | SSEFinalEvent | SSEErrorEvent
+export interface SSEAgentTokenEvent {
+  type: 'agent_token'
+  role: string
+  token: string
+}
+
+export type SSEEvent = SSEAgentEvent | SSEFinalEvent | SSEErrorEvent | SSEAgentTokenEvent
 
 export interface RuntimeInfo {
   total_seconds: number

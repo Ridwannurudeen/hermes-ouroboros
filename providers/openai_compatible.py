@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from contextvars import ContextVar
 
 from openai import AsyncOpenAI
@@ -65,6 +66,54 @@ class OpenAICompatibleProvider:
                 {'role': 'system', 'content': system_prompt},
                 {'role': 'user', 'content': query},
             ],
+        }
+        if include_temperature:
+            payload['temperature'] = self.temperature
+        return await self.client.chat.completions.create(**payload)
+
+    async def generate_stream(
+        self,
+        role: str,
+        system_prompt: str,
+        query: str,
+        context: dict[str, str] | None = None,
+    ) -> AsyncIterator[str]:
+        """Async generator that yields tokens as they arrive from the LLM."""
+        try:
+            stream = await self._create_completion_stream(system_prompt, query, include_temperature=True)
+            self._backend_var.set('openai')
+            self._error_var.set(None)
+            async for chunk in stream:
+                delta = chunk.choices[0].delta.content if chunk.choices and chunk.choices[0].delta else None
+                if delta:
+                    yield delta
+        except Exception as exc:
+            if self._should_retry_without_temperature(exc):
+                stream = await self._create_completion_stream(system_prompt, query, include_temperature=False)
+                self._backend_var.set('openai')
+                self._error_var.set('retried_without_temperature')
+                async for chunk in stream:
+                    delta = chunk.choices[0].delta.content if chunk.choices and chunk.choices[0].delta else None
+                    if delta:
+                        yield delta
+                return
+            if self.fallback_provider is None:
+                raise
+            # Fallback provider may not support streaming — yield complete response as single chunk
+            self._backend_var.set(type(self.fallback_provider).__name__)
+            self._error_var.set(str(exc))
+            full = await self.fallback_provider.generate(role, system_prompt, query, context=context)
+            if full:
+                yield full
+
+    async def _create_completion_stream(self, system_prompt: str, query: str, include_temperature: bool):
+        payload = {
+            'model': self.model,
+            'messages': [
+                {'role': 'system', 'content': system_prompt},
+                {'role': 'user', 'content': query},
+            ],
+            'stream': True,
         }
         if include_temperature:
             payload['temperature'] = self.temperature

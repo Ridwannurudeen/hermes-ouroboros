@@ -33,7 +33,7 @@ class MasterOrchestrator:
         self.trajectory_logger = TrajectoryLogger(self.root)
         self.skill_creator = SkillCreator(self.root)
 
-    async def run_query(self, query: str, stream_callback=None) -> dict[str, Any]:
+    async def run_query(self, query: str, stream_callback=None, token_callback=None) -> dict[str, Any]:
         session_id = str(uuid.uuid4())
         timestamp = datetime.now(timezone.utc).isoformat()
         started = datetime.now(timezone.utc)
@@ -46,18 +46,24 @@ class MasterOrchestrator:
             except Exception:
                 evidence = None
             print('Agents dispatched... waiting for responses...')
-            agent_responses, agent_timings = await self.agent_launcher.launch_agents(query, stream_callback=stream_callback, evidence=evidence)
+            agent_responses, agent_timings = await self.agent_launcher.launch_agents(
+                query, stream_callback=stream_callback, token_callback=token_callback, evidence=evidence
+            )
             conflict = await self.conflict_resolver.resolve(query, agent_responses)
             arbiter_prompt = self._build_arbiter_prompt(query, agent_responses, conflict)
-            arbiter_verdict = await self.provider.generate(
-                'arbiter',
-                ARBITER_AGENT.system_prompt,
-                arbiter_prompt,
-                context={
-                    'conflict_summary': conflict.conflict_summary,
-                    'additional_research': conflict.additional_research or '',
-                },
-            )
+            arbiter_context = {
+                'conflict_summary': conflict.conflict_summary,
+                'additional_research': conflict.additional_research or '',
+            }
+            if token_callback and hasattr(self.provider, 'generate_stream'):
+                arbiter_verdict = await self._stream_arbiter(arbiter_prompt, arbiter_context, token_callback)
+            else:
+                arbiter_verdict = await self.provider.generate(
+                    'arbiter',
+                    ARBITER_AGENT.system_prompt,
+                    arbiter_prompt,
+                    context=arbiter_context,
+                )
             arbiter_meta = self._consume_provider_diagnostics()
             confidence_score = self._parse_confidence(arbiter_verdict)
             elapsed_seconds = round((datetime.now(timezone.utc) - started).total_seconds(), 3)
@@ -111,6 +117,22 @@ class MasterOrchestrator:
                 'additional_research': None,
                 'agent_timings': {},
             }
+
+    async def _stream_arbiter(
+        self,
+        arbiter_prompt: str,
+        context: dict[str, str],
+        token_callback,
+    ) -> str:
+        chunks: list[str] = []
+        async for token in self.provider.generate_stream(
+            'arbiter', ARBITER_AGENT.system_prompt, arbiter_prompt, context=context
+        ):
+            chunks.append(token)
+            maybe = token_callback('arbiter', token)
+            if asyncio.iscoroutine(maybe):
+                await maybe
+        return ''.join(chunks)
 
     def _save_dpo_pairs(self, session_id: str, pairs: list[dict]) -> None:
         dpo_dir = self.root / 'trajectories' / 'dpo'

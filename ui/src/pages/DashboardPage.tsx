@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import DashboardLayout from '../components/dashboard/DashboardLayout'
 import QueryPanel from '../components/dashboard/QueryPanel'
 import AgentProgressGrid from '../components/dashboard/AgentProgressGrid'
+import AgentStreamPanel from '../components/dashboard/AgentStreamPanel'
 import CouncilRing from '../components/dashboard/CouncilRing'
 import ResultPanel from '../components/dashboard/ResultPanel'
 import SessionHistory from '../components/dashboard/SessionHistory'
@@ -107,6 +108,15 @@ export default function DashboardPage() {
               isStreaming={sse.isStreaming}
               conflict={sse.finalPayload?.result?.conflict_detected}
               isFinal={!!sse.finalPayload}
+            />
+          )}
+
+          {/* Live agent token streaming */}
+          {!sse.finalPayload && (sse.isStreaming || Object.keys(sse.streamingText).length > 0) && (
+            <AgentStreamPanel
+              streamingText={sse.streamingText}
+              completedAgents={sse.completedAgents}
+              isStreaming={sse.isStreaming}
             />
           )}
 

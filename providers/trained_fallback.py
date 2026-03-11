@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import AsyncIterator
 from contextvars import ContextVar
 from pathlib import Path
 from typing import Any
@@ -41,6 +42,32 @@ class TrainedFallbackProvider:
         self._backend_var.set(backend)
         self._error_var.set(error)
         return response
+
+    async def generate_stream(
+        self,
+        role: str,
+        system_prompt: str,
+        query: str,
+        context: dict[str, str] | None = None,
+    ) -> AsyncIterator[str]:
+        if not hasattr(self.base_provider, 'generate_stream'):
+            full = await self.generate(role, system_prompt, query, context=context)
+            if full:
+                yield full
+            return
+        trained_prompt = self._build_system_prompt(role, system_prompt, query, context or {})
+        backend = type(self.base_provider).__name__
+        error = None
+        async for token in self.base_provider.generate_stream(role, trained_prompt, query, context=context):
+            yield token
+        if hasattr(self.base_provider, 'consume_generation_diagnostics'):
+            diagnostics = self.base_provider.consume_generation_diagnostics()
+            backend = f"{self.profile_name}->{diagnostics.get('backend') or backend}"
+            error = diagnostics.get('error')
+        else:
+            backend = f'{self.profile_name}->{backend}'
+        self._backend_var.set(backend)
+        self._error_var.set(error)
 
     def _build_system_prompt(
         self,

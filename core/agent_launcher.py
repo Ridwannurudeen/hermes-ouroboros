@@ -9,6 +9,7 @@ from core.web_search import EvidenceBundle
 from providers import MockCouncilProvider
 
 StreamCallback = Callable[[str, str, dict[str, object]], Awaitable[None] | None]
+TokenCallback = Callable[[str, str], Awaitable[None] | None]
 
 
 class AgentLauncher:
@@ -23,10 +24,11 @@ class AgentLauncher:
         self,
         query: str,
         stream_callback: StreamCallback | None = None,
+        token_callback: TokenCallback | None = None,
         evidence: EvidenceBundle | None = None,
     ) -> tuple[dict[str, str], dict[str, dict[str, object]]]:
         tasks = [
-            asyncio.create_task(self._run_agent(agent, query, stream_callback, evidence=evidence))
+            asyncio.create_task(self._run_agent(agent, query, stream_callback, token_callback=token_callback, evidence=evidence))
             for agent in COUNCIL_AGENTS
         ]
         completed = await asyncio.gather(*tasks)
@@ -39,6 +41,7 @@ class AgentLauncher:
         agent: AgentDefinition,
         query: str,
         stream_callback: StreamCallback | None,
+        token_callback: TokenCallback | None = None,
         evidence: EvidenceBundle | None = None,
     ) -> tuple[str, str, dict[str, object]]:
         start = datetime.now(timezone.utc)
@@ -52,7 +55,12 @@ class AgentLauncher:
             if evidence_text:
                 augmented_query = f"{query}\n\n---\nWEB EVIDENCE (cite URLs where relevant):\n{evidence_text}"
         try:
-            if self._semaphore is None:
+            use_streaming = token_callback and hasattr(self.provider, 'generate_stream')
+            if use_streaming:
+                response = await self._run_agent_streaming(
+                    agent, augmented_query, token_callback
+                )
+            elif self._semaphore is None:
                 response = await asyncio.wait_for(
                     self.provider.generate(agent.role, agent.system_prompt, augmented_query),
                     timeout=self.timeout_seconds,
@@ -82,3 +90,25 @@ class AgentLauncher:
             if asyncio.iscoroutine(maybe_awaitable):
                 await maybe_awaitable
         return agent.role, response, meta
+
+    async def _run_agent_streaming(
+        self,
+        agent: AgentDefinition,
+        query: str,
+        token_callback: TokenCallback,
+    ) -> str:
+        chunks: list[str] = []
+
+        async def _iterate():
+            async for token in self.provider.generate_stream(agent.role, agent.system_prompt, query):
+                chunks.append(token)
+                maybe = token_callback(agent.role, token)
+                if asyncio.iscoroutine(maybe):
+                    await maybe
+
+        if self._semaphore is None:
+            await asyncio.wait_for(_iterate(), timeout=self.timeout_seconds)
+        else:
+            async with self._semaphore:
+                await asyncio.wait_for(_iterate(), timeout=self.timeout_seconds)
+        return ''.join(chunks)

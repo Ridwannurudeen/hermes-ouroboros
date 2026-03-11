@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useAuthStore } from '../store/auth'
 import type { SSEAgentEvent, SSEFinalEvent, SSEEvent } from '../api/types'
 
@@ -8,6 +8,7 @@ interface SSEState {
   isStreaming: boolean
   error: string | null
   elapsed: number
+  streamingText: Record<string, string>
 }
 
 export function useSSE() {
@@ -17,11 +18,38 @@ export function useSSE() {
     isStreaming: false,
     error: null,
     elapsed: 0,
+    streamingText: {},
   })
 
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval>>()
   const startTimeRef = useRef(0)
+  const streamingTextRef = useRef<Record<string, string>>({})
+  const syncIntervalRef = useRef<ReturnType<typeof setInterval>>()
+
+  // Sync streaming text ref → state at ~10fps
+  useEffect(() => {
+    if (state.isStreaming) {
+      syncIntervalRef.current = setInterval(() => {
+        setState((s) => {
+          const current = streamingTextRef.current
+          // Only update if there are actual changes
+          const keys = Object.keys(current)
+          if (keys.length === 0 && Object.keys(s.streamingText).length === 0) return s
+          let changed = false
+          for (const k of keys) {
+            if (s.streamingText[k] !== current[k]) {
+              changed = true
+              break
+            }
+          }
+          if (!changed && keys.length === Object.keys(s.streamingText).length) return s
+          return { ...s, streamingText: { ...current } }
+        })
+      }, 100)
+    }
+    return () => clearInterval(syncIntervalRef.current)
+  }, [state.isStreaming])
 
   const abort = useCallback(() => {
     if (readerRef.current) {
@@ -29,6 +57,7 @@ export function useSSE() {
       readerRef.current = null
     }
     clearInterval(timerRef.current)
+    clearInterval(syncIntervalRef.current)
     setState((s) => ({ ...s, isStreaming: false }))
   }, [])
 
@@ -36,12 +65,14 @@ export function useSSE() {
     async (query: string, mode: string) => {
       abort()
 
+      streamingTextRef.current = {}
       setState({
         completedAgents: {},
         finalPayload: null,
         isStreaming: true,
         error: null,
         elapsed: 0,
+        streamingText: {},
       })
 
       startTimeRef.current = Date.now()
@@ -89,7 +120,10 @@ export function useSSE() {
             } catch {
               continue
             }
-            if (event.type === 'agent_complete') {
+            if (event.type === 'agent_token') {
+              const prev = streamingTextRef.current[event.role] || ''
+              streamingTextRef.current[event.role] = prev + event.token
+            } else if (event.type === 'agent_complete') {
               setState((s) => ({
                 ...s,
                 completedAgents: { ...s.completedAgents, [event.role]: event as SSEAgentEvent },
@@ -103,10 +137,13 @@ export function useSSE() {
         }
 
         if (!finalPayload) throw new Error('Stream ended without a final result.')
-        setState((s) => ({ ...s, finalPayload, isStreaming: false }))
+        // Final sync of streaming text
+        setState((s) => ({ ...s, finalPayload, isStreaming: false, streamingText: { ...streamingTextRef.current } }))
         clearInterval(timerRef.current)
+        clearInterval(syncIntervalRef.current)
       } catch (e) {
         clearInterval(timerRef.current)
+        clearInterval(syncIntervalRef.current)
         setState((s) => ({
           ...s,
           isStreaming: false,

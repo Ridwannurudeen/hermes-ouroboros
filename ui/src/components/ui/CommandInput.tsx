@@ -13,12 +13,12 @@ const CommandInput = forwardRef<HTMLTextAreaElement, CommandInputProps>(
   ({ value, onChange, onSubmit, placeholder = 'Ask the council anything...', disabled }, ref) => {
     return (
       <div className="relative group">
-        {/* Glow backdrop */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/10 via-violet-500/10 to-indigo-500/10 rounded-[22px] blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
+        {/* Glow backdrop — no filter:blur, just a gradient with opacity */}
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500/20 via-violet-500/20 to-indigo-500/20 rounded-[22px] opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
 
-        <div className="relative rounded-[20px] border border-white/[0.04] bg-white/[0.02] group-focus-within:border-indigo-500/20 group-focus-within:bg-white/[0.03] transition-all duration-500">
+        <div className="relative rounded-[20px] border border-white/[0.06] bg-white/[0.02] group-focus-within:border-indigo-500/25 group-focus-within:bg-white/[0.03] transition-all duration-500 shadow-[0_2px_20px_rgba(0,0,0,0.2)]">
           <div className="flex items-start gap-3.5 p-5">
-            <Search size={17} className="text-white/15 mt-1.5 flex-shrink-0 group-focus-within:text-indigo-400/40 transition-colors duration-500" />
+            <Search size={17} className="text-white/15 mt-1.5 flex-shrink-0 group-focus-within:text-indigo-400/50 transition-colors duration-500" />
             <textarea
               ref={ref}
               value={value}
@@ -35,8 +35,12 @@ const CommandInput = forwardRef<HTMLTextAreaElement, CommandInputProps>(
               className="flex-1 bg-transparent text-white/90 placeholder-white/15 outline-none resize-none text-[15px] leading-relaxed"
             />
           </div>
-          <div className="px-5 pb-3">
+          <div className="px-5 pb-3 flex items-center justify-between">
             <span className="text-[10px] text-white/10 font-mono">Ctrl+Enter to submit</span>
+            <div className="flex items-center gap-1.5">
+              <div className="w-1 h-1 rounded-full bg-indigo-500/30" />
+              <span className="text-[9px] text-white/10 font-mono">AI Council</span>
+            </div>
           </div>
         </div>
       </div>

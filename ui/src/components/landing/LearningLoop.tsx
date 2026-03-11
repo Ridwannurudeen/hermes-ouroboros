@@ -2,12 +2,20 @@ import { motion } from 'framer-motion'
 import OuroborosRing from './OuroborosRing'
 
 const FLOW_STEPS = [
-  { label: 'Query', desc: 'User submits a question', num: '01' },
-  { label: 'Debate', desc: 'Five agents deliberate', num: '02' },
-  { label: 'Extract', desc: 'DPO pairs from trajectories', num: '03' },
-  { label: 'Train', desc: 'Fine-tune on Modal GPUs', num: '04' },
-  { label: 'Deploy', desc: 'Next-gen model goes live', num: '05' },
+  { label: 'Query', desc: 'User submits a question', num: '01', color: 'indigo' },
+  { label: 'Debate', desc: 'Five agents deliberate', num: '02', color: 'violet' },
+  { label: 'Extract', desc: 'DPO pairs from trajectories', num: '03', color: 'rose' },
+  { label: 'Train', desc: 'Fine-tune on Modal GPUs', num: '04', color: 'amber' },
+  { label: 'Deploy', desc: 'Next-gen model goes live', num: '05', color: 'emerald' },
 ]
+
+const COLOR_MAP: Record<string, string> = {
+  indigo: 'group-hover:border-indigo-500/20 group-hover:bg-indigo-500/[0.03]',
+  violet: 'group-hover:border-violet-500/20 group-hover:bg-violet-500/[0.03]',
+  rose: 'group-hover:border-rose-500/20 group-hover:bg-rose-500/[0.03]',
+  amber: 'group-hover:border-amber-500/20 group-hover:bg-amber-500/[0.03]',
+  emerald: 'group-hover:border-emerald-500/20 group-hover:bg-emerald-500/[0.03]',
+}
 
 export default function LearningLoop() {
   return (
@@ -23,7 +31,7 @@ export default function LearningLoop() {
             viewport={{ once: true }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-400/60 font-medium mb-4">Self-Improvement</p>
+            <p className="section-label text-emerald-400/60 mb-4">Self-Improvement</p>
             <h2 className="font-display text-4xl md:text-5xl font-bold text-white tracking-tight mb-6 leading-[1.05]">
               The Ouroboros
               <br />
@@ -51,8 +59,9 @@ export default function LearningLoop() {
                   className="flex items-center gap-4 group"
                 >
                   <span className="text-[11px] font-mono text-white/10 w-6 group-hover:text-indigo-400/40 transition-colors">{step.num}</span>
-                  <div className="flex-1 flex items-center gap-3 py-2.5 px-4 rounded-xl border border-white/[0.03] bg-white/[0.01] group-hover:border-white/[0.08] group-hover:bg-white/[0.03] transition-all duration-300">
+                  <div className={`flex-1 flex items-center gap-3 py-2.5 px-4 rounded-xl border border-white/[0.03] bg-white/[0.01] transition-all duration-300 ${COLOR_MAP[step.color]}`}>
                     <span className="text-sm font-medium text-white/60 group-hover:text-white/80 transition-colors">{step.label}</span>
+                    <div className="w-px h-3 bg-white/[0.06]" />
                     <span className="text-xs text-white/20">{step.desc}</span>
                   </div>
                   {i < FLOW_STEPS.length - 1 && (

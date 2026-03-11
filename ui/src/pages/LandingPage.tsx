@@ -20,21 +20,30 @@ export default function LandingPage() {
         <LandingNav />
         <LandingHero />
 
+        {/* Section divider — gradient line with glow */}
         <div className="relative h-px mx-auto max-w-4xl">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
+          <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-indigo-400/60" />
         </div>
 
         <HowItWorks />
 
         <div className="relative h-px mx-auto max-w-4xl">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-violet-500/30 to-transparent" />
+          <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-violet-400/60" />
         </div>
 
         <AgentShowcase />
+
+        <div className="relative h-px mx-auto max-w-4xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-500/20 to-transparent" />
+        </div>
+
         <LearningLoop />
 
         <div className="relative h-px mx-auto max-w-4xl">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
+          <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-emerald-400/60" />
         </div>
 
         <ResultsSection />

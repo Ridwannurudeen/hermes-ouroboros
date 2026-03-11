@@ -18,10 +18,10 @@ export default function GlassCard({ children, className = '', glow, hover, delay
       className={`
         rounded-[20px] border
         ${glow
-          ? 'bg-white/[0.04] border-indigo-500/20 shadow-[0_0_40px_rgba(99,102,241,0.12),0_0_80px_rgba(99,102,241,0.04)] '
+          ? 'bg-white/[0.04] border-indigo-500/20 shadow-[0_0_40px_rgba(99,102,241,0.12),0_0_80px_rgba(99,102,241,0.04),inset_0_1px_0_rgba(255,255,255,0.05)] '
           : 'bg-white/[0.02] border-white/[0.04] '
         }
-        ${hover ? 'shine transition-all duration-400 hover:bg-white/[0.04] hover:border-white/[0.08] cursor-pointer' : ''}
+        ${hover ? 'shine transition-all duration-400 hover:bg-white/[0.04] hover:border-white/[0.08] hover:shadow-[0_8px_40px_rgba(0,0,0,0.3)] cursor-pointer' : ''}
         ${className}
       `}
     >

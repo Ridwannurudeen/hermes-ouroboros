@@ -27,8 +27,7 @@ export default function Sidebar({ activePanel, onPanelChange }: SidebarProps) {
       {/* Logo */}
       <div className="h-16 flex items-center px-4 border-b border-white/[0.04]">
         <div className="relative">
-          <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 blur-md opacity-30" />
-          <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+          <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
             <span className="text-white font-bold text-sm">H</span>
           </div>
         </div>
@@ -54,7 +53,7 @@ export default function Sidebar({ activePanel, onPanelChange }: SidebarProps) {
                 <div className="absolute inset-0 rounded-xl bg-indigo-500/[0.08] border border-indigo-500/[0.15]" />
               )}
               {isActive && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-indigo-500" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
               )}
               <Icon size={17} className="relative" />
               <span className="hidden lg:block relative">{label}</span>

@@ -47,17 +47,17 @@ export default function LandingHero() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.8 }}
-              className="block text-[clamp(3rem,8vw,7rem)] text-white text-glow"
+              className="block text-[clamp(2.8rem,7vw,6.5rem)] text-white text-glow"
             >
-              Five Minds.
+              The AI That Debugs
             </motion.span>
             <motion.span
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.8 }}
-              className="block text-[clamp(3rem,8vw,7rem)] gradient-text mt-2"
+              className="block text-[clamp(2.8rem,7vw,6.5rem)] gradient-text mt-2"
             >
-              One Verdict.
+              Its Own Brain.
             </motion.span>
           </h1>
 
@@ -67,10 +67,10 @@ export default function LandingHero() {
             transition={{ delay: 0.8, duration: 0.8 }}
             className="text-lg md:text-xl text-white/35 max-w-2xl mx-auto leading-relaxed font-light"
           >
-            A multi-agent AI council that debates your hardest questions —{' '}
-            <span className="text-white/60 font-normal">then teaches itself to be better.</span>
+            Five adversarial agents debate your hardest questions.{' '}
+            <span className="text-white/60 font-normal">Every disagreement becomes training data. Every cycle, the council gets sharper.</span>
             <br className="hidden md:block" />
-            <span className="text-indigo-300/40">Powered by Hermes and DPO self-improvement.</span>
+            <span className="text-indigo-300/40">No human in the loop.</span>
           </motion.p>
 
           {/* CTAs */}

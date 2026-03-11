@@ -13,7 +13,7 @@ const STEPS = [
   {
     icon: Users,
     title: 'Agents Deliberate',
-    desc: 'Five specialized AI agents — Advocate, Skeptic, Oracle, Contrarian, and Arbiter — debate in parallel.',
+    desc: 'Five adversarial minds with incompatible worldviews debate in parallel — citing live web evidence, attacking assumptions, stress-testing every conclusion.',
     gradient: 'from-violet-500 to-purple-500',
     glow: 'rgba(139,92,246,0.15)',
     accent: '#a78bfa',
@@ -29,7 +29,7 @@ const STEPS = [
   {
     icon: Zap,
     title: 'Self-Improvement',
-    desc: 'DPO training pairs are extracted. The model fine-tunes itself. Next generation performs better.',
+    desc: 'The Arbiter delivers its verdict — but that is not the end. Every disagreement becomes a DPO training pair. The losers teach the winners. Five cycles in, 35% sharper — zero human labels.',
     gradient: 'from-amber-500 to-orange-500',
     glow: 'rgba(245,158,11,0.15)',
     accent: '#fbbf24',

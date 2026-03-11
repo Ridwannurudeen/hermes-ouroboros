@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import DashboardLayout from '../components/dashboard/DashboardLayout'
 import QueryPanel from '../components/dashboard/QueryPanel'
 import AgentProgressGrid from '../components/dashboard/AgentProgressGrid'
+import CouncilRing from '../components/dashboard/CouncilRing'
 import ResultPanel from '../components/dashboard/ResultPanel'
 import SessionHistory from '../components/dashboard/SessionHistory'
 import StatsPanel from '../components/dashboard/StatsPanel'
@@ -99,17 +100,14 @@ export default function DashboardPage() {
             onSubmit={handleQuery}
           />
 
-          {/* Agent progress */}
+          {/* Council Ring visualization */}
           {(sse.isStreaming || Object.keys(sse.completedAgents).length > 0) && (
-            <div>
-              <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3 px-1">
-                Agent Progress ({Object.keys(sse.completedAgents).length}/4 complete)
-              </h3>
-              <AgentProgressGrid
-                completedAgents={sse.completedAgents}
-                isStreaming={sse.isStreaming}
-              />
-            </div>
+            <CouncilRing
+              completedAgents={sse.completedAgents}
+              isStreaming={sse.isStreaming}
+              conflict={sse.finalPayload?.result?.conflict_detected}
+              isFinal={!!sse.finalPayload}
+            />
           )}
 
           {/* Error */}

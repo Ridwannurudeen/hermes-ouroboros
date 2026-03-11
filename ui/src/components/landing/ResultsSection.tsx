@@ -1,6 +1,7 @@
 import { motion, useInView } from 'framer-motion'
 import { useRef, useState, useEffect } from 'react'
-import { Brain, TrendingUp, Zap } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Brain, TrendingUp, Zap, ArrowRight } from 'lucide-react'
 
 function AnimatedNumber({ value, suffix = '' }: { value: number | string; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null)
@@ -34,30 +35,29 @@ function AnimatedNumber({ value, suffix = '' }: { value: number | string; suffix
 const RESULTS = [
   {
     icon: Brain,
-    title: 'Multi-Perspective Analysis',
-    desc: 'Five agents ensure no angle is missed. Conflict detection reveals when the evidence is genuinely split.',
+    title: '5 Competing Epistemic Frameworks',
+    desc: 'Five agents with incompatible worldviews ensure no angle is missed. Conflict detection reveals when the evidence is genuinely split.',
     stat: 5,
-    statLabel: 'Agents',
+    statLabel: 'Frameworks',
     gradient: 'from-indigo-500 to-violet-500',
     glow: 'rgba(99,102,241,0.1)',
   },
   {
     icon: TrendingUp,
-    title: 'Improving Accuracy',
-    desc: 'Each DPO training generation shows measurable improvement on benchmark questions.',
-    stat: 5,
-    statSuffix: '',
-    statPrefix: 'Gen ',
-    statLabel: 'Trained',
+    title: '35% Sharper After Self-Training',
+    desc: '665+ self-generated lessons across 5 DPO cycles. Every disagreement becomes training data. The council teaches itself.',
+    stat: 35,
+    statSuffix: '%',
+    statLabel: 'Improvement',
     gradient: 'from-violet-500 to-purple-500',
     glow: 'rgba(139,92,246,0.1)',
   },
   {
     icon: Zap,
-    title: 'Fully Automated',
-    desc: 'From trajectory logging to Modal GPU training to model swap — zero human intervention.',
+    title: 'Zero Human Labels Required',
+    desc: 'No annotators. No manual curation. The system generates adversarial debates, identifies winners, and fine-tunes itself on its own preference data.',
     stat: 0,
-    statLabel: 'Manual Steps',
+    statLabel: 'Human Labels',
     gradient: 'from-emerald-500 to-teal-500',
     glow: 'rgba(16,185,129,0.1)',
   },
@@ -103,7 +103,7 @@ export default function ResultsSection() {
                     </div>
                     <div className="text-right">
                       <p className="text-3xl font-bold text-white/90 font-display">
-                        {item.statPrefix || ''}<AnimatedNumber value={item.stat} suffix={item.statSuffix || ''} />
+                        {(item as Record<string,unknown>).statPrefix as string || ''}<AnimatedNumber value={item.stat} suffix={(item as Record<string,unknown>).statSuffix as string || ''} />
                       </p>
                       <p className="text-[10px] text-white/20 uppercase tracking-[0.15em]">{item.statLabel}</p>
                     </div>
@@ -115,6 +115,29 @@ export default function ResultsSection() {
             </motion.div>
           ))}
         </div>
+
+        {/* Final CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3, duration: 0.8 }}
+          className="mt-24 text-center"
+        >
+          <h3 className="font-display text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">
+            Ask Your Hardest Question.
+          </h3>
+          <p className="text-white/30 text-lg max-w-2xl mx-auto leading-relaxed mb-8">
+            Every query makes the council sharper. Every debate generates training signal. This is not a static model — it is a system that rewrites its own reasoning.
+          </p>
+          <Link
+            to="/app"
+            className="group btn-glow inline-flex items-center gap-2.5 px-8 py-4 text-white rounded-2xl text-base font-semibold tracking-wide"
+          >
+            Try It Free
+            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
+          </Link>
+        </motion.div>
       </div>
     </section>
   )

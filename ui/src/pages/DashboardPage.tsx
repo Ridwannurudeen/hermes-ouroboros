@@ -4,6 +4,7 @@ import QueryPanel from '../components/dashboard/QueryPanel'
 import AgentProgressGrid from '../components/dashboard/AgentProgressGrid'
 import AgentStreamPanel from '../components/dashboard/AgentStreamPanel'
 import CouncilRing from '../components/dashboard/CouncilRing'
+import DeliberationTimeline from '../components/dashboard/DeliberationTimeline'
 import ResultPanel from '../components/dashboard/ResultPanel'
 import SessionHistory from '../components/dashboard/SessionHistory'
 import StatsPanel from '../components/dashboard/StatsPanel'
@@ -133,6 +134,16 @@ export default function DashboardPage() {
               isStreaming={sse.isStreaming}
               conflict={sse.finalPayload?.result?.conflict_detected}
               isFinal={!!sse.finalPayload}
+            />
+          )}
+
+          {/* Deliberation Timeline */}
+          {(sse.isStreaming || Object.keys(sse.completedAgents).length > 0) && (
+            <DeliberationTimeline
+              completedAgents={sse.completedAgents}
+              isStreaming={sse.isStreaming}
+              isFinal={!!sse.finalPayload}
+              hasRound2={Object.keys(sse.streamingText).some((k) => k.startsWith('r2_'))}
             />
           )}
 

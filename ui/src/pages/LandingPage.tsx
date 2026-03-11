@@ -1,5 +1,6 @@
 import LandingNav from '../components/landing/LandingNav'
 import LandingHero from '../components/landing/LandingHero'
+import LandingDemo from '../components/landing/LandingDemo'
 import HowItWorks from '../components/landing/HowItWorks'
 import DifferentiatorSection from '../components/landing/DifferentiatorSection'
 import AgentShowcase from '../components/landing/AgentShowcase'
@@ -25,6 +26,20 @@ export default function LandingPage() {
         <div className="relative h-px mx-auto max-w-4xl">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
           <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-indigo-400/60" />
+        </div>
+
+        {/* Guest Demo — zero-friction trial */}
+        <section className="py-20 px-6">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-2xl font-bold text-white mb-2">Try It Now</h2>
+            <p className="text-sm text-white/40 mb-8">No signup required. 5 free queries.</p>
+            <LandingDemo />
+          </div>
+        </section>
+
+        <div className="relative h-px mx-auto max-w-4xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
+          <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-emerald-400/60" />
         </div>
 
         <HowItWorks />

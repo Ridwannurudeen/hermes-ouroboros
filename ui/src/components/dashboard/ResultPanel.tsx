@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 import {
   Scale, AlertTriangle, BookOpen, Zap, Brain, Eye, Skull, Target,
   TrendingUp, TrendingDown, HelpCircle, Copy, Check, Share2, ExternalLink,
@@ -21,7 +21,7 @@ interface ResultPanelProps {
 
 const COUNCIL_ROLES: AgentRole[] = ['advocate', 'skeptic', 'oracle', 'contrarian']
 
-function ScoreGauge({ score, label }: { score: number; label: string }) {
+export function ScoreGauge({ score, label }: { score: number; label: string }) {
   const color = score >= 70 ? 'text-emerald-400' : score >= 40 ? 'text-amber-400' : 'text-rose-400'
   const bgColor = score >= 70 ? 'bg-emerald-500' : score >= 40 ? 'bg-amber-500' : 'bg-rose-500'
   const ringColor = score >= 70 ? 'stroke-emerald-500' : score >= 40 ? 'stroke-amber-500' : 'stroke-rose-500'
@@ -29,6 +29,18 @@ function ScoreGauge({ score, label }: { score: number; label: string }) {
   const radius = 40
   const circumference = 2 * Math.PI * radius
   const offset = circumference - (Math.max(0, score) / 100) * circumference
+
+  // Count-up animation for the score number
+  const motionVal = useMotionValue(0)
+  const rounded = useTransform(motionVal, (v) => Math.round(v))
+  const [displayNum, setDisplayNum] = useState(0)
+
+  useEffect(() => {
+    const target = score >= 0 ? score : 0
+    const controls = animate(motionVal, target, { duration: 1.5, delay: 0.3, ease: 'easeOut' })
+    const unsub = rounded.on('change', (v) => setDisplayNum(v))
+    return () => { controls.stop(); unsub() }
+  }, [score, motionVal, rounded])
 
   return (
     <div className="flex flex-col items-center">
@@ -51,9 +63,9 @@ function ScoreGauge({ score, label }: { score: number; label: string }) {
             className={`text-2xl font-bold ${color}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.3 }}
           >
-            {score >= 0 ? score : '?'}
+            {score >= 0 ? displayNum : '?'}
           </motion.span>
         </div>
       </div>
@@ -292,41 +304,67 @@ export default function ResultPanel({ result, soloResult, soloLoading, loopStatu
 
   const showCompare = soloResult != null || soloLoading
 
+  // Glow color hex for cinematic border pulse
+  const glowHex = verdictLabel.includes('STRONG') || verdictLabel.includes('TRUE') || verdictLabel.includes('BULLISH')
+    ? '#10b981'
+    : verdictLabel.includes('FATAL') || verdictLabel.includes('FALSE') || verdictLabel.includes('BEARISH')
+      ? '#f43f5e'
+      : '#f59e0b'
+
   const councilContent = (
     <div className="space-y-4">
-      {/* Hero: Scores + Verdict Label */}
-      <GlassCard glow className="p-6">
-        <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
-          <div className="flex items-start gap-4 sm:gap-6">
-            <ScoreGauge score={hermesScore} label="HERMES Score" />
-            {confidenceScore !== hermesScore && confidenceScore >= 0 && (
-              <ScoreGauge score={confidenceScore} label="Confidence" />
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                {verdictLabel && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`text-lg font-black uppercase tracking-wider mb-2 ${verdictColor}`}
-                  >
-                    {verdictLabel}
-                  </motion.p>
-                )}
-              </div>
-              <div className="flex items-center gap-0.5 flex-shrink-0">
-                <CopyButton result={result} />
-                <ShareButton result={result} />
-              </div>
+      {/* Hero: Scores + Verdict Label — Cinematic Reveal */}
+      <motion.div
+        initial={{ boxShadow: 'none' }}
+        animate={{
+          boxShadow: [
+            `0 0 0px ${glowHex}00`,
+            `0 0 30px ${glowHex}40`,
+            `0 0 10px ${glowHex}15`,
+          ],
+        }}
+        transition={{ duration: 1.8, delay: 1.0, ease: 'easeOut' }}
+        className="rounded-2xl"
+      >
+        <GlassCard glow className="p-6">
+          <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+            <div className="flex items-start gap-4 sm:gap-6">
+              <ScoreGauge score={hermesScore} label="HERMES Score" />
+              {confidenceScore !== hermesScore && confidenceScore >= 0 && (
+                <ScoreGauge score={confidenceScore} label="Confidence" />
+              )}
             </div>
-            <p className="text-sm text-white/70 leading-relaxed whitespace-pre-wrap line-clamp-6">
-              {result.arbiter_verdict || result.verdict || ''}
-            </p>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  {verdictLabel && (
+                    <motion.p
+                      initial={{ opacity: 0, scale: 1.2, filter: 'blur(8px)' }}
+                      animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                      transition={{ delay: 1.2, duration: 0.5, ease: 'easeOut' }}
+                      className={`text-lg font-black uppercase tracking-wider mb-2 ${verdictColor}`}
+                    >
+                      {verdictLabel}
+                    </motion.p>
+                  )}
+                </div>
+                <div className="flex items-center gap-0.5 flex-shrink-0">
+                  <CopyButton result={result} />
+                  <ShareButton result={result} />
+                </div>
+              </div>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.5, duration: 0.6 }}
+                className="text-sm text-white/70 leading-relaxed whitespace-pre-wrap line-clamp-6"
+              >
+                {result.arbiter_verdict || result.verdict || ''}
+              </motion.p>
+            </div>
           </div>
-        </div>
-      </GlassCard>
+        </GlassCard>
+      </motion.div>
 
       {/* Web Sources (Feature 1) */}
       <WebSourcesSection result={result} />

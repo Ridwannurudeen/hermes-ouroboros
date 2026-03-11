@@ -78,7 +78,7 @@ async def _search(query: str, max_results: int = 5) -> list[dict[str, str]]:
         from duckduckgo_search import DDGS
         def _do() -> list[dict[str, str]]:
             with DDGS() as ddgs:
-                return list(ddgs.text(query, max_results=max_results))
+                return list(ddgs.text(query, max_results=max_results, region='us-en'))
         return await asyncio.wait_for(asyncio.to_thread(_do), timeout=10.0)
     except Exception:
         return []

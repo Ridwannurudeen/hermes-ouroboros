@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HERMES Settings</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #06060e;
+      color: rgba(255, 255, 255, 0.8);
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .header-icon {
+      width: 36px;
+      height: 36px;
+      background: #6366f1;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 20px;
+      color: white;
+    }
+
+    .header-text h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: white;
+      letter-spacing: 0.5px;
+    }
+
+    .header-text p {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.35);
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 4px;
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.4);
+      margin-bottom: 16px;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 10px 44px 10px 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      font-family: monospace;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-group input:focus {
+      border-color: rgba(99, 102, 241, 0.5);
+    }
+
+    .input-group input::placeholder {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    .toggle-vis {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      transition: color 0.2s;
+    }
+
+    .toggle-vis:hover {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .btn-save {
+      width: 100%;
+      padding: 10px;
+      background: #6366f1;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-save:hover {
+      background: #5558e6;
+    }
+
+    .btn-save:active {
+      background: #4f46e5;
+    }
+
+    .status-msg {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 13px;
+      color: #22c55e;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .status-msg.visible {
+      opacity: 1;
+    }
+
+    .rate-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .rate-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 6px;
+    }
+
+    .rate-label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .rate-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .rate-value.highlight {
+      color: #6366f1;
+    }
+
+    .link {
+      color: #6366f1;
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .link:hover {
+      text-decoration: underline;
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    .footer-note a {
+      color: rgba(255, 255, 255, 0.35);
+      text-decoration: none;
+    }
+
+    .footer-note a:hover {
+      color: rgba(255, 255, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-icon">H</div>
+      <div class="header-text">
+        <h1>HERMES Settings</h1>
+        <p>Adversarial Intelligence Engine</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">API Key</div>
+      <div class="card-desc">
+        Get your API key from the
+        <a class="link" href="https://hermes-ouroboros.online/app" target="_blank" rel="noopener">HERMES dashboard</a>.
+      </div>
+      <div class="input-group">
+        <input type="password" id="api-key" placeholder="Enter your API key" autocomplete="off" spellcheck="false">
+        <button class="toggle-vis" id="toggle-vis" title="Show/hide key">&#9673;</button>
+      </div>
+      <button class="btn-save" id="btn-save">Save API Key</button>
+      <div class="status-msg" id="status-msg">Saved!</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Rate Limits</div>
+      <div class="card-desc">Higher limits with an API key.</div>
+      <div class="rate-info">
+        <div class="rate-row">
+          <span class="rate-label">Without API key</span>
+          <span class="rate-value">5 queries/min</span>
+        </div>
+        <div class="rate-row">
+          <span class="rate-label">With API key</span>
+          <span class="rate-value highlight">30 queries/min</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      <a href="https://hermes-ouroboros.online" target="_blank" rel="noopener">hermes-ouroboros.online</a>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

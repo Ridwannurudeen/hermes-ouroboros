@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-icon">H</div>
+    <div>
+      <div class="header-title">HERMES</div>
+      <div class="header-subtitle">Adversarial Intelligence Engine</div>
+    </div>
+  </div>
+
+  <!-- Idle State -->
+  <div class="content" id="idle-state">
+    <div class="idle-state">
+      <div class="idle-diagram">
+        <svg viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Text selection icon -->
+          <rect x="30" y="15" width="140" height="20" rx="4" fill="rgba(99,102,241,0.1)" stroke="rgba(99,102,241,0.3)" stroke-width="1"/>
+          <rect x="38" y="22" width="60" height="6" rx="2" fill="rgba(99,102,241,0.4)"/>
+          <rect x="104" y="22" width="40" height="6" rx="2" fill="rgba(255,255,255,0.1)"/>
+          <!-- Arrow down -->
+          <line x1="100" y1="40" x2="100" y2="58" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+          <polyline points="94,52 100,58 106,52" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" fill="none"/>
+          <!-- Right click menu -->
+          <rect x="60" y="62" width="80" height="46" rx="6" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+          <rect x="68" y="70" width="8" height="8" rx="2" fill="rgba(34,197,94,0.5)"/>
+          <rect x="80" y="72" width="44" height="4" rx="1.5" fill="rgba(255,255,255,0.2)"/>
+          <rect x="68" y="82" width="8" height="8" rx="2" fill="rgba(239,68,68,0.5)"/>
+          <rect x="80" y="84" width="44" height="4" rx="1.5" fill="rgba(255,255,255,0.2)"/>
+          <rect x="68" y="94" width="8" height="8" rx="2" fill="rgba(99,102,241,0.5)"/>
+          <rect x="80" y="96" width="44" height="4" rx="1.5" fill="rgba(255,255,255,0.2)"/>
+        </svg>
+      </div>
+      <p class="idle-text">Select text on any page, right-click, and choose an analysis mode.</p>
+      <div class="idle-modes">
+        <span class="mode-pill verify">Verify</span>
+        <span class="mode-pill red-team">Red Team</span>
+        <span class="mode-pill research">Research</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="content hidden" id="loading-state">
+    <div class="loading-state">
+      <div class="spinner-container">
+        <svg class="spinner-ring" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="34"/>
+        </svg>
+      </div>
+      <div class="loading-text">Analyzing with 5 adversarial agents...</div>
+      <div class="loading-dots">
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+      </div>
+      <div class="loading-mode" id="loading-mode-label">MODE: VERIFY</div>
+    </div>
+  </div>
+
+  <!-- Result State -->
+  <div class="content hidden" id="result-state">
+    <div class="result-state">
+      <div class="result-query" id="result-query"></div>
+      <div class="score-section">
+        <div class="score-ring-container">
+          <svg class="score-ring" viewBox="0 0 80 80">
+            <circle class="score-ring-bg" cx="40" cy="40" r="34"/>
+            <circle class="score-ring-fg indigo" id="score-ring-fg" cx="40" cy="40" r="34"
+              stroke-dasharray="213.6"
+              stroke-dashoffset="213.6"/>
+            <text class="score-text" x="40" y="40" id="score-value">--</text>
+          </svg>
+        </div>
+        <div class="score-info">
+          <div class="verdict-pill amber" id="verdict-pill">ANALYZING</div>
+          <div class="mode-label" id="result-mode-label">MODE: VERIFY</div>
+        </div>
+      </div>
+      <div class="summary-section">
+        <div class="summary-label">Arbiter Summary</div>
+        <div class="summary-text" id="summary-text"></div>
+      </div>
+      <a class="full-analysis-link" href="https://hermes-ouroboros.online/app" target="_blank" rel="noopener">
+        Open Full Analysis
+      </a>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="content hidden" id="error-state">
+    <div class="error-state">
+      <div class="error-icon">!</div>
+      <div class="error-message" id="error-message">An error occurred.</div>
+      <div id="error-actions"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <a class="footer-link" href="https://hermes-ouroboros.online" target="_blank" rel="noopener">hermes-ouroboros.online</a>
+    <a class="footer-link" href="options.html" target="_blank" rel="noopener">Settings</a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

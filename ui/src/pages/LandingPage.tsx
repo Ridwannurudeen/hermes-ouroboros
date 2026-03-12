@@ -11,6 +11,9 @@ import AgentShowcase from '../components/landing/AgentShowcase'
 import BenchmarkShowcase from '../components/landing/BenchmarkShowcase'
 import ProofSection from '../components/landing/ProofSection'
 import LearningLoop from '../components/landing/LearningLoop'
+import TrainingLab from '../components/landing/TrainingLab'
+import EvolutionTimeline from '../components/landing/EvolutionTimeline'
+import ExtensionCTA from '../components/landing/ExtensionCTA'
 import ResultsSection from '../components/landing/ResultsSection'
 import LandingFooter from '../components/landing/LandingFooter'
 
@@ -66,6 +69,13 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
         </div>
 
+        {/* Head-to-Head: Solo vs Council with toggle */}
+        <EvolutionTimeline />
+
+        <div className="relative h-px mx-auto max-w-4xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent" />
+        </div>
+
         {/* The Proof — side-by-side solo vs council */}
         <ProofSection />
 
@@ -109,10 +119,24 @@ export default function LandingPage() {
         <BenchmarkShowcase />
 
         <div className="relative h-px mx-auto max-w-4xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
+        </div>
+
+        {/* Live Training Lab — watch the AI get smarter */}
+        <TrainingLab />
+
+        <div className="relative h-px mx-auto max-w-4xl">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-500/20 to-transparent" />
         </div>
 
         <LearningLoop />
+
+        <div className="relative h-px mx-auto max-w-4xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
+        </div>
+
+        {/* Chrome Extension CTA */}
+        <ExtensionCTA />
 
         <div className="relative h-px mx-auto max-w-4xl">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />

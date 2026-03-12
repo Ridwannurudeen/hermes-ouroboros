@@ -72,6 +72,21 @@ def extract_claims(arbiter_verdict: str, web_evidence: dict | None = None) -> li
     return claims
 
 
+_HEADER_PREFIXES = re.compile(
+    r'^(?:VERDICT|HERMES\s+SCORE|CONFIDENCE|FATAL\s+FLAW|KEY\s+STRENGTH|FIX\s+OR\s+DIE|'
+    r'THINKING\s+TRAP|BLIND\s+SPOT|PREMORTEM|SO\s+WHAT|KEY\s+EVIDENCE|MISSING\s+CONTEXT|'
+    r'SOURCE\s+CREDIB|BULL\s+CASE\s+SUMM|BEAR\s+CASE\s+SUMM|KEY\s+UNCERTAIN|'
+    r'DISSENTING|WHAT\s+WOULD\s+CHANGE|SURVIVAL\s+PROB|PROBABILITY\s+OF|FACTUAL\s+ACC|'
+    r'MISLEADING|EVIDENCE\s+FOR|EVIDENCE\s+AGAINST|DATA\s+CONFIDENCE|CONTRARIAN)',
+    re.IGNORECASE,
+)
+
+
+def _is_section_header(text: str) -> bool:
+    """Check if text starts with a verdict section header."""
+    return bool(_HEADER_PREFIXES.match(text.strip()))
+
+
 def _extract_candidates(text: str) -> list[str]:
     """Extract claim-like sentences from verdict text."""
     candidates = []
@@ -112,10 +127,12 @@ def _extract_candidates(text: str) -> list[str]:
             if 50 <= len(clean) <= 400 and _is_claim_like(clean):
                 candidates.append(clean)
 
-    # Deduplicate while preserving order
+    # Deduplicate while preserving order, skip section headers
     seen = set()
     unique = []
     for c in candidates:
+        if _is_section_header(c):
+            continue
         norm = c[:50].lower()
         if norm not in seen:
             seen.add(norm)

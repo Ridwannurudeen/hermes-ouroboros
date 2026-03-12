@@ -17,6 +17,7 @@ from core.claim_extractor import extract_claims
 from core.source_trust import enrich_sources
 from core.web_search import EvidenceGatherer
 from core.session_store import SessionStore
+from core.claim_store import ClaimStore
 from core.settings import load_settings
 from core.skill_creator import SkillCreator
 from learning.preference_extractor import extract_preference_pairs
@@ -34,6 +35,7 @@ class MasterOrchestrator:
         self.agent_launcher = AgentLauncher(provider=self.provider)
         self.conflict_resolver = ConflictResolver(provider=self.provider)
         self.session_store = SessionStore(self.root)
+        self.claim_store = ClaimStore(self.root)
         self.trajectory_logger = TrajectoryLogger(self.root)
         self.skill_creator = SkillCreator(self.root)
 
@@ -112,6 +114,9 @@ class MasterOrchestrator:
             web_evidence_dict = enrich_sources(web_evidence_dict)
             claim_breakdown = extract_claims(arbiter_verdict, web_evidence_dict)
 
+            # Flag whether claims came from structured JSON or regex fallback
+            claims_structured = bool(claim_breakdown and claim_breakdown[0].get('structured'))
+
             session_result: dict[str, Any] = {
                 'query': query,
                 'timestamp': timestamp,
@@ -130,6 +135,7 @@ class MasterOrchestrator:
                 'round2_timings': round2_timings,
                 'verdict_sections': verdict_sections,
                 'claim_breakdown': claim_breakdown,
+                'claims_structured': claims_structured,
                 'web_evidence': web_evidence_dict,
                 'provider_meta': {
                     'research': conflict.additional_research_meta,
@@ -144,6 +150,9 @@ class MasterOrchestrator:
                 session_result['dpo_pairs_count'] = len(dpo_pairs)
                 self._save_dpo_pairs(session_id, dpo_pairs)
             session_path = self.session_store.save_session(session_result)
+            claim_ids = self.claim_store.index_session_claims(session_result)
+            if claim_ids:
+                session_result['claim_ids'] = claim_ids
             trajectory_count = self.trajectory_logger.log_session(session_result)
             self._append_log(
                 f"{datetime.now(timezone.utc).isoformat()} | {session_id} | COMPLETE | "

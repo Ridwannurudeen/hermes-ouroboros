@@ -1,6 +1,11 @@
-"""Lightweight source trust layer — domain tier + recency + corroboration."""
+"""Lightweight source trust layer — domain tier + recency + corroboration.
+
+Each source gets a trust explanation string that explains WHY it received
+its trust tier, recency label, and corroboration score.
+"""
 
 import re
+from datetime import datetime, timezone
 from urllib.parse import urlparse
 from typing import Any
 
@@ -83,7 +88,7 @@ def classify_recency(snippet: str, title: str = '') -> str:
         return 'Unknown'
 
     latest = max(int(y) for y in years)
-    current_year = 2026  # Hardcoded to avoid timezone issues
+    current_year = datetime.now(timezone.utc).year
 
     diff = current_year - latest
     if diff <= 1:
@@ -112,8 +117,71 @@ def count_corroboration(source: dict, all_sources: list[dict]) -> int:
     return count
 
 
+def explain_trust_tier(url: str, tier: str) -> str:
+    """Explain WHY a source received its trust tier."""
+    try:
+        hostname = urlparse(url).hostname or url
+    except Exception:
+        hostname = url
+
+    explanations = {
+        'Academic': f'{hostname} is an academic/research domain — peer-reviewed sources have the highest credibility.',
+        'Government': f'{hostname} is a government/institutional domain — official data sources are considered highly authoritative.',
+        'Major News': f'{hostname} is a major news outlet — professional editorial standards and fact-checking processes.',
+        'Blog/Forum': f'{hostname} is a blog/forum/social platform — user-generated content with no editorial oversight.',
+        'Unknown': f'{hostname} is an unclassified source — credibility cannot be determined from domain alone.',
+    }
+    return explanations.get(tier, f'{hostname}: unclassified source.')
+
+
+def explain_recency(recency: str, snippet: str = '', title: str = '') -> str:
+    """Explain WHY a source received its recency label."""
+    text = (snippet or '') + ' ' + (title or '')
+    years = YEAR_PATTERN.findall(text)
+    latest = max((int(y) for y in years), default=None)
+
+    if recency == 'Current':
+        return f'References {latest} data — within the past year, highly current.'
+    elif recency == 'Recent':
+        return f'References {latest} data — within 3 years, reasonably current.'
+    elif recency == 'Dated':
+        return f'References {latest} data — older than 3 years, may be outdated.'
+    return 'No date references found — recency cannot be determined.'
+
+
+def explain_corroboration(count: int) -> str:
+    """Explain corroboration score."""
+    if count == 0:
+        return 'No other sources share significant content overlap — this claim stands alone.'
+    elif count == 1:
+        return '1 other source covers similar ground — limited cross-reference.'
+    else:
+        return f'{count} other sources share key terms — well-corroborated across multiple references.'
+
+
+def build_trust_explanation(item: dict[str, Any]) -> str:
+    """Build a complete trust explanation string for a source."""
+    parts = []
+    tier = item.get('trust_tier', 'Unknown')
+    url = item.get('url', '')
+    parts.append(explain_trust_tier(url, tier))
+    recency = item.get('recency', 'Unknown')
+    parts.append(explain_recency(recency, item.get('snippet', ''), item.get('title', '')))
+    corr = item.get('corroboration', 0)
+    parts.append(explain_corroboration(corr))
+    return ' '.join(parts)
+
+
+def compute_trust_score(tier: str, recency: str, corroboration: int) -> int:
+    """Compute a 0-100 trust score from the three signals."""
+    tier_scores = {'Academic': 40, 'Government': 38, 'Major News': 28, 'Blog/Forum': 10, 'Unknown': 15}
+    recency_scores = {'Current': 30, 'Recent': 20, 'Dated': 8, 'Unknown': 12}
+    corr_score = min(corroboration * 10, 30)
+    return min(100, tier_scores.get(tier, 15) + recency_scores.get(recency, 12) + corr_score)
+
+
 def enrich_sources(web_evidence: dict[str, Any] | None) -> dict[str, Any] | None:
-    """Add trust metadata to all sources in a web evidence dict."""
+    """Add trust metadata and explanations to all sources in a web evidence dict."""
     if not web_evidence:
         return web_evidence
 
@@ -133,11 +201,14 @@ def enrich_sources(web_evidence: dict[str, Any] | None) -> dict[str, Any] | None
                 enriched_items.append(item)
                 continue
             enriched_item = dict(item)
-            enriched_item['trust_tier'] = classify_domain(item.get('url', ''))
-            enriched_item['recency'] = classify_recency(
-                item.get('snippet', ''), item.get('title', '')
-            )
-            enriched_item['corroboration'] = count_corroboration(item, all_sources)
+            tier = classify_domain(item.get('url', ''))
+            recency = classify_recency(item.get('snippet', ''), item.get('title', ''))
+            corr = count_corroboration(item, all_sources)
+            enriched_item['trust_tier'] = tier
+            enriched_item['recency'] = recency
+            enriched_item['corroboration'] = corr
+            enriched_item['trust_score'] = compute_trust_score(tier, recency, corr)
+            enriched_item['trust_explanation'] = build_trust_explanation(enriched_item)
             enriched_items.append(enriched_item)
         enriched[category] = enriched_items
 

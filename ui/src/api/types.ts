@@ -93,6 +93,8 @@ export interface EvidenceItem {
   trust_tier?: 'Academic' | 'Government' | 'Major News' | 'Blog/Forum' | 'Unknown'
   recency?: 'Current' | 'Recent' | 'Dated' | 'Unknown'
   corroboration?: number
+  trust_score?: number
+  trust_explanation?: string
 }
 
 export interface WebEvidence {
@@ -120,6 +122,22 @@ export interface ClaimItem {
   status: 'supported' | 'weakly_supported' | 'disputed' | 'insufficient_evidence'
   reasoning: string
   source_url?: string
+  evidence_for?: string[]
+  evidence_against?: string[]
+  uncertainty?: number
+  structured?: boolean
+}
+
+export interface FeedbackEvent {
+  type: 'rating' | 'outcome' | 'claim_feedback' | 'note'
+  timestamp: string
+  rating?: number
+  tags?: string[]
+  outcome?: string
+  note?: string
+  text?: string
+  claim_id?: string
+  claim_text?: string
 }
 
 export interface FeedbackData {
@@ -127,6 +145,9 @@ export interface FeedbackData {
   rating: number
   tags: string[]
   timestamp: string
+  events?: FeedbackEvent[]
+  latest_outcome?: string
+  claim_outcomes?: Record<string, string>
 }
 
 export interface SessionResult {
@@ -154,6 +175,7 @@ export interface SessionResult {
   dpo_pairs_created?: number
   web_evidence?: WebEvidence | null
   claim_breakdown?: ClaimItem[]
+  claims_structured?: boolean
   feedback?: FeedbackData
 }
 

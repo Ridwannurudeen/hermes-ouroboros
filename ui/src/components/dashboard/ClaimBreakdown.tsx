@@ -97,16 +97,58 @@ export default function ClaimBreakdown({ claims }: ClaimBreakdownProps) {
                     transition={{ duration: 0.2 }}
                     className="overflow-hidden"
                   >
-                    <div className="px-3 pb-3 pt-0 border-t border-white/[0.06] mt-0">
-                      <p className="text-xs text-white/50 mt-2 leading-relaxed">
-                        {claim.reasoning}
-                      </p>
+                    <div className="px-3 pb-3 pt-0 border-t border-white/[0.06] mt-0 space-y-2">
+                      {/* Evidence For */}
+                      {claim.evidence_for && claim.evidence_for.length > 0 && (
+                        <div className="mt-2">
+                          <p className="text-[10px] text-emerald-400/70 font-medium uppercase tracking-wider mb-1">Evidence For</p>
+                          <ul className="space-y-0.5">
+                            {claim.evidence_for.map((e, j) => (
+                              <li key={j} className="text-xs text-white/50 leading-relaxed pl-3 relative before:content-['+'] before:absolute before:left-0 before:text-emerald-400/50 before:text-[10px]">
+                                {e}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {/* Evidence Against */}
+                      {claim.evidence_against && claim.evidence_against.length > 0 && (
+                        <div>
+                          <p className="text-[10px] text-rose-400/70 font-medium uppercase tracking-wider mb-1">Evidence Against</p>
+                          <ul className="space-y-0.5">
+                            {claim.evidence_against.map((e, j) => (
+                              <li key={j} className="text-xs text-white/50 leading-relaxed pl-3 relative before:content-['\2212'] before:absolute before:left-0 before:text-rose-400/50 before:text-[10px]">
+                                {e}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {/* Uncertainty bar */}
+                      {claim.uncertainty !== undefined && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-white/30 shrink-0">Uncertainty</span>
+                          <div className="flex-1 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-cyan-500/60 to-violet-500/60 transition-all"
+                              style={{ width: `${claim.uncertainty}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] text-white/30 tabular-nums">{claim.uncertainty}%</span>
+                        </div>
+                      )}
+                      {/* Fallback reasoning (shown for regex-extracted claims) */}
+                      {!claim.structured && claim.reasoning && (
+                        <p className="text-xs text-white/50 mt-1 leading-relaxed">
+                          {claim.reasoning}
+                        </p>
+                      )}
                       {claim.source_url && (
                         <a
                           href={claim.source_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 mt-2 text-[11px] text-cyan-400 hover:text-cyan-300 transition-colors"
+                          className="inline-flex items-center gap-1 mt-1 text-[11px] text-cyan-400 hover:text-cyan-300 transition-colors"
                           onClick={e => e.stopPropagation()}
                         >
                           <span>Source</span>

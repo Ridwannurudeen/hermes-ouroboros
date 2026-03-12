@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { apiPost } from '../../api/client'
 import type { FeedbackData } from '../../api/types'
 
@@ -12,6 +12,13 @@ const FEEDBACK_TAGS = [
   'actionable',
 ]
 
+const OUTCOME_OPTIONS = [
+  { value: 'confirmed', label: 'Confirmed', color: 'emerald' },
+  { value: 'refuted', label: 'Refuted', color: 'rose' },
+  { value: 'partially_correct', label: 'Partial', color: 'amber' },
+  { value: 'still_pending', label: 'Pending', color: 'white' },
+] as const
+
 interface FeedbackPanelProps {
   sessionId: string
   existing?: FeedbackData | null
@@ -21,6 +28,8 @@ export default function FeedbackPanel({ sessionId, existing }: FeedbackPanelProp
   const [feedback, setFeedback] = useState<FeedbackData | null>(existing || null)
   const [selectedTags, setSelectedTags] = useState<string[]>(existing?.tags || [])
   const [submitting, setSubmitting] = useState(false)
+  const [showOutcome, setShowOutcome] = useState(false)
+  const [outcomeNote, setOutcomeNote] = useState('')
 
   const handleRate = async (rating: number) => {
     if (submitting) return
@@ -38,6 +47,23 @@ export default function FeedbackPanel({ sessionId, existing }: FeedbackPanelProp
     }
   }
 
+  const handleOutcome = async (outcome: string) => {
+    if (submitting) return
+    setSubmitting(true)
+    try {
+      const res = await apiPost<{ ok: boolean; feedback: FeedbackData }>(
+        `/api/sessions/${sessionId}/outcome`,
+        { outcome, note: outcomeNote }
+      )
+      setFeedback(res.feedback)
+      setShowOutcome(false)
+    } catch {
+      // Silently fail
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   const toggleTag = (tag: string) => {
     setSelectedTags(prev =>
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
@@ -45,31 +71,83 @@ export default function FeedbackPanel({ sessionId, existing }: FeedbackPanelProp
   }
 
   if (feedback) {
+    const outcomeLabel = feedback.latest_outcome
+      ? OUTCOME_OPTIONS.find(o => o.value === feedback.latest_outcome)
+      : null
+
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex items-center gap-3 py-3 px-4 rounded-xl bg-white/[0.02] border border-white/[0.06]"
-      >
-        <div className="flex items-center gap-2">
-          <span className={`text-lg ${feedback.rating > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-            {feedback.rating > 0 ? '\u25B2' : '\u25BC'}
-          </span>
-          <span className="text-xs text-white/50">
-            {feedback.rating > 0 ? 'Helpful' : 'Not helpful'}
-          </span>
-        </div>
-        {feedback.tags.length > 0 && (
-          <div className="flex gap-1.5 flex-wrap">
-            {feedback.tags.map(tag => (
-              <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
-                {tag}
-              </span>
-            ))}
+      <div className="space-y-2">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex items-center gap-3 py-3 px-4 rounded-xl bg-white/[0.02] border border-white/[0.06] flex-wrap"
+        >
+          <div className="flex items-center gap-2">
+            <span className={`text-lg ${feedback.rating > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+              {feedback.rating > 0 ? '\u25B2' : '\u25BC'}
+            </span>
+            <span className="text-xs text-white/50">
+              {feedback.rating > 0 ? 'Helpful' : 'Not helpful'}
+            </span>
+          </div>
+          {feedback.tags.length > 0 && (
+            <div className="flex gap-1.5 flex-wrap">
+              {feedback.tags.map(tag => (
+                <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+          {outcomeLabel && (
+            <span className={`text-[10px] px-2 py-0.5 rounded-full bg-${outcomeLabel.color}-500/10 text-${outcomeLabel.color}-400 border border-${outcomeLabel.color}-500/20`}>
+              Outcome: {outcomeLabel.label}
+            </span>
+          )}
+          <span className="text-[10px] text-white/25 ml-auto">Feedback saved</span>
+        </motion.div>
+
+        {/* Outcome tracking — show after rating */}
+        {!feedback.latest_outcome && (
+          <div className="py-2 px-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+            {!showOutcome ? (
+              <button
+                onClick={() => setShowOutcome(true)}
+                className="text-[11px] text-cyan-400 hover:text-cyan-300 transition-colors"
+              >
+                Record what actually happened {'\u2192'}
+              </button>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-[10px] text-white/40 uppercase tracking-wider font-medium">
+                  Was this verdict correct?
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  {OUTCOME_OPTIONS.map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => handleOutcome(opt.value)}
+                      disabled={submitting}
+                      className={`text-[10px] px-2.5 py-1 rounded-full border transition-colors
+                        bg-${opt.color}-500/10 text-${opt.color}-400 border-${opt.color}-500/20
+                        hover:bg-${opt.color}-500/20 disabled:opacity-50`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  placeholder="Optional note..."
+                  value={outcomeNote}
+                  onChange={e => setOutcomeNote(e.target.value)}
+                  className="w-full text-xs bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-1.5 text-white/70 placeholder-white/20 focus:outline-none focus:border-cyan-500/30"
+                />
+              </div>
+            )}
           </div>
         )}
-        <span className="text-[10px] text-white/25 ml-auto">Feedback saved — feeds DPO training</span>
-      </motion.div>
+      </div>
     )
   }
 

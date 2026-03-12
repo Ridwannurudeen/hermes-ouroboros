@@ -6,7 +6,7 @@ SKEPTIC_AGENT = AgentDefinition(
     system_prompt=(
         'You are the Skeptic — a Popperian falsificationist. Your mandate: '
         'find the conditions under which the proposition FAILS and design '
-        'the empirical tests that would prove it false. '
+        'the empirical tests that would falsify it. '
         'Do not merely list risks — identify the single most devastating '
         'falsification. Ask: what is the hidden assumption that, if wrong, '
         'collapses the entire argument? What historical precedent contradicts '

@@ -1,7 +1,14 @@
-"""Extract atomic claims from Arbiter verdict text. No LLM calls — pure parsing."""
+"""Extract atomic claims from Arbiter verdict text.
+
+Prefers structured JSON claims emitted directly by the Arbiter (via
+verdict_parser.extract_structured_claims). Falls back to regex-based
+extraction if structured claims are unavailable.
+"""
 
 import re
 from typing import Any
+
+from core.verdict_parser import extract_structured_claims
 
 
 # Hedging / weak support markers
@@ -35,11 +42,58 @@ URL_PATTERN = re.compile(r'https?://[^\s\)\],"]+')
 def extract_claims(arbiter_verdict: str, web_evidence: dict | None = None) -> list[dict[str, Any]]:
     """Parse arbiter verdict into atomic claims with status classification.
 
-    Returns list of {claim, status, reasoning, source_url?}
+    Tries structured JSON claims from the arbiter first (higher quality).
+    Falls back to regex-based extraction if structured claims are empty.
+
+    Returns list of {claim, status, reasoning, source_url?, evidence_for?, evidence_against?, uncertainty?}
     """
     if not arbiter_verdict or len(arbiter_verdict) < 50:
         return []
 
+    # --- Primary path: structured claims from arbiter JSON ---
+    structured = extract_structured_claims(arbiter_verdict)
+    if structured:
+        source_urls = _build_source_index(web_evidence)
+        claims = []
+        for sc in structured:
+            # Build reasoning from evidence lists
+            reasoning_parts = []
+            if sc.get('evidence_for'):
+                reasoning_parts.append('Supporting: ' + '; '.join(sc['evidence_for']))
+            if sc.get('evidence_against'):
+                reasoning_parts.append('Contradicting: ' + '; '.join(sc['evidence_against']))
+            if not reasoning_parts:
+                reasoning_parts.append(_status_reasoning(sc['status']))
+
+            source_url = _find_matching_source(sc['claim'], source_urls)
+            claims.append({
+                'claim': sc['claim'],
+                'status': sc['status'],
+                'reasoning': ' | '.join(reasoning_parts),
+                'source_url': source_url,
+                'evidence_for': sc.get('evidence_for', []),
+                'evidence_against': sc.get('evidence_against', []),
+                'uncertainty': sc.get('uncertainty', 50),
+                'structured': True,
+            })
+        return claims
+
+    # --- Fallback: regex-based extraction ---
+    return _extract_claims_regex(arbiter_verdict, web_evidence)
+
+
+def _status_reasoning(status: str) -> str:
+    """Generate default reasoning text for a claim status."""
+    return {
+        'supported': 'Strong assertion backed by evidence markers or established consensus.',
+        'disputed': 'Contains contradiction or dispute markers. Multiple agents flagged concerns.',
+        'weakly_supported': 'Hedging language detected. Evidence exists but is not conclusive.',
+        'insufficient_evidence': 'No clear evidence markers. Claim requires further verification.',
+    }.get(status, 'Status determined by arbiter analysis.')
+
+
+def _extract_claims_regex(arbiter_verdict: str, web_evidence: dict | None = None) -> list[dict[str, Any]]:
+    """Regex-based claim extraction — legacy fallback."""
     # Build URL index from web evidence for source matching
     source_urls = _build_source_index(web_evidence)
 
@@ -64,6 +118,7 @@ def extract_claims(arbiter_verdict: str, web_evidence: dict | None = None) -> li
             "status": status,
             "reasoning": reasoning,
             "source_url": source_url,
+            "structured": False,
         })
 
         if len(claims) >= 7:

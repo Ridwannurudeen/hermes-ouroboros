@@ -592,7 +592,7 @@ export default function PaperPage() {
             <p className="text-sm text-gray-700 leading-relaxed mb-4">
               <strong>Why multi-agent debate works for preference data.</strong> Traditional DPO requires human annotators
               to compare two responses and select the better one. Our system replaces this with structured disagreement:
-              by forcing agents into opposing epistemic roles, we guarantee that at least some responses will be
+              by forcing agents into opposing epistemic roles, we expect that at least some responses will be
               substantively wrong or incomplete. The Arbiter's judicial synthesis then acts as an automated annotator,
               but one that has access to the full deliberation record rather than just two decontextualized responses.
             </p>

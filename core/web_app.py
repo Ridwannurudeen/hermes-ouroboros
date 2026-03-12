@@ -23,6 +23,7 @@ from core.feedback_store import FeedbackStore
 from core.memo_generator import generate_memo
 from core.drift_monitor import build_drift_analysis
 from core.claim_ledger import build_claim_ledger
+from core.claim_store import ClaimStore
 from learning.atropos_runner import get_training_status
 from learning.preference_extractor import build_dpo_dataset
 from learning.trajectory_stats import build_stats
@@ -109,9 +110,16 @@ class HermesWebApp:
                 web.get('/api/skills', self.handle_skills_list),
                 web.get('/api/research/analysis', self.handle_research_analysis),
                 web.post('/api/sessions/{session_id}/feedback', self.handle_session_feedback),
+                web.post('/api/sessions/{session_id}/outcome', self.handle_session_outcome),
+                web.post('/api/sessions/{session_id}/claim-feedback', self.handle_claim_feedback),
+                web.post('/api/sessions/{session_id}/note', self.handle_session_note),
                 web.get('/api/feedback/stats', self.handle_feedback_stats),
                 web.get('/api/sessions/{session_id}/drift', self.handle_session_drift),
                 web.get('/api/claims/ledger', self.handle_claim_ledger),
+                web.get('/api/claims/store', self.handle_claim_store_stats),
+                web.get('/api/claims/search', self.handle_claim_search),
+                web.get('/api/claims/recurring', self.handle_recurring_claims),
+                web.get('/api/claims/{claim_id}', self.handle_claim_detail),
             ]
         )
         # SPA routes — serve React index.html for /app and /app/*
@@ -343,6 +351,42 @@ class HermesWebApp:
         feedback = self.feedback_store.save_feedback(session_id, rating, tags)
         return web.json_response({'ok': True, 'feedback': feedback})
 
+    async def handle_session_outcome(self, request: web.Request) -> web.Response:
+        """Record what actually happened — was the verdict right?"""
+        session_id = request.match_info['session_id']
+        payload = await self._read_json(request)
+        outcome = payload.get('outcome', '')
+        if outcome not in ('confirmed', 'refuted', 'partially_correct', 'still_pending'):
+            raise web.HTTPBadRequest(text='outcome must be: confirmed, refuted, partially_correct, still_pending')
+        note = str(payload.get('note', ''))[:500]
+        data = self.feedback_store.record_outcome(session_id, outcome, note)
+        return web.json_response({'ok': True, 'feedback': data})
+
+    async def handle_claim_feedback(self, request: web.Request) -> web.Response:
+        """Record feedback on an individual claim."""
+        session_id = request.match_info['session_id']
+        payload = await self._read_json(request)
+        claim_id = payload.get('claim_id', '')
+        claim_text = payload.get('claim_text', '')
+        outcome = payload.get('outcome', '')
+        if outcome not in ('confirmed', 'refuted', 'pending'):
+            raise web.HTTPBadRequest(text='outcome must be: confirmed, refuted, pending')
+        if not claim_id:
+            raise web.HTTPBadRequest(text='claim_id is required')
+        note = str(payload.get('note', ''))[:500]
+        data = self.feedback_store.record_claim_feedback(session_id, claim_id, claim_text, outcome, note)
+        return web.json_response({'ok': True, 'feedback': data})
+
+    async def handle_session_note(self, request: web.Request) -> web.Response:
+        """Add a free-text note to a session."""
+        session_id = request.match_info['session_id']
+        payload = await self._read_json(request)
+        text = str(payload.get('text', '')).strip()
+        if not text:
+            raise web.HTTPBadRequest(text='text is required')
+        data = self.feedback_store.add_note(session_id, text)
+        return web.json_response({'ok': True, 'feedback': data})
+
     async def handle_feedback_stats(self, request: web.Request) -> web.Response:
         """Aggregate feedback stats — no auth required (read-only, non-sensitive)."""
         stats = self.feedback_store.get_stats()
@@ -363,6 +407,38 @@ class HermesWebApp:
         """Global claim statistics across all sessions — no auth required."""
         ledger = build_claim_ledger(self.session_store.sessions_dir)
         return web.json_response(ledger)
+
+    async def handle_claim_store_stats(self, request: web.Request) -> web.Response:
+        """Persistent claim store statistics."""
+        store = ClaimStore(self.root)
+        return web.json_response(store.get_stats())
+
+    async def handle_claim_search(self, request: web.Request) -> web.Response:
+        """Search claims by text."""
+        q = request.query.get('q', '').strip()
+        if not q or len(q) < 2:
+            raise web.HTTPBadRequest(text='Query must be at least 2 characters.')
+        limit = min(int(request.query.get('limit', '20')), 50)
+        store = ClaimStore(self.root)
+        results = store.search_claims(q, limit=limit)
+        return web.json_response({'results': results, 'count': len(results)})
+
+    async def handle_recurring_claims(self, request: web.Request) -> web.Response:
+        """Get claims that appear across multiple sessions."""
+        min_appearances = max(2, int(request.query.get('min', '2')))
+        limit = min(int(request.query.get('limit', '20')), 50)
+        store = ClaimStore(self.root)
+        results = store.get_recurring_claims(min_appearances=min_appearances, limit=limit)
+        return web.json_response({'results': results, 'count': len(results)})
+
+    async def handle_claim_detail(self, request: web.Request) -> web.Response:
+        """Get full claim record by canonical ID."""
+        claim_id = request.match_info['claim_id']
+        store = ClaimStore(self.root)
+        record = store.get_claim(claim_id)
+        if record is None:
+            raise web.HTTPNotFound(text='Claim not found.')
+        return web.json_response(record)
 
     async def handle_benchmark_report(self, request: web.Request) -> web.Response:
         self._require_principal(request)

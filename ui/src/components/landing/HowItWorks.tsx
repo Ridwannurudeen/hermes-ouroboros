@@ -29,7 +29,7 @@ const STEPS = [
   {
     icon: Zap,
     title: 'Self-Improvement Loop',
-    desc: 'Every disagreement becomes a DPO training pair. The council fine-tunes itself on its own debate data. Zero human labels — autonomous improvement.',
+    desc: 'Every disagreement becomes a DPO training pair. The council fine-tunes itself on its own debate data. Zero human labels required.',
     gradient: 'from-amber-500 to-orange-500',
     glow: 'rgba(245,158,11,0.15)',
     accent: '#fbbf24',

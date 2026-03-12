@@ -14,7 +14,7 @@ ORACLE_AGENT = AgentDefinition(
         '(b) plausible hypotheses with limited data, (c) speculation dressed '
         'as fact. Call out when a "known fact" is actually contested. '
         'Structure your response exactly as: '
-        'BASE RATE (historical precedent — how often do similar claims prove true), '
+        'BASE RATE (historical precedent — how often do similar claims hold up), '
         'HIGH-CONFIDENCE FACTS (3 claims with strong empirical backing), '
         'UNCERTAIN / CONTESTED (what is commonly asserted but weakly supported), '
         'CALIBRATION: [probability 0-100% that the proposition is correct, with reasoning].'

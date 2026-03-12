@@ -3,9 +3,13 @@
 The mode-specific arbiter prompts ask for sections like HERMES SCORE,
 THINKING TRAPS, BLIND SPOTS, PREMORTEM, etc.  This module extracts them
 into a dict so the frontend can render them individually.
+
+The arbiter also emits a structured CLAIMS JSON block — this module
+extracts it directly, avoiding fragile regex-based claim extraction.
 """
 from __future__ import annotations
 
+import json
 import re
 from typing import Any
 
@@ -47,7 +51,7 @@ _ALL_HEADERS = re.compile(
     r'^(?:VERDICT|HERMES\s+SCORE|CONFIDENCE|FATAL\s+FLAW|KEY\s+STRENGTH|FIX\s+OR\s+DIE|'
     r'THINKING\s+TRAP|BLIND\s+SPOT|PREMORTEM|SO\s+WHAT|KEY\s+EVIDENCE|MISSING\s+CONTEXT|'
     r'SOURCE\s+CREDIB|BULL\s+CASE\s+SUMM|BEAR\s+CASE\s+SUMM|KEY\s+UNCERTAIN|'
-    r'DISSENTING|WHAT\s+WOULD\s+CHANGE|SURVIVAL\s+PROB|PROBABILITY\s+OF|FACTUAL\s+ACC|MISLEADING)\s*[:=]',
+    r'DISSENTING|WHAT\s+WOULD\s+CHANGE|SURVIVAL\s+PROB|PROBABILITY\s+OF|FACTUAL\s+ACC|MISLEADING|CLAIMS)\s*[:=]',
     re.IGNORECASE | re.MULTILINE,
 )
 
@@ -89,4 +93,121 @@ def parse_verdict(verdict: str) -> dict[str, Any]:
             if cleaned:
                 result[field] = cleaned
 
+    # Structured claims (JSON array emitted by arbiter)
+    structured = extract_structured_claims(verdict)
+    if structured:
+        result['structured_claims'] = structured
+
     return result
+
+
+# ---------------------------------------------------------------------------
+# Structured claim extraction
+# ---------------------------------------------------------------------------
+
+_VALID_STATUSES = {'supported', 'disputed', 'weakly_supported', 'insufficient_evidence'}
+
+
+def extract_structured_claims(verdict: str) -> list[dict[str, Any]]:
+    """Extract the JSON CLAIMS array from arbiter verdict text.
+
+    Returns a validated list of claim dicts, or empty list if not found/invalid.
+    """
+    if not verdict:
+        return []
+
+    # Find the CLAIMS section — look for "CLAIMS:" or "CLAIMS =" followed by JSON
+    claims_match = re.search(
+        r'CLAIMS\s*[:=]\s*',
+        verdict,
+        re.IGNORECASE,
+    )
+    if not claims_match:
+        return []
+
+    rest = verdict[claims_match.end():]
+
+    # Find the JSON array — may be preceded by whitespace or a newline
+    json_str = _extract_json_array(rest)
+    if not json_str:
+        return []
+
+    try:
+        raw = json.loads(json_str)
+    except (json.JSONDecodeError, ValueError):
+        return []
+
+    if not isinstance(raw, list):
+        return []
+
+    # Validate and normalize each claim
+    claims = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        claim_text = item.get('claim', '').strip()
+        if not claim_text or len(claim_text) < 10:
+            continue
+
+        status = item.get('status', 'insufficient_evidence').lower().strip()
+        if status not in _VALID_STATUSES:
+            status = 'insufficient_evidence'
+
+        evidence_for = item.get('evidence_for', [])
+        if not isinstance(evidence_for, list):
+            evidence_for = [str(evidence_for)] if evidence_for else []
+
+        evidence_against = item.get('evidence_against', [])
+        if not isinstance(evidence_against, list):
+            evidence_against = [str(evidence_against)] if evidence_against else []
+
+        uncertainty = item.get('uncertainty', 50)
+        if not isinstance(uncertainty, (int, float)):
+            try:
+                uncertainty = int(uncertainty)
+            except (ValueError, TypeError):
+                uncertainty = 50
+        uncertainty = max(0, min(100, int(uncertainty)))
+
+        claims.append({
+            'claim': claim_text,
+            'status': status,
+            'evidence_for': [str(e) for e in evidence_for if e],
+            'evidence_against': [str(e) for e in evidence_against if e],
+            'uncertainty': uncertainty,
+        })
+
+    return claims[:7]  # Cap at 7 claims
+
+
+def _extract_json_array(text: str) -> str | None:
+    """Extract the first JSON array from text, handling nested brackets."""
+    # Skip whitespace
+    text = text.lstrip()
+    if not text.startswith('['):
+        return None
+
+    depth = 0
+    in_string = False
+    escape = False
+
+    for i, ch in enumerate(text):
+        if escape:
+            escape = False
+            continue
+        if ch == '\\' and in_string:
+            escape = True
+            continue
+        if ch == '"' and not escape:
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if ch == '[':
+            depth += 1
+        elif ch == ']':
+            depth -= 1
+            if depth == 0:
+                return text[:i + 1]
+
+    return None

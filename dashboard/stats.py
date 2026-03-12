@@ -67,7 +67,7 @@ def main() -> None:
         print(f"Benchmark label: {payload.get('label', 'n/a')}")
         print(f'Benchmark runtime modes: {runtime_modes}')
         if 'trained_fallback' in runtime_modes:
-            print('Benchmark status: fallback-only. Current benchmark does not prove the Modal adapter improved the system.')
+            print('Benchmark status: fallback-only. Current benchmark does not show the Modal adapter improved the system.')
 
     by_role = trajectory_stats.get('by_role', {})
     if by_role:

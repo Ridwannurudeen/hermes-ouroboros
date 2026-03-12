@@ -1,8 +1,8 @@
 """Verdict Drift Monitor — track how Hermes answers evolve over time.
 
 Compares the current session to similar past sessions, revealing score
-changes, verdict label shifts, and claim evolution.  Proves the DPO
-self-improvement loop is working.
+changes, verdict label shifts, and claim evolution.  Tracks whether the
+DPO self-improvement loop is producing measurable differences.
 """
 
 from __future__ import annotations

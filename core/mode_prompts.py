@@ -72,7 +72,17 @@ RED_TEAM_PROMPTS: dict[str, str] = {
         'PREMORTEM: (it is one year later and this failed — the most likely reason is...), '
         'WHAT WOULD CHANGE THIS VERDICT: (what specific new evidence, data, or events would flip this assessment — be concrete), '
         'SO WHAT — DO THIS NOW: (the single most important next action), '
-        'CONFIDENCE: [0-100].'
+        'CONFIDENCE: [0-100], '
+        'CLAIMS: (MANDATORY — output a raw JSON array of the key claims you evaluated. '
+        'Each object must have: "claim" (the atomic assertion), '
+        '"status" (one of: supported, disputed, weakly_supported, insufficient_evidence), '
+        '"evidence_for" (list of specific supporting facts/sources), '
+        '"evidence_against" (list of specific contradicting facts/sources), '
+        '"uncertainty" (0-100, how uncertain this claim is). '
+        'Output 3-7 claims. Example: '
+        '[{"claim": "The market is growing at 15% YoY", "status": "supported", '
+        '"evidence_for": ["Industry report shows 14.8% CAGR"], '
+        '"evidence_against": [], "uncertainty": 20}])'
     ),
 }
 
@@ -137,7 +147,17 @@ VERIFY_PROMPTS: dict[str, str] = {
         'SOURCE CREDIBILITY: (how trustworthy are the origins of this claim), '
         'WHAT WOULD CHANGE THIS VERDICT: (what specific new evidence or developments would flip this assessment), '
         'SO WHAT — THE BOTTOM LINE: (what should you actually believe and why), '
-        'CONFIDENCE: [0-100].'
+        'CONFIDENCE: [0-100], '
+        'CLAIMS: (MANDATORY — output a raw JSON array of the key claims you evaluated. '
+        'Each object must have: "claim" (the atomic assertion), '
+        '"status" (one of: supported, disputed, weakly_supported, insufficient_evidence), '
+        '"evidence_for" (list of specific supporting facts/sources), '
+        '"evidence_against" (list of specific contradicting facts/sources), '
+        '"uncertainty" (0-100, how uncertain this claim is). '
+        'Output 3-7 claims. Example: '
+        '[{"claim": "Study X found a 30% reduction", "status": "supported", '
+        '"evidence_for": ["Peer-reviewed paper in Nature 2024"], '
+        '"evidence_against": ["Sample size was only 200"], "uncertainty": 35}])'
     ),
 }
 
@@ -201,7 +221,17 @@ RESEARCH_PROMPTS: dict[str, str] = {
         'PREMORTEM: (if the bull case is wrong, this is the most likely reason), '
         'WHAT WOULD CHANGE THIS VERDICT: (what specific new data, events, or evidence would fundamentally alter this assessment), '
         'SO WHAT — RECOMMENDED ACTION: (what to do based on this analysis), '
-        'CONFIDENCE: [0-100].'
+        'CONFIDENCE: [0-100], '
+        'CLAIMS: (MANDATORY — output a raw JSON array of the key claims you evaluated. '
+        'Each object must have: "claim" (the atomic assertion), '
+        '"status" (one of: supported, disputed, weakly_supported, insufficient_evidence), '
+        '"evidence_for" (list of specific supporting facts/sources), '
+        '"evidence_against" (list of specific contradicting facts/sources), '
+        '"uncertainty" (0-100, how uncertain this claim is). '
+        'Output 3-7 claims. Example: '
+        '[{"claim": "Revenue grew 25% in Q3", "status": "supported", '
+        '"evidence_for": ["Earnings report Q3 2025"], '
+        '"evidence_against": [], "uncertainty": 15}])'
     ),
 }
 

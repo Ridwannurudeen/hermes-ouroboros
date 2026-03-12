@@ -144,7 +144,21 @@ function SourceCard({ item, label }: { item: EvidenceItem; label: string }) {
             +{item.corroboration} corr.
           </span>
         )}
+        {item.trust_score !== undefined && (
+          <span className={`text-[8px] px-1.5 py-0.5 rounded-full border ${
+            item.trust_score >= 60 ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' :
+            item.trust_score >= 35 ? 'bg-amber-500/10 text-amber-300 border-amber-500/20' :
+            'bg-rose-500/10 text-rose-300 border-rose-500/20'
+          }`}>
+            Trust: {item.trust_score}
+          </span>
+        )}
       </div>
+      {item.trust_explanation && (
+        <p className="text-[9px] text-white/20 mt-1 leading-relaxed line-clamp-2 hover:line-clamp-none transition-all">
+          {item.trust_explanation}
+        </p>
+      )}
     </a>
   )
 }

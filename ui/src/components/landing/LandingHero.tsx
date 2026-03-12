@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Sparkles, Shield, Search, BarChart3 } from 'lucide-react'
 import OuroborosRing from './OuroborosRing'
+import HeroAutoDemo from './HeroAutoDemo'
 
 const MODES = [
   { icon: Shield, label: 'Red Team', desc: 'Stress-test any idea', color: 'text-rose-400', border: 'border-rose-500/20' },
@@ -79,11 +80,22 @@ export default function LandingHero() {
             <span className="text-indigo-300/40">Then watch the verdict form in real-time.</span>
           </motion.p>
 
-          {/* Mode cards */}
+          {/* Auto-playing hero demo */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9, duration: 0.8 }}
+          >
+            <div className="max-w-xl mx-auto">
+              <HeroAutoDemo />
+            </div>
+          </motion.div>
+
+          {/* Mode cards */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.1, duration: 0.8 }}
             className="flex justify-center gap-4 flex-wrap"
           >
             {MODES.map((m, i) => (

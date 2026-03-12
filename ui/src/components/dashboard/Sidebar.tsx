@@ -1,6 +1,6 @@
 import {
   MessageSquare, History, BarChart3, GitBranch,
-  Key, Settings, Sparkles, Scale, Share2, Download,
+  Key, Settings, Sparkles, Scale, Share2, Download, Code,
 } from 'lucide-react'
 
 const NAV_ITEMS = [
@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { id: 'skills', icon: Sparkles, label: 'Skills' },
   { id: 'share', icon: Share2, label: 'Share' },
   { id: 'export', icon: Download, label: 'Export' },
+  { id: 'api', icon: Code, label: 'API Docs' },
   { id: 'keys', icon: Key, label: 'API Keys' },
   { id: 'auth', icon: Settings, label: 'Auth' },
 ]

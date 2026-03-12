@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { SSEAgentEvent, AgentRole, AnalysisMode } from '../../api/types'
 import { MODE_AGENT_LABELS } from '../../api/types'
+import { PersonalityBadge } from './AgentPersonality'
 
 const COUNCIL_ROLES: AgentRole[] = ['advocate', 'skeptic', 'oracle', 'contrarian']
 
@@ -36,8 +37,8 @@ interface AgentStreamPanelProps {
   analysisMode?: AnalysisMode
 }
 
-function AutoScrollBox({ text, role, isDone, duration, label }: {
-  text: string; role: string; isDone: boolean; duration?: number; label?: string
+function AutoScrollBox({ text, role, isDone, duration, label, showPersonality }: {
+  text: string; role: string; isDone: boolean; duration?: number; label?: string; showPersonality?: boolean
 }) {
   const boxRef = useRef<HTMLDivElement>(null)
 
@@ -57,16 +58,19 @@ function AutoScrollBox({ text, role, isDone, duration, label }: {
       className={`rounded-xl border ${ROLE_COLORS[role] || 'border-white/10'} bg-white/[0.02] overflow-hidden`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/[0.04]">
-        <span className={`text-[10px] font-bold uppercase tracking-wider ${ROLE_TEXT[role] || 'text-white/50'} ${ROLE_BG[role] || ''} px-2 py-0.5 rounded-full`}>
-          {displayLabel}
-        </span>
-        {isDone && duration != null && (
-          <span className="text-[10px] text-white/30 flex items-center gap-1">
-            <span className="text-emerald-400">&#10003;</span>
-            {duration.toFixed(1)}s
+      <div className="border-b border-white/[0.04]">
+        <div className="flex items-center justify-between px-3 py-1.5">
+          <span className={`text-[10px] font-bold uppercase tracking-wider ${ROLE_TEXT[role] || 'text-white/50'} ${ROLE_BG[role] || ''} px-2 py-0.5 rounded-full`}>
+            {displayLabel}
           </span>
-        )}
+          {isDone && duration != null && (
+            <span className="text-[10px] text-white/30 flex items-center gap-1">
+              <span className="text-emerald-400">&#10003;</span>
+              {duration.toFixed(1)}s
+            </span>
+          )}
+        </div>
+        {showPersonality && <PersonalityBadge role={role} />}
       </div>
       {/* Body */}
       <div
@@ -117,6 +121,7 @@ export default function AgentStreamPanel({ streamingText, completedAgents, isStr
               isDone={!!completedAgents[role]}
               duration={completedAgents[role]?.duration_seconds}
               label={labels[role]}
+              showPersonality
             />
           ))}
         </div>

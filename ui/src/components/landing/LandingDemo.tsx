@@ -10,6 +10,22 @@ const MODES: { key: AnalysisMode; icon: typeof Shield; label: string; color: str
   { key: 'research', icon: BarChart3, label: 'Research', color: 'text-violet-400', bg: 'bg-violet-500/10 border-violet-500/20' },
 ]
 
+const EXAMPLES: Record<AnalysisMode, string[]> = {
+  default: [],
+  red_team: [
+    'My startup idea: AI-powered personal finance app for Gen Z',
+    'Our go-to-market strategy relies on viral TikTok growth',
+  ],
+  verify: [
+    'GPT-4 can pass the bar exam with a top 10% score',
+    'Remote workers are 13% more productive than office workers',
+  ],
+  research: [
+    'Is Solana a good long-term investment compared to Ethereum?',
+    'What are the real risks of AI replacing software engineers?',
+  ],
+}
+
 type DemoState = 'idle' | 'streaming' | 'result' | 'error' | 'limited'
 
 export default function LandingDemo() {
@@ -21,8 +37,9 @@ export default function LandingDemo() {
   const [errorMsg, setErrorMsg] = useState('')
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null)
 
-  const handleSubmit = async () => {
-    if (!query.trim() || demoState === 'streaming') return
+  const handleSubmit = async (directQuery?: string) => {
+    const q = (directQuery ?? query).trim()
+    if (!q || demoState === 'streaming') return
     setDemoState('streaming')
     setArbiterText('')
     setResult(null)
@@ -31,7 +48,7 @@ export default function LandingDemo() {
       const res = await fetch('/api/query/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: query.trim(), mode: 'default', analysis_mode: mode }),
+        body: JSON.stringify({ query: q, mode: 'default', analysis_mode: mode }),
       })
 
       if (res.status === 429) {
@@ -127,7 +144,7 @@ export default function LandingDemo() {
             className="flex-1 bg-transparent text-sm text-white/80 placeholder:text-white/20 outline-none"
           />
           <button
-            onClick={handleSubmit}
+            onClick={() => handleSubmit()}
             disabled={!query.trim() || demoState === 'streaming'}
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-500/20 text-indigo-300 text-xs font-semibold hover:bg-indigo-500/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
@@ -139,6 +156,21 @@ export default function LandingDemo() {
           </button>
         </div>
       </div>
+
+      {/* Example chips */}
+      {EXAMPLES[mode]?.length > 0 && demoState !== 'streaming' && (
+        <div className="flex items-center gap-2 justify-center flex-wrap">
+          {EXAMPLES[mode].map((ex) => (
+            <button
+              key={ex}
+              onClick={() => { setQuery(ex); handleSubmit(ex) }}
+              className="px-3 py-1.5 rounded-full border border-white/[0.06] bg-white/[0.02] text-[11px] text-white/40 hover:text-white/60 hover:bg-white/[0.05] hover:border-white/10 transition-all truncate max-w-[280px]"
+            >
+              {ex}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* States */}
       <AnimatePresence mode="wait">

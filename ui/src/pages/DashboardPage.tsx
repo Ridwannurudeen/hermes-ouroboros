@@ -14,6 +14,8 @@ import SkillsBrowser from '../components/dashboard/SkillsBrowser'
 import ShareControls from '../components/dashboard/ShareControls'
 import ExportControls from '../components/dashboard/ExportControls'
 import ApiKeysPanel from '../components/dashboard/ApiKeysPanel'
+import ApiPlayground from '../components/dashboard/ApiPlayground'
+import CommandPalette from '../components/dashboard/CommandPalette'
 import AuthPanel from '../components/dashboard/AuthPanel'
 import GlassCard from '../components/ui/GlassCard'
 import StatTile from '../components/ui/StatTile'
@@ -28,6 +30,7 @@ import type { AnalysisMode } from '../api/types'
 
 export default function DashboardPage() {
   const [activePanel, setActivePanel] = useState('query')
+  const [paletteOpen, setPaletteOpen] = useState(false)
   const [currentAnalysisMode, setCurrentAnalysisMode] = useState<AnalysisMode>('red_team')
   const [soloResult, setSoloResult] = useState<{ response: string; elapsed_seconds: number } | null>(null)
   const [soloLoading, setSoloLoading] = useState(false)
@@ -96,6 +99,18 @@ export default function DashboardPage() {
       handleRefresh()
     }
   }, [sse.finalPayload, setSelectedSession, setCurrentSession, handleRefresh])
+
+  // Ctrl+K command palette
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        setPaletteOpen((o) => !o)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
 
   const providerName = meta.data?.provider_name || '...'
   const model = meta.data?.model || '...'
@@ -229,9 +244,17 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {activePanel === 'api' && (
+        <div className="max-w-3xl">
+          <ApiPlayground />
+        </div>
+      )}
+
       {activePanel === 'auth' && (
         <AuthPanel onRefresh={handleRefresh} />
       )}
+
+      <CommandPalette isOpen={paletteOpen} onClose={() => setPaletteOpen(false)} onAction={setActivePanel} />
     </DashboardLayout>
   )
 }

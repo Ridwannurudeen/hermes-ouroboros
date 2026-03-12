@@ -1,6 +1,7 @@
 import LandingNav from '../components/landing/LandingNav'
 import LandingHero from '../components/landing/LandingHero'
 import LandingDemo from '../components/landing/LandingDemo'
+import VerdictGallery from '../components/landing/VerdictGallery'
 import HowItWorks from '../components/landing/HowItWorks'
 import DifferentiatorSection from '../components/landing/DifferentiatorSection'
 import AgentShowcase from '../components/landing/AgentShowcase'
@@ -40,6 +41,20 @@ export default function LandingPage() {
         <div className="relative h-px mx-auto max-w-4xl">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
           <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-emerald-400/60" />
+        </div>
+
+        {/* Example verdicts gallery */}
+        <section className="py-20 px-6">
+          <div className="max-w-5xl mx-auto text-center">
+            <h2 className="text-2xl font-bold text-white mb-2">See Real Verdicts</h2>
+            <p className="text-sm text-white/40 mb-10">Real queries analyzed by the 5-agent adversarial council.</p>
+            <VerdictGallery />
+          </div>
+        </section>
+
+        <div className="relative h-px mx-auto max-w-4xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-violet-500/25 to-transparent" />
+          <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-violet-400/60" />
         </div>
 
         <HowItWorks />

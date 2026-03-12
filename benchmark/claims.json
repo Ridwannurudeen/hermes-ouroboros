@@ -118,5 +118,65 @@
     "category": "research",
     "ground_truth": null,
     "notes": "IEA projects ~35-45% depending on policies; China already above 50% but other markets lag"
+  },
+  {
+    "claim": "Vaccines cause autism in children",
+    "category": "verify",
+    "ground_truth": "false",
+    "notes": "Original Wakefield study retracted for fraud; dozens of large-scale studies find no link"
+  },
+  {
+    "claim": "Glass is actually a slow-moving liquid that flows over centuries",
+    "category": "verify",
+    "ground_truth": "false",
+    "notes": "Glass is an amorphous solid; old window thickness variations are from manufacturing, not flow"
+  },
+  {
+    "claim": "The Sahara Desert is the largest desert on Earth",
+    "category": "verify",
+    "ground_truth": "false",
+    "notes": "Antarctica is the largest desert by area (14.2M km2 vs Sahara 9.2M km2); deserts defined by precipitation not temperature"
+  },
+  {
+    "claim": "We want to build a decentralized social media platform where all content is stored on-chain with no moderation",
+    "category": "red_team",
+    "ground_truth": null,
+    "notes": "Storage costs prohibitive; no moderation creates legal liability (CSAM, terrorism); blockchain immutability makes content removal impossible"
+  },
+  {
+    "claim": "Our fintech startup will offer 15% APY on stablecoin deposits with zero risk to users",
+    "category": "red_team",
+    "ground_truth": null,
+    "notes": "15% APY with zero risk is economically implausible; resembles Terra/Luna or Celsius promises"
+  },
+  {
+    "claim": "We plan to launch an autonomous drone delivery service in urban areas within 12 months using off-the-shelf hardware",
+    "category": "red_team",
+    "ground_truth": null,
+    "notes": "FAA BVLOS regulations, urban airspace challenges, liability, noise complaints make 12-month timeline unrealistic"
+  },
+  {
+    "claim": "Universal basic income would reduce workforce participation and economic output",
+    "category": "research",
+    "ground_truth": null,
+    "notes": "Finland/Stockton/Kenya trials show mixed results; some show modest work reduction, others increased entrepreneurship"
+  },
+  {
+    "claim": "Nuclear fusion will become a commercially viable energy source within the next decade",
+    "category": "research",
+    "ground_truth": null,
+    "notes": "NIF achieved ignition (2022); private companies project 2030s; but engineering challenges remain enormous"
+  },
+  {
+    "claim": "Social media use is the primary driver of the teen mental health crisis",
+    "category": "research",
+    "ground_truth": null,
+    "notes": "Haidt argues strong link; Orben/Przybylski find small effect sizes; likely one factor among many"
+  },
+  {
+    "claim": "Carbon taxes are strictly more effective than cap-and-trade systems for reducing greenhouse gas emissions",
+    "category": "research",
+    "ground_truth": null,
+    "notes": "Both have tradeoffs; EU ETS showed price volatility; BC carbon tax showed effectiveness; optimal design matters more than mechanism type"
   }
 ]

@@ -1,11 +1,11 @@
 """
-Benchmark: 5-Agent Council vs Solo Hermes-3 on 20 verifiable claims.
+Benchmark: 5-Agent Council vs Solo Hermes-3 on 30 verifiable claims.
 
 Runs each claim through:
   1. Solo Hermes-3 (single model, generic system prompt)
   2. Full 5-agent adversarial council (2 rounds + arbiter)
 
-Measures: confidence, quality, depth, elapsed time.
+Measures: confidence, quality, depth, elapsed time, ground-truth accuracy.
 Saves results to benchmark/results_council_vs_solo.json
 
 Usage:
@@ -63,6 +63,62 @@ def solo_quality_score(response: str) -> int:
     if any(c.isdigit() for c in response) and '%' in response:
         score += 15
     return min(score, 100)
+
+
+def _response_says_false(text: str) -> bool:
+    """Heuristic: does the response identify the claim as false/misleading?"""
+    low = text.lower()
+    false_signals = ['false', 'myth', 'misconception', 'not true', 'inaccurate',
+                     'misleading', 'debunked', 'no scientific', 'not supported',
+                     'no evidence', 'incorrect', 'refuted', 'disputed']
+    true_signals = ['true', 'correct', 'accurate', 'confirmed', 'supported',
+                    'well-established', 'scientifically proven', 'evidence supports']
+    false_count = sum(1 for s in false_signals if s in low)
+    true_count = sum(1 for s in true_signals if s in low)
+    return false_count > true_count
+
+
+def _response_says_nuanced(text: str) -> bool:
+    """Heuristic: does the response identify the claim as nuanced/partially true?"""
+    low = text.lower()
+    nuance_signals = ['partially', 'nuanced', 'mixed', 'depends', 'oversimplif',
+                      'some truth', 'not entirely', 'more complicated', 'both',
+                      'misleading', 'context', 'it depends']
+    return sum(1 for s in nuance_signals if s in low) >= 2
+
+
+def score_accuracy(ground_truth: str | None, response_text: str,
+                   verdict_label: str = '', hermes_score: int = -1) -> dict[str, Any]:
+    """Score whether a response correctly identifies the ground truth.
+
+    Returns: {accurate: bool, alignment: str, ground_truth: str}
+    """
+    if ground_truth is None:
+        return {'accurate': None, 'alignment': 'no_ground_truth', 'ground_truth': None}
+
+    gt = ground_truth.lower().strip()
+    low_text = response_text.lower()
+    low_label = verdict_label.lower().strip() if verdict_label else ''
+
+    if gt == 'false':
+        accurate = _response_says_false(response_text)
+        alignment = 'correct_reject' if accurate else 'missed_false'
+    elif gt == 'true':
+        accurate = not _response_says_false(response_text)
+        alignment = 'correct_accept' if accurate else 'false_reject'
+    elif gt in ('misleading', 'partially_true', 'mostly_true'):
+        accurate = _response_says_nuanced(response_text)
+        if not accurate:
+            # Also accept if they correctly flagged the direction
+            if gt == 'misleading':
+                accurate = _response_says_false(response_text)
+            elif gt == 'mostly_true':
+                accurate = not _response_says_false(response_text)
+        alignment = 'correct_nuance' if accurate else 'missed_nuance'
+    else:
+        return {'accurate': None, 'alignment': 'unknown_gt', 'ground_truth': gt}
+
+    return {'accurate': accurate, 'alignment': alignment, 'ground_truth': gt}
 
 
 async def run_solo(provider, query: str) -> dict[str, Any]:
@@ -146,6 +202,15 @@ async def main() -> None:
         c_time = council.get('elapsed_seconds', 0)
         print(f'done ({c_time}s, quality={c_quality}, confidence={council.get("confidence_score", "?")})')
 
+        # Accuracy scoring against ground truth
+        solo_acc = score_accuracy(ground_truth, solo.get('response', ''))
+        council_acc = score_accuracy(
+            ground_truth,
+            council.get('verdict_preview', ''),
+            verdict_label=council.get('verdict_label', ''),
+            hermes_score=council.get('hermes_score', -1),
+        )
+
         solo_scores.append(solo['quality_score'])
         council_scores.append(c_quality)
         solo_times.append(solo['elapsed_seconds'])
@@ -155,8 +220,8 @@ async def main() -> None:
             'claim': claim,
             'category': category,
             'ground_truth': ground_truth,
-            'solo': solo,
-            'council': council,
+            'solo': {**solo, 'accuracy': solo_acc},
+            'council': {**council, 'accuracy': council_acc},
         })
 
     # Aggregate stats
@@ -174,6 +239,14 @@ async def main() -> None:
     if conf_values:
         avg_council_confidence = round(sum(conf_values) / len(conf_values), 1)
 
+    # Accuracy aggregation (only for claims with ground truth)
+    gt_results = [r for r in results if r['ground_truth'] is not None]
+    gt_n = len(gt_results)
+    solo_correct = sum(1 for r in gt_results if r['solo'].get('accuracy', {}).get('accurate'))
+    council_correct = sum(1 for r in gt_results if r['council'].get('accuracy', {}).get('accurate'))
+    solo_accuracy = round(solo_correct / max(gt_n, 1) * 100, 1)
+    council_accuracy = round(council_correct / max(gt_n, 1) * 100, 1)
+
     payload = {
         'generated_at': datetime.now(timezone.utc).isoformat(),
         'total_claims': n,
@@ -188,6 +261,10 @@ async def main() -> None:
             'solo_wins': solo_wins,
             'ties': ties,
             'council_win_rate': round(council_wins / max(n, 1) * 100, 1),
+            'ground_truth_claims': gt_n,
+            'solo_accuracy': solo_accuracy,
+            'council_accuracy': council_accuracy,
+            'accuracy_improvement': round(council_accuracy - solo_accuracy, 1),
         },
         'results': results,
     }
@@ -211,6 +288,11 @@ async def main() -> None:
     print(f'Ties:                    {ties}/{n}')
     print(f'Avg Solo Time:           {avg_solo_time}s')
     print(f'Avg Council Time:        {avg_council_time}s')
+    print(f'{"-" * 60}')
+    print(f'Ground-Truth Claims:     {gt_n}')
+    print(f'Solo Accuracy:           {solo_accuracy}%')
+    print(f'Council Accuracy:        {council_accuracy}%')
+    print(f'Accuracy Improvement:    {council_accuracy - solo_accuracy:+.1f}pp')
     print(f'{"=" * 60}')
     print(f'Saved to {out}')
 

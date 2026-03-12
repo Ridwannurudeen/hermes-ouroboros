@@ -17,6 +17,10 @@ interface AnalysisData {
     council_win_rate: number
     avg_solo_time: number
     avg_council_time: number
+    ground_truth_claims?: number
+    solo_accuracy?: number
+    council_accuracy?: number
+    accuracy_improvement?: number
   } | null
   benchmark_claims: number
   per_category: Record<string, {
@@ -427,6 +431,7 @@ export default function PaperPage() {
                     headers={['Metric', 'Solo Hermes-3', '5-Agent Council', 'Delta']}
                     rows={[
                       ['Avg Quality Score', data.benchmark.avg_solo_quality.toFixed(1), data.benchmark.avg_council_quality.toFixed(1), `+${data.benchmark.quality_improvement.toFixed(1)}%`],
+                      ...(data.benchmark.council_accuracy != null ? [['Ground-Truth Accuracy', `${data.benchmark.solo_accuracy?.toFixed(1)}%`, `${data.benchmark.council_accuracy.toFixed(1)}%`, `+${data.benchmark.accuracy_improvement?.toFixed(1)}pp`]] : []),
                       ['Avg Confidence', 'N/A', data.benchmark.avg_council_confidence.toFixed(1), '—'],
                       ['Win Rate', `${((data.benchmark.solo_wins / data.benchmark_claims) * 100).toFixed(0)}%`, `${data.benchmark.council_win_rate.toFixed(0)}%`, `+${(data.benchmark.council_win_rate - (data.benchmark.solo_wins / data.benchmark_claims) * 100).toFixed(0)}pp`],
                       ['Avg Response Time', `${data.benchmark.avg_solo_time.toFixed(1)}s`, `${data.benchmark.avg_council_time.toFixed(1)}s`, `+${(data.benchmark.avg_council_time - data.benchmark.avg_solo_time).toFixed(1)}s`],
@@ -436,7 +441,12 @@ export default function PaperPage() {
                   <p className="text-sm text-gray-700 leading-relaxed">
                     The council won {data.benchmark.council_wins} of {data.benchmark_claims} head-to-head comparisons,
                     with {data.benchmark.solo_wins} solo wins and {data.benchmark.ties} tie{data.benchmark.ties !== 1 ? 's' : ''}.
-                    The quality improvement comes at a cost of ~{(data.benchmark.avg_council_time / data.benchmark.avg_solo_time).toFixed(1)}x
+                    {data.benchmark.council_accuracy != null && data.benchmark.solo_accuracy != null && (
+                      <> On {data.benchmark.ground_truth_claims} claims with known ground truth, the council achieved {data.benchmark.council_accuracy.toFixed(1)}%
+                      accuracy vs {data.benchmark.solo_accuracy.toFixed(1)}% for solo — a {data.benchmark.accuracy_improvement?.toFixed(1)}pp improvement.
+                      This demonstrates the value of adversarial debate for identifying nuanced truth.</>
+                    )}
+                    {' '}The quality improvement comes at a cost of ~{(data.benchmark.avg_council_time / data.benchmark.avg_solo_time).toFixed(1)}x
                     longer response time, reflecting the multi-agent deliberation overhead.
                   </p>
                 </>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, useInView, useMotionValue, useTransform, animate } from 'framer-motion'
-import { BarChart3, Zap, Clock, Trophy, ChevronDown, ChevronUp } from 'lucide-react'
+import { BarChart3, Zap, Clock, Trophy, ChevronDown, ChevronUp, Target } from 'lucide-react'
 
 interface BenchmarkData {
   available: boolean
@@ -16,6 +16,10 @@ interface BenchmarkData {
     solo_wins: number
     ties: number
     council_win_rate: number
+    ground_truth_claims?: number
+    solo_accuracy?: number
+    council_accuracy?: number
+    accuracy_improvement?: number
   }
   results: {
     claim: string
@@ -230,13 +234,15 @@ export default function BenchmarkShowcase() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="rounded-xl border border-white/[0.04] bg-white/[0.02] p-5 text-center"
+            className="rounded-xl border border-cyan-500/20 bg-cyan-500/[0.04] p-5 text-center"
           >
-            <Clock size={16} className="text-violet-400 mx-auto mb-2 opacity-60" />
-            <p className="text-3xl font-black font-mono text-white/90">
-              {data.total_claims}
+            <Target size={16} className="text-cyan-400 mx-auto mb-2 opacity-60" />
+            <p className="text-3xl font-black font-mono text-cyan-400">
+              {s.council_accuracy != null ? <CountUp target={s.council_accuracy} suffix="%" /> : data.total_claims}
             </p>
-            <p className="text-[10px] uppercase tracking-wider text-white/25 mt-1">Claims Tested</p>
+            <p className="text-[10px] uppercase tracking-wider text-white/25 mt-1">
+              {s.council_accuracy != null ? 'Council Accuracy' : 'Claims Tested'}
+            </p>
           </motion.div>
         </div>
 
@@ -252,6 +258,15 @@ export default function BenchmarkShowcase() {
             <QualityBar label="Solo Hermes-3" score={s.avg_solo_quality} color="text-white/40" delay={0.2} />
             <QualityBar label="5-Agent Council" score={s.avg_council_quality} color="text-emerald-400" delay={0.4} />
           </div>
+          {s.solo_accuracy != null && s.council_accuracy != null && (
+            <>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-white/40 mt-6 mb-4">Ground-Truth Accuracy</h3>
+              <div className="space-y-4">
+                <QualityBar label="Solo Hermes" score={s.solo_accuracy} color="text-white/40" delay={0.6} />
+                <QualityBar label="5-Agent Council" score={s.council_accuracy} color="text-emerald-400" delay={0.8} />
+              </div>
+            </>
+          )}
           <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/[0.04]">
             <span className="text-[10px] text-white/20">Win / Loss / Tie</span>
             <span className="text-xs font-mono text-white/50">

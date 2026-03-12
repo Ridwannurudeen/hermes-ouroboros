@@ -7,6 +7,7 @@ import HowItWorks from '../components/landing/HowItWorks'
 import DifferentiatorSection from '../components/landing/DifferentiatorSection'
 import HermesAdvantage from '../components/landing/HermesAdvantage'
 import AgentShowcase from '../components/landing/AgentShowcase'
+import BenchmarkShowcase from '../components/landing/BenchmarkShowcase'
 import LearningLoop from '../components/landing/LearningLoop'
 import ResultsSection from '../components/landing/ResultsSection'
 import LandingFooter from '../components/landing/LandingFooter'
@@ -84,6 +85,12 @@ export default function LandingPage() {
         </div>
 
         <AgentShowcase />
+
+        <div className="relative h-px mx-auto max-w-4xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
+        </div>
+
+        <BenchmarkShowcase />
 
         <div className="relative h-px mx-auto max-w-4xl">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-500/20 to-transparent" />

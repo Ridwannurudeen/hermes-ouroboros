@@ -1,82 +1,65 @@
-# Hermes Ouroboros
+# HERMES OUROBOROS — Adversarial Intelligence Engine
 
-**Live:** [https://hermes-ouroboros.online](https://hermes-ouroboros.online) · **Dashboard:** [/app](https://hermes-ouroboros.online/app) · **API Docs:** [/docs](https://hermes-ouroboros.online/docs)
+**Live:** [hermes-ouroboros.online](https://hermes-ouroboros.online) · **Dashboard:** [/app](https://hermes-ouroboros.online/app) · **API Docs:** [/docs](https://hermes-ouroboros.online/docs)
 
-A self-improving multi-agent council powered by [NousResearch Hermes-4](https://portal.nousresearch.com/models). Five adversarial agents debate every query in parallel. The Arbiter synthesizes a Bayesian verdict. The verdict becomes training signal. The model that generated the debate improves itself.
+> Five adversarial AI agents debate every query. The Arbiter delivers a verdict. The debate becomes training data. The model improves itself. The ouroboros turns.
 
-**The key insight: the debate IS the preference data.** When the Arbiter picks a winner, the aligned responses become `chosen` and the overruled responses become `rejected` — automatic DPO pairs from every session.
+## Why Hermes-3
 
-## How it works
+This project exists because of three capabilities unique to NousResearch Hermes:
+
+1. **Uncensored Reasoning** — Red-teaming requires brutal honesty. When the Skeptic agent needs to find the fatal flaw in your startup idea, it can't self-censor. Hermes-3 is the only open-weight model that reliably maintains adversarial personas without safety-refusal interference.
+
+2. **Multi-Persona System Prompt Adherence** — Five distinct intellectual traditions (Popperian falsificationism, Bayesian reasoning, Kuhnian paradigm challenging) running simultaneously in one model. Hermes-3's system prompt following is what makes this work — each agent stays in character across multi-turn debates.
+
+3. **Native Function Calling** — The Oracle agent gathers real-time web evidence using Hermes's native tool-use format. Structured evidence flows directly into the Arbiter's synthesis, not as an afterthought but as a first-class input to the verdict.
+
+No other open model can do all three simultaneously. We tried.
+
+## How It Works
 
 ```
 USER QUERY
-    |
-    v
-MASTER ORCHESTRATOR
-    |  spawns simultaneously
-    |---------------------------------------------|
-    |              |             |                 |
-    v              v             v                 v
-ADVOCATE      SKEPTIC        ORACLE          CONTRARIAN
-Steel-mans    Popperian      Calibrated      Kuhnian paradigm
-the FOR case  falsificationist base-rate     challenger --
-              -- what would  empiricist      what is the
-              kill this?                     question wrong?
-    |              |             |                 |
-    |--------------|-------------|-----------------|
-                          |
-                          v
-                       ARBITER
-               Bayesian reasoner --
-               explicit prior -> update -> posterior
-               Final Verdict + Confidence 0-100
-                          |
-                |---------+----------|
-                v                    v
-         WEB / CLI / TELEGRAM    DPO PAIRS
-                              chosen = aligned agents
-                              rejected = overruled agents
-                                    |
-                                    v
-                          TRAJECTORIES (JSONL)
-                          high-confidence only
-                                    |
-                                    v
-                      SFT + DPO FINE-TUNING
-                      Modal A10G GPU
-                      NousResearch/Hermes-3-Llama-3.1-8B
-                      LoRA r=16, 3 epochs, 2048 ctx
-                                    |
-                                    v
-                   BENCHMARKED ADAPTER -> PROMOTED
-                   only if it beats the active version
-                                    |
-                                    v
-                          LOOP FIRES AGAIN
+    │
+    ▼
+┌─────────────────────────────────────────────┐
+│           MASTER ORCHESTRATOR               │
+│  spawns 4 agents in parallel + web search   │
+└──┬──────────┬──────────┬──────────┬─────────┘
+   │          │          │          │
+   ▼          ▼          ▼          ▼
+ADVOCATE   SKEPTIC    ORACLE   CONTRARIAN
+Steel-man  Find the   Base     Challenge
+the case   fatal flaw rates    the frame
+   │          │          │          │
+   └──────────┴──────────┴──────────┘
+              │
+              ▼  (Round 2: Rebuttals)
+        All agents see each other's
+        arguments and respond
+              │
+              ▼
+          ARBITER
+    Bayesian synthesis of all
+    perspectives → HERMES Score
+    + structured verdict sections
+              │
+    ┌─────────┴─────────┐
+    ▼                   ▼
+ VERDICT            DPO PAIRS
+ Web / CLI /        chosen = aligned agents
+ Telegram /         rejected = overruled agents
+ API                    │
+                        ▼
+               SELF-IMPROVEMENT LOOP
+               SFT + DPO fine-tuning
+               on Hermes-3-8B (LoRA)
+               Benchmark → Promote → Loop
 ```
-
-The council runs on **Hermes-4-70B** via the [NousResearch Inference API](https://inference-api.nousresearch.com). Every session generates SFT trajectories and DPO preference pairs. When enough accumulate, fine-tuning fires on Modal GPU using Hermes-3-8B as the base. The promoted adapter is benchmarked before replacing the active version.
-
-## Training History
-
-Five self-improvement loops have completed:
-
-| Version | Training Loss | Status |
-|---------|--------------|--------|
-| v0 | -- (baseline) | Base Hermes-3-8B |
-| v1 | 4.096 | Promoted |
-| v2 | 4.093 | Promoted |
-| v3 | 3.214 | Promoted |
-| v4 | 3.281 | Benchmarked |
-| v5 | **2.657** | Promoted |
-
-Loss decreased **35% across 5 iterations** — the ouroboros loop is working.
 
 ## Agent Personas
 
-Each agent embodies a distinct intellectual tradition:
-
-| Agent | Tradition | Mandate |
+| Agent | Intellectual Tradition | Mandate |
 |---|---|---|
 | **Advocate** | Steel-manning | Build the strongest possible FOR argument, stronger than its own proponents state it |
 | **Skeptic** | Popperian falsificationism | Find the single observation that would kill the claim; expose the hidden assumption |
@@ -84,37 +67,69 @@ Each agent embodies a distinct intellectual tradition:
 | **Contrarian** | Kuhnian paradigm challenger | Reject the question's framing; find the paradigm that makes the standard answer a category error |
 | **Arbiter** | Bayesian reasoner | Explicit prior → evidence update → posterior; award the agent with the most falsifiable evidence |
 
+## Three Analysis Modes
+
+| Mode | What It Does | Best For |
+|---|---|---|
+| **Red Team** | Stress-tests ideas, plans, strategies | Startup ideas, business plans, investment theses |
+| **Verify** | Fact-checks claims against evidence | Statistics, news claims, viral statements |
+| **Research** | Deep bull/bear analysis | Investment decisions, technology bets, career choices |
+
+## The Self-Improvement Loop
+
+The key insight: **the debate IS the preference data.**
+
+When the Arbiter picks a winner, aligned agent responses become `chosen` and overruled responses become `rejected` — automatic DPO pairs from every session. No human labeling needed.
+
+Five self-improvement loops have completed:
+
+| Version | Training Loss | Status |
+|---------|--------------|--------|
+| v0 | — (baseline) | Base Hermes-3-8B |
+| v1 | 4.096 | Promoted |
+| v2 | 4.093 | Promoted |
+| v3 | 3.214 | Promoted |
+| v4 | 3.281 | Benchmarked |
+| v5 | **2.657** | Promoted |
+
+Loss decreased **35% across 5 iterations**. The ouroboros loop is working.
+
 ## Features
 
-### Web Dashboard
+**Dashboard (30+ features)**
 - Real-time SSE streaming — agents appear as they complete
-- Session history with search and filtering
-- Shareable session links (`/share/<id>`)
-- Dark mode toggle
-- Mobile responsive
+- Cinematic score reveal with count-up animation and verdict glow
+- Council Ring visualization showing agent completion
+- Deliberation Timeline tracking each phase
+- Head-to-head Compare Mode (Solo vs Council side-by-side)
+- Web Sources with favicon cards and evidence categorization
+- Copy verdict, Share link, Share on X
+- HTML report export (self-contained dark-theme branded report)
+- Command palette (Ctrl+K / ⌘K)
+- Follow-up questions (mode-aware "Dig Deeper" suggestions)
+- Session history with search
+- DPO Loop dashboard with model version timeline
+- API Playground with live request builder
+- API key management
+- Email auth with verification and password reset
 
-### Authentication
-- Email + password registration with email verification
-- Password reset via email
-- Session-based auth with CSRF protection
-- Admin token for full access
+**Landing Page**
+- Zero-friction guest demo (no signup, 5 free queries)
+- Real verdict gallery with browsable examples
+- Live stats counter (sessions, DPO pairs, model versions)
+- "Why Hermes-3" section
+- Benchmark showcase (Council vs Solo comparison)
+- Agent architecture explainer
+- Learning Loop visualization
 
-### Developer API
-- API key authentication (`X-API-Key` header)
-- Per-key rate limiting (30 req/min)
-- Usage tracking per key
-- Full [API documentation](https://hermes-ouroboros.online/docs) with curl, Python, and JavaScript examples
-
-### Self-Improvement Loop
-- Every session generates DPO preference pairs automatically
-- SFT + DPO fine-tuning on Modal A10G GPU
-- Automatic benchmarking before adapter promotion
-- Loop status visible at `/api/loop/status`
-
-### Telegram Bot
-- `/ask <query>` — run a council query
-- `/history` — recent sessions
-- Inline keyboard for detailed results
+**Backend**
+- aiohttp async server with SSE streaming
+- DPO preference extraction from every session
+- SFT + DPO fine-tuning on Modal A10G GPU (LoRA r=16)
+- Automated benchmarking before adapter promotion
+- API key auth with per-key rate limiting
+- Telegram bot integration
+- Web search evidence gathering
 
 ## Quick Start
 
@@ -125,80 +140,19 @@ python -m venv .venv
 source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env
-# Set your NousResearch API key in .env
-python main.py --query "Should AI systems train on their own outputs indefinitely?"
+# Set OPENAI_API_KEY to your NousResearch API key
+python main.py --api --host 127.0.0.1 --port 8000
+# Open http://localhost:8000/app
 ```
-
-## Interfaces
-
-| Mode | Command |
-|---|---|
-| CLI query | `python main.py --query "..."` |
-| Interactive console | `python main.py` |
-| Web dashboard + API | `python main.py --api --host 127.0.0.1 --port 8000` |
-| Telegram bot | `python main.py --bot` |
 
 ## API Usage
 
 ```bash
-# Create an API key in the dashboard, then:
 curl -X POST https://hermes-ouroboros.online/api/query \
   -H "X-API-Key: ho_your_key_here" \
   -H "Content-Type: application/json" \
-  -d '{"query": "What are the tradeoffs of proof-of-stake vs proof-of-work?", "mode": "default"}'
+  -d '{"query": "Is proof-of-stake more secure than proof-of-work?", "analysis_mode": "research"}'
 ```
-
-```python
-import requests
-
-resp = requests.post("https://hermes-ouroboros.online/api/query", json={
-    "query": "Should Ethereum switch to a different VM?",
-    "mode": "default",
-}, headers={"X-API-Key": "ho_your_key_here"})
-
-data = resp.json()
-print(f"Confidence: {data['result']['confidence_score']}")
-print(f"Verdict: {data['result']['arbiter_verdict'][:200]}...")
-```
-
-## Environment Variables
-
-Copy `.env.example` to `.env`.
-
-| Variable | Description |
-|---|---|
-| `HERMES_PROVIDER` | `openai_compatible` for NousResearch API, `ollama` for local |
-| `HERMES_MODEL` | `Hermes-4-70B` (or `Hermes-4-405B` for highest quality) |
-| `HERMES_BASE_URL` | `https://inference-api.nousresearch.com/v1` |
-| `OPENAI_API_KEY` | NousResearch API key from portal.nousresearch.com |
-| `HERMES_WEB_TOKEN` | Admin bearer token for the web API |
-| `HERMES_AUTH_SECRET` | 32+ byte secret for signed session cookies |
-| `HERMES_PUBLIC_BASE_URL` | Public HTTPS origin for share links |
-| `RESEND_API_KEY` | Resend API key for transactional emails |
-| `HERMES_FROM_EMAIL` | From address for verification/reset emails |
-| `TELEGRAM_ENABLED` | `true` to run the bot |
-| `TELEGRAM_BOT_TOKEN` | Token from @BotFather |
-| `TELEGRAM_ALLOWED_USERS` | Comma-separated Telegram user IDs |
-| `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` | Modal credentials for GPU fine-tuning |
-
-## Docker Deployment
-
-```bash
-cd deploy
-docker compose up -d --build
-```
-
-Data is persisted via bind mounts to `/opt/hermes/data/` (sessions, users, models, trajectories, skills, logs). Daily backups run at 3am with 7-day rotation.
-
-Health check: `curl https://hermes-ouroboros.online/api/health`
-
-## Benchmark
-
-```bash
-python -X utf8 benchmark/run_benchmark_hermes.py
-```
-
-Scores each session on confidence (0-100) and response quality (structural completeness: section headings, verdict length, dissenting views). Only adapters that beat the active benchmark score get promoted.
 
 ## Tech Stack
 
@@ -206,46 +160,11 @@ Scores each session on confidence (0-100) and response quality (structural compl
 |---|---|
 | Inference | NousResearch Hermes-4-70B via Nous Inference API |
 | Fine-tuning base | NousResearch/Hermes-3-Llama-3.1-8B |
-| SFT + DPO | LoRA via TRL/PEFT on Modal A10G |
+| Training | LoRA via TRL/PEFT on Modal A10G GPU |
 | Language | Python 3.12 |
-| Concurrency | asyncio + threaded background tasks |
+| Frontend | React + TypeScript + Vite + Tailwind + Framer Motion |
 | Web framework | aiohttp with SSE streaming |
-| Auth | Session cookies + CSRF + API keys + email verification |
-| Email | Resend transactional API |
 | Deployment | Docker Compose on VPS, nginx + certbot HTTPS |
-| Storage | JSON files (sessions, users, API keys, trajectories) |
-
-## Project Structure
-
-```
-hermes-ouroboros/
-  core/
-    agents.py          # Agent definitions and prompts
-    orchestrator.py    # Parallel agent dispatch + Arbiter synthesis
-    web_app.py         # aiohttp API server, auth, SSE streaming
-    user_store.py      # User management, verification, password reset
-    api_key_store.py   # Developer API key CRUD
-    email_service.py   # Resend transactional email
-  learning/
-    preference_extractor.py  # DPO pair extraction from sessions
-    trainer.py               # SFT + DPO fine-tuning on Modal
-    fallback_provider.py     # RAG-style guidance from prior sessions
-  benchmark/
-    run_benchmark_hermes.py  # Base vs guided comparison
-    common.py                # Quality scoring
-  web/
-    index.html         # Dashboard UI (single-page app)
-  landing/
-    index.html         # Landing page
-    docs/index.html    # API documentation
-    og-image.png       # Social sharing image
-  deploy/
-    docker-compose.yml # Production Docker setup
-    Dockerfile         # Python 3.12-slim container
-  scripts/
-    backup.sh          # Daily backup with rotation
-    close_loop.py      # Manual training trigger
-```
 
 ## License
 

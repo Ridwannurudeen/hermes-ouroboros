@@ -1,0 +1,122 @@
+[
+  {
+    "claim": "GPT-4 can pass the bar exam with a score in the top 10% of test takers",
+    "category": "verify",
+    "ground_truth": "mostly_true",
+    "notes": "OpenAI reported ~90th percentile on the Uniform Bar Exam"
+  },
+  {
+    "claim": "Bitcoin has never been hacked — the blockchain itself has a perfect security record",
+    "category": "verify",
+    "ground_truth": "misleading",
+    "notes": "The base chain hasn't been 51% attacked, but exchanges have been hacked, and there was a 2010 value overflow bug"
+  },
+  {
+    "claim": "Remote workers are 13% more productive than office workers according to Stanford research",
+    "category": "verify",
+    "ground_truth": "partially_true",
+    "notes": "Bloom et al 2015 found 13% for call center workers; later studies show mixed results for knowledge workers"
+  },
+  {
+    "claim": "Ethereum's move to proof-of-stake reduced its energy consumption by 99.95%",
+    "category": "verify",
+    "ground_truth": "true",
+    "notes": "Widely confirmed by the Ethereum Foundation and independent researchers"
+  },
+  {
+    "claim": "The average American has $65,000 in student loan debt",
+    "category": "verify",
+    "ground_truth": "misleading",
+    "notes": "Average is ~$37,000; $65,000 is closer to graduate degree holders only"
+  },
+  {
+    "claim": "China owns more than 50% of all US government debt",
+    "category": "verify",
+    "ground_truth": "false",
+    "notes": "China holds ~3% of total US debt; ~10% of foreign-held debt. Most US debt is held domestically"
+  },
+  {
+    "claim": "Nuclear energy causes more deaths per kilowatt-hour than solar energy",
+    "category": "verify",
+    "ground_truth": "false",
+    "notes": "Nuclear has among the lowest deaths per TWh of any energy source, comparable to or better than solar"
+  },
+  {
+    "claim": "My startup idea: an AI-powered resume screener that removes bias from hiring",
+    "category": "red_team",
+    "ground_truth": null,
+    "notes": "Known issues: AI resume screeners often encode existing biases from training data"
+  },
+  {
+    "claim": "Our go-to-market strategy is to offer a free tier and convert 5% to paid within 6 months",
+    "category": "red_team",
+    "ground_truth": null,
+    "notes": "5% conversion is optimistic for most SaaS; industry average is 2-3%"
+  },
+  {
+    "claim": "We plan to disrupt the $4 trillion healthcare market with a chatbot that does initial patient triage",
+    "category": "red_team",
+    "ground_truth": null,
+    "notes": "Regulatory barriers (HIPAA, FDA), liability concerns, and adoption challenges"
+  },
+  {
+    "claim": "Is Solana a better long-term investment than Ethereum for the next 5 years?",
+    "category": "research",
+    "ground_truth": null,
+    "notes": "Genuine research question with strong arguments on both sides"
+  },
+  {
+    "claim": "Will AI replace most software engineering jobs within the next decade?",
+    "category": "research",
+    "ground_truth": null,
+    "notes": "Active debate with strong arguments on both sides"
+  },
+  {
+    "claim": "The Mediterranean diet reduces heart disease risk by 30%",
+    "category": "verify",
+    "ground_truth": "partially_true",
+    "notes": "PREDIMED study showed ~30% reduction but had methodology issues; corrected analysis still shows significant benefit"
+  },
+  {
+    "claim": "Open-source AI models will surpass closed-source models in capability by 2027",
+    "category": "research",
+    "ground_truth": null,
+    "notes": "Trend analysis question with evidence on both sides"
+  },
+  {
+    "claim": "Zero-knowledge proofs can make any blockchain scale to 100,000 TPS without sacrificing decentralization",
+    "category": "verify",
+    "ground_truth": "misleading",
+    "notes": "ZK rollups improve throughput but still face prover costs, data availability limits, and centralization tradeoffs"
+  },
+  {
+    "claim": "Drinking 8 glasses of water per day is scientifically proven to be necessary for health",
+    "category": "verify",
+    "ground_truth": "false",
+    "notes": "No scientific basis for the specific 8-glass recommendation; water needs vary by individual"
+  },
+  {
+    "claim": "My business plan: raise $10M at a $50M valuation for a pre-revenue social media app targeting Gen Z",
+    "category": "red_team",
+    "ground_truth": null,
+    "notes": "Pre-revenue $50M valuation is aggressive in current market; Gen Z social is extremely competitive"
+  },
+  {
+    "claim": "The human brain uses only 10% of its capacity",
+    "category": "verify",
+    "ground_truth": "false",
+    "notes": "A persistent myth; neuroimaging shows all brain regions have known functions and are active"
+  },
+  {
+    "claim": "Quantum computers will break all current encryption within 5 years, making blockchain obsolete",
+    "category": "verify",
+    "ground_truth": "false",
+    "notes": "Current quantum computers are far from breaking RSA/ECC; post-quantum cryptography is being standardized"
+  },
+  {
+    "claim": "The global EV market will reach 50% of new car sales by 2030",
+    "category": "research",
+    "ground_truth": null,
+    "notes": "IEA projects ~35-45% depending on policies; China already above 50% but other markets lag"
+  }
+]

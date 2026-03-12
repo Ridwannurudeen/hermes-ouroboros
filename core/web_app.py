@@ -99,6 +99,7 @@ class HermesWebApp:
                 web.get('/api/keys', self.handle_list_api_keys),
                 web.delete('/api/keys/{key_id}', self.handle_revoke_api_key),
                 web.get('/api/compare/benchmark', self.handle_compare_benchmark),
+                web.get('/api/benchmark/council-vs-solo', self.handle_council_vs_solo_benchmark),
                 web.get('/api/export/dpo', self.handle_export_dpo),
                 web.get('/api/skills', self.handle_skills_list),
             ]
@@ -415,6 +416,15 @@ class HermesWebApp:
             'improvement_pct': round(improved / max(1, len(comparisons)) * 100, 1),
             'comparisons': comparisons,
         })
+
+    async def handle_council_vs_solo_benchmark(self, request: web.Request) -> web.Response:
+        """Pre-computed council vs solo benchmark results. No auth — read-only showcase data."""
+        path = self.root / 'benchmark' / 'results_council_vs_solo.json'
+        if not path.exists():
+            return web.json_response({'available': False})
+        data = json.loads(path.read_text(encoding='utf-8'))
+        data['available'] = True
+        return web.json_response(data)
 
     async def handle_export_dpo(self, request: web.Request) -> web.Response:
         """Export DPO dataset as JSONL (HuggingFace standard)."""

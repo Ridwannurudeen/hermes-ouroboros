@@ -419,7 +419,10 @@ class HermesWebApp:
 
     async def handle_council_vs_solo_benchmark(self, request: web.Request) -> web.Response:
         """Pre-computed council vs solo benchmark results. No auth — read-only showcase data."""
-        path = self.root / 'benchmark' / 'results_council_vs_solo.json'
+        # Check mounted volume first, then local benchmark dir
+        path = self.root / 'benchmark_results' / 'results_council_vs_solo.json'
+        if not path.exists():
+            path = self.root / 'benchmark' / 'results_council_vs_solo.json'
         if not path.exists():
             return web.json_response({'available': False})
         data = json.loads(path.read_text(encoding='utf-8'))

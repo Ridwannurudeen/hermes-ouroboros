@@ -192,7 +192,10 @@ async def main() -> None:
         'results': results,
     }
 
-    out = ROOT / 'benchmark' / 'results_council_vs_solo.json'
+    # Write to mounted volume if available, otherwise local benchmark dir
+    mounted = ROOT / 'benchmark_results'
+    out_dir = mounted if mounted.is_dir() else ROOT / 'benchmark'
+    out = out_dir / 'results_council_vs_solo.json'
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding='utf-8')
 
     print(f'\n{"=" * 60}')

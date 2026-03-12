@@ -18,6 +18,7 @@ services:
       - /opt/hermes/data/skills:/app/skills
       - /opt/hermes/data/users:/app/users
       - /opt/hermes/data/models:/app/models
+      - /opt/hermes/data/benchmark:/app/benchmark_results
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/api/health"]
       interval: 30s

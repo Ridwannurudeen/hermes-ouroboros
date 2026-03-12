@@ -89,7 +89,7 @@ function VerdictSection({ icon, title, content }: {
         {icon}
         <h4 className="text-xs font-bold uppercase tracking-wider text-white/60">{title}</h4>
       </div>
-      <p className="text-xs text-white/50 leading-relaxed whitespace-pre-wrap">{content}</p>
+      <p className="text-[13px] text-white/60 leading-relaxed whitespace-pre-wrap">{content}</p>
     </GlassCard>
   )
 }
@@ -140,7 +140,7 @@ function SourceCard({ item, label }: { item: EvidenceItem; label: string }) {
           </span>
         )}
         {item.corroboration !== undefined && item.corroboration > 0 && (
-          <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+          <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
             +{item.corroboration} corr.
           </span>
         )}
@@ -369,7 +369,7 @@ function FollowUpQuestions({ query, mode, onFollowUp }: { query: string; mode: A
           <button
             key={q}
             onClick={() => onFollowUp(q)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-indigo-500/[0.06] hover:border-indigo-500/20 text-xs text-white/40 hover:text-white/70 transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-cyan-500/[0.06] hover:border-cyan-500/20 text-xs text-white/40 hover:text-white/70 transition-all"
           >
             {q}
             <ArrowRight size={12} className="opacity-40" />

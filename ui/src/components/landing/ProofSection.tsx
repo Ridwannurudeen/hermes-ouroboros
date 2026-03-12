@@ -39,7 +39,7 @@ function QualityBar({ score, color, label, delay }: { score: number; color: stri
       </div>
       <div className="h-2.5 bg-white/[0.04] rounded-full overflow-hidden">
         <motion.div
-          className={`h-full rounded-full ${color === 'text-white/40' ? 'bg-white/20' : 'bg-indigo-500'}`}
+          className={`h-full rounded-full ${color === 'text-white/40' ? 'bg-white/20' : 'bg-cyan-500'}`}
           initial={{ width: 0 }}
           whileInView={{ width: `${score}%` }}
           viewport={{ once: true }}
@@ -64,7 +64,7 @@ function ProofCard({ proof, isActive }: { proof: ProofCase; isActive: boolean })
         >
           {/* Claim */}
           <div className="mb-6">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400/60">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400/60">
               {proof.category.replace('_', ' ')} mode
             </span>
             <p className="text-sm text-white/70 mt-1 leading-relaxed italic">
@@ -87,12 +87,12 @@ function ProofCard({ proof, isActive }: { proof: ProofCase; isActive: boolean })
             </div>
 
             {/* Council */}
-            <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/[0.04] p-5 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-indigo-500/[0.06] rounded-full -translate-y-1/2 translate-x-1/2" />
+            <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/[0.04] p-5 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-cyan-500/[0.06] rounded-full -translate-y-1/2 translate-x-1/2" />
               <div className="relative">
                 <div className="flex items-center gap-2 mb-3">
-                  <Shield size={13} className="text-indigo-400/60" />
-                  <span className="text-xs font-bold text-indigo-300/60 uppercase tracking-wider">5-Agent Council</span>
+                  <Shield size={13} className="text-cyan-400/60" />
+                  <span className="text-xs font-bold text-cyan-300/60 uppercase tracking-wider">5-Agent Council</span>
                   {proof.verdictLabel && (
                     <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                       proof.verdictLabel.includes('FALSE') ? 'bg-red-500/10 text-red-400/70' :
@@ -107,7 +107,7 @@ function ProofCard({ proof, isActive }: { proof: ProofCase; isActive: boolean })
                 <p className="text-xs text-white/40 leading-relaxed mb-4 line-clamp-4">
                   {proof.councilExcerpt}
                 </p>
-                <QualityBar score={proof.councilScore} color="text-indigo-400" label="Quality" delay={0.5} />
+                <QualityBar score={proof.councilScore} color="text-cyan-400" label="Quality" delay={0.5} />
               </div>
             </div>
           </div>
@@ -120,7 +120,7 @@ function ProofCard({ proof, isActive }: { proof: ProofCase; isActive: boolean })
             </div>
             <div className="w-px h-8 bg-white/[0.06]" />
             <div>
-              <div className="text-lg font-black font-mono text-indigo-400">{proof.confidence}</div>
+              <div className="text-lg font-black font-mono text-cyan-400">{proof.confidence}</div>
               <div className="text-[9px] text-white/20 uppercase tracking-wider">Confidence</div>
             </div>
             {proof.hasWeb && (
@@ -211,7 +211,7 @@ export default function ProofSection() {
                 <button
                   key={i}
                   onClick={() => setActive(i)}
-                  className={`w-1.5 h-1.5 rounded-full transition-all ${i === active ? 'bg-indigo-400 w-4' : 'bg-white/10 hover:bg-white/20'}`}
+                  className={`w-1.5 h-1.5 rounded-full transition-all ${i === active ? 'bg-cyan-400 w-4' : 'bg-white/10 hover:bg-white/20'}`}
                 />
               ))}
             </div>
@@ -235,8 +235,8 @@ export default function ProofSection() {
             <div className="text-[9px] text-white/20 uppercase tracking-wider mt-1">Avg Quality Gap</div>
           </div>
           <div className="text-center p-4 rounded-xl border border-white/[0.03] bg-white/[0.015]">
-            <Shield size={14} className="text-indigo-400/50 mx-auto mb-2" />
-            <div className="text-xl font-black font-mono text-indigo-400">{proofs.length}/{proofs.length}</div>
+            <Shield size={14} className="text-cyan-400/50 mx-auto mb-2" />
+            <div className="text-xl font-black font-mono text-cyan-400">{proofs.length}/{proofs.length}</div>
             <div className="text-[9px] text-white/20 uppercase tracking-wider mt-1">Council Wins</div>
           </div>
           <div className="text-center p-4 rounded-xl border border-white/[0.03] bg-white/[0.015]">

@@ -7,7 +7,7 @@ import { PersonalityBadge } from './AgentPersonality'
 const COUNCIL_ROLES: AgentRole[] = ['advocate', 'skeptic', 'oracle', 'contrarian']
 
 const ROLE_COLORS: Record<string, string> = {
-  advocate: 'border-indigo-500/30',
+  advocate: 'border-cyan-500/30',
   skeptic: 'border-amber-500/30',
   oracle: 'border-violet-500/30',
   contrarian: 'border-rose-500/30',
@@ -15,7 +15,7 @@ const ROLE_COLORS: Record<string, string> = {
 }
 
 const ROLE_BG: Record<string, string> = {
-  advocate: 'bg-indigo-500/10',
+  advocate: 'bg-cyan-500/10',
   skeptic: 'bg-amber-500/10',
   oracle: 'bg-violet-500/10',
   contrarian: 'bg-rose-500/10',
@@ -23,7 +23,7 @@ const ROLE_BG: Record<string, string> = {
 }
 
 const ROLE_TEXT: Record<string, string> = {
-  advocate: 'text-indigo-400',
+  advocate: 'text-cyan-400',
   skeptic: 'text-amber-400',
   oracle: 'text-violet-400',
   contrarian: 'text-rose-400',

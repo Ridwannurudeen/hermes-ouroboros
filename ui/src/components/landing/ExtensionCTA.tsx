@@ -10,7 +10,7 @@ const FEATURES = [
 export default function ExtensionCTA() {
   return (
     <section className="py-28 px-6 relative overflow-hidden">
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-indigo-500/[0.04] rounded-full pointer-events-none blur-3xl" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-cyan-500/[0.04] rounded-full pointer-events-none blur-3xl" />
 
       <div className="max-w-5xl mx-auto relative">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -23,7 +23,7 @@ export default function ExtensionCTA() {
             className="relative"
           >
             {/* Browser extension popup mockup */}
-            <div className="rounded-xl border border-white/[0.06] bg-[#0a0a16] shadow-2xl shadow-indigo-500/5 p-1 max-w-[320px] mx-auto">
+            <div className="rounded-xl border border-white/[0.06] bg-[#0a0a16] shadow-2xl shadow-cyan-500/5 p-1 max-w-[320px] mx-auto">
               {/* Fake browser chrome */}
               <div className="flex items-center gap-1.5 px-3 py-2 border-b border-white/[0.04]">
                 <div className="w-2 h-2 rounded-full bg-red-500/30" />
@@ -37,7 +37,7 @@ export default function ExtensionCTA() {
               {/* Context menu mockup */}
               <div className="p-4">
                 <p className="text-[10px] text-white/30 leading-relaxed mb-3">
-                  ...study claims that <span className="bg-indigo-500/20 text-indigo-300 px-1 rounded">renewable energy now provides 40% of global electricity</span>...
+                  ...study claims that <span className="bg-cyan-500/20 text-cyan-300 px-1 rounded">renewable energy now provides 40% of global electricity</span>...
                 </p>
 
                 {/* Fake context menu */}
@@ -45,10 +45,10 @@ export default function ExtensionCTA() {
                   <div className="px-3 py-1.5 text-[10px] text-white/20">Copy</div>
                   <div className="h-px bg-white/[0.04] my-0.5" />
                   <div className="px-3 py-1.5 text-[10px] text-white/40 flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-indigo-500/30 flex items-center justify-center text-[7px] text-indigo-300 font-bold">H</span>
+                    <span className="w-3 h-3 rounded-full bg-cyan-500/30 flex items-center justify-center text-[7px] text-cyan-300 font-bold">H</span>
                     Verify with Hermes
                   </div>
-                  <div className="px-3 py-1.5 text-[10px] text-white/40 flex items-center gap-2 bg-indigo-500/[0.06] rounded">
+                  <div className="px-3 py-1.5 text-[10px] text-white/40 flex items-center gap-2 bg-cyan-500/[0.06] rounded">
                     <span className="w-3 h-3 rounded-full bg-rose-500/30 flex items-center justify-center text-[7px] text-rose-300 font-bold">H</span>
                     Red Team with Hermes
                   </div>
@@ -60,10 +60,10 @@ export default function ExtensionCTA() {
               </div>
 
               {/* Result popup mockup */}
-              <div className="mx-4 mb-4 rounded-lg border border-indigo-500/20 bg-indigo-500/[0.03] p-3">
+              <div className="mx-4 mb-4 rounded-lg border border-cyan-500/20 bg-cyan-500/[0.03] p-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full border-2 border-indigo-500 flex items-center justify-center">
-                    <span className="text-sm font-black font-mono text-indigo-400">72</span>
+                  <div className="w-10 h-10 rounded-full border-2 border-cyan-500 flex items-center justify-center">
+                    <span className="text-sm font-black font-mono text-cyan-400">72</span>
                   </div>
                   <div>
                     <div className="text-[10px] font-black text-amber-400 uppercase tracking-wider">MOSTLY TRUE</div>
@@ -74,7 +74,7 @@ export default function ExtensionCTA() {
             </div>
 
             {/* Glow behind mockup */}
-            <div className="absolute -inset-4 bg-indigo-500/[0.04] rounded-2xl -z-10 blur-xl" />
+            <div className="absolute -inset-4 bg-cyan-500/[0.04] rounded-2xl -z-10 blur-xl" />
           </motion.div>
 
           {/* Right: text + CTA */}
@@ -84,9 +84,9 @@ export default function ExtensionCTA() {
             viewport={{ once: true }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-500/20 bg-indigo-500/[0.06] mb-6">
-              <Chrome size={11} className="text-indigo-400" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400/80">Chrome Extension</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/20 bg-cyan-500/[0.06] mb-6">
+              <Chrome size={11} className="text-cyan-400" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400/80">Chrome Extension</span>
             </div>
 
             <h2 className="font-display text-4xl md:text-5xl font-bold text-white tracking-tight mb-6 leading-[1.05]">
@@ -112,8 +112,8 @@ export default function ExtensionCTA() {
                     transition={{ delay: 0.2 + i * 0.1 }}
                     className="flex items-center gap-3 group"
                   >
-                    <div className="w-8 h-8 rounded-lg border border-white/[0.06] bg-white/[0.02] flex items-center justify-center group-hover:border-indigo-500/20 group-hover:bg-indigo-500/[0.04] transition-all">
-                      <Icon size={14} className="text-white/30 group-hover:text-indigo-400 transition-colors" />
+                    <div className="w-8 h-8 rounded-lg border border-white/[0.06] bg-white/[0.02] flex items-center justify-center group-hover:border-cyan-500/20 group-hover:bg-cyan-500/[0.04] transition-all">
+                      <Icon size={14} className="text-white/30 group-hover:text-cyan-400 transition-colors" />
                     </div>
                     <div>
                       <div className="text-sm font-semibold text-white/60">{f.label}</div>
@@ -130,7 +130,7 @@ export default function ExtensionCTA() {
                 href="https://github.com/Ridwannurudeen/hermes-ouroboros/tree/master/extension"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-400 transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-500 text-white text-sm font-semibold hover:bg-cyan-400 transition-colors"
               >
                 <Chrome size={16} />
                 Get Extension

@@ -22,7 +22,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[#06060e] dot-grid">
       {/* Static background glows (no blur filter, just opacity) */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="orb w-[600px] h-[600px] bg-indigo-600/[0.06] top-[5%] left-[-10%]" />
+        <div className="orb w-[600px] h-[600px] bg-cyan-600/[0.06] top-[5%] left-[-10%]" />
         <div className="orb w-[500px] h-[500px] bg-violet-600/[0.05] top-[40%] right-[-5%]" />
         <div className="orb w-[400px] h-[400px] bg-emerald-600/[0.04] bottom-[10%] left-[20%]" />
       </div>
@@ -33,8 +33,8 @@ export default function LandingPage() {
 
         {/* Section divider — gradient line with glow */}
         <div className="relative h-px mx-auto max-w-4xl">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
-          <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-indigo-400/60" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
+          <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-cyan-400/60" />
         </div>
 
         {/* Guest Demo — zero-friction trial */}
@@ -73,7 +73,7 @@ export default function LandingPage() {
         <EvolutionTimeline />
 
         <div className="relative h-px mx-auto max-w-4xl">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent" />
         </div>
 
         {/* The Proof — side-by-side solo vs council */}
@@ -107,7 +107,7 @@ export default function LandingPage() {
         <HermesAdvantage />
 
         <div className="relative h-px mx-auto max-w-4xl">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent" />
         </div>
 
         <AgentShowcase />
@@ -132,7 +132,7 @@ export default function LandingPage() {
         <LearningLoop />
 
         <div className="relative h-px mx-auto max-w-4xl">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
         </div>
 
         {/* Chrome Extension CTA */}

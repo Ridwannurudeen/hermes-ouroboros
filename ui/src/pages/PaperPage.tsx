@@ -151,7 +151,7 @@ function QualityBarChart({ data }: { data: AnalysisData }) {
             <span className="font-mono">{council.toFixed(1)}</span>
           </div>
           <div className="h-6 bg-gray-100 rounded overflow-hidden">
-            <div className="h-full bg-indigo-500 rounded" style={{ width: `${(council / max) * 100}%` }} />
+            <div className="h-full bg-cyan-500 rounded" style={{ width: `${(council / max) * 100}%` }} />
           </div>
         </div>
       </div>
@@ -200,7 +200,7 @@ function Section({ id, number, title, children }: { id: string; number: string; 
   return (
     <section id={id} className="mt-10 mb-6">
       <h2 className="text-xl font-bold text-gray-900 border-b border-gray-200 pb-2 mb-4">
-        <span className="text-indigo-600">{number}</span> {title}
+        <span className="text-cyan-600">{number}</span> {title}
       </h2>
       {children}
     </section>
@@ -211,7 +211,7 @@ function SubSection({ number, title, children }: { number: string; title: string
   return (
     <div className="mt-6 mb-4">
       <h3 className="text-base font-semibold text-gray-800 mb-3">
-        <span className="text-indigo-500">{number}</span> {title}
+        <span className="text-cyan-500">{number}</span> {title}
       </h3>
       {children}
     </div>
@@ -258,7 +258,7 @@ export default function PaperPage() {
           </Link>
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-cyan-600 border border-cyan-200 rounded-lg hover:bg-cyan-50 transition-colors"
           >
             <Download size={12} /> Download PDF
           </button>
@@ -269,7 +269,7 @@ export default function PaperPage() {
 
         {/* Title block */}
         <header className="text-center mb-12 pb-8 border-b border-gray-200">
-          <p className="text-xs uppercase tracking-[0.2em] text-indigo-500 font-sans font-semibold mb-4">Technical Report</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-cyan-500 font-sans font-semibold mb-4">Technical Report</p>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-6" style={{ fontFamily: 'system-ui, sans-serif' }}>
             Adversarial Debate as Automatic Preference Data: Self-Improving Language Models Through Multi-Agent Deliberation
           </h1>
@@ -278,15 +278,15 @@ export default function PaperPage() {
             <p>March 2026</p>
             <div className="flex items-center justify-center gap-6 mt-3 text-xs">
               <a href="https://hermes-ouroboros.online" target="_blank" rel="noopener noreferrer"
-                className="text-indigo-500 hover:text-indigo-700 flex items-center gap-1">
+                className="text-cyan-500 hover:text-cyan-700 flex items-center gap-1">
                 Live System <ExternalLink size={10} />
               </a>
               <a href="https://huggingface.co/datasets/gudman1/hermes-adversarial-dpo" target="_blank" rel="noopener noreferrer"
-                className="text-indigo-500 hover:text-indigo-700 flex items-center gap-1">
+                className="text-cyan-500 hover:text-cyan-700 flex items-center gap-1">
                 Dataset <ExternalLink size={10} />
               </a>
               <a href="https://github.com/Ridwannurudeen/hermes-ouroboros" target="_blank" rel="noopener noreferrer"
-                className="text-indigo-500 hover:text-indigo-700 flex items-center gap-1">
+                className="text-cyan-500 hover:text-cyan-700 flex items-center gap-1">
                 Source Code <ExternalLink size={10} />
               </a>
             </div>
@@ -665,8 +665,8 @@ export default function PaperPage() {
             </p>
             <p className="text-sm text-gray-700 leading-relaxed">
               All code, data, and trained adapters are open-sourced. The live system is available
-              at <a href="https://hermes-ouroboros.online" className="text-indigo-600 hover:underline">hermes-ouroboros.online</a> and
-              the DPO dataset at <a href="https://huggingface.co/datasets/gudman1/hermes-adversarial-dpo" className="text-indigo-600 hover:underline">HuggingFace</a>.
+              at <a href="https://hermes-ouroboros.online" className="text-cyan-600 hover:underline">hermes-ouroboros.online</a> and
+              the DPO dataset at <a href="https://huggingface.co/datasets/gudman1/hermes-adversarial-dpo" className="text-cyan-600 hover:underline">HuggingFace</a>.
             </p>
           </Section>
 

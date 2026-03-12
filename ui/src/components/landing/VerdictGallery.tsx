@@ -73,7 +73,7 @@ export default function VerdictGallery() {
           {/* Expandable details */}
           <button
             onClick={() => setExpanded(expanded === i ? null : i)}
-            className="flex items-center gap-1 text-[10px] text-indigo-400/60 hover:text-indigo-400 transition-colors font-semibold uppercase tracking-wider"
+            className="flex items-center gap-1 text-[10px] text-cyan-400/60 hover:text-cyan-400 transition-colors font-semibold uppercase tracking-wider"
           >
             {expanded === i ? 'Hide Details' : 'Key Findings'}
             {expanded === i ? <ChevronUp size={12} /> : <ChevronDown size={12} />}

@@ -131,9 +131,9 @@ export default function LandingDemo() {
 
       {/* Query input */}
       <div className="relative group">
-        <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-indigo-500/20 via-violet-500/20 to-indigo-500/20 opacity-0 group-focus-within:opacity-100 transition-opacity blur-sm" />
-        <div className="relative flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 group-focus-within:border-indigo-500/25">
-          <Search size={16} className="text-white/20 group-focus-within:text-indigo-400/50 transition-colors flex-shrink-0" />
+        <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-cyan-500/20 via-violet-500/20 to-cyan-500/20 opacity-0 group-focus-within:opacity-100 transition-opacity blur-sm" />
+        <div className="relative flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 group-focus-within:border-cyan-500/25">
+          <Search size={16} className="text-white/20 group-focus-within:text-cyan-400/50 transition-colors flex-shrink-0" />
           <input
             type="text"
             value={query}
@@ -146,7 +146,7 @@ export default function LandingDemo() {
           <button
             onClick={() => handleSubmit()}
             disabled={!query.trim() || demoState === 'streaming'}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-500/20 text-indigo-300 text-xs font-semibold hover:bg-indigo-500/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500/20 text-cyan-300 text-xs font-semibold hover:bg-cyan-500/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {demoState === 'streaming' ? (
               <><Loader2 size={14} className="animate-spin" /> Deliberating...</>
@@ -183,12 +183,12 @@ export default function LandingDemo() {
             className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5"
           >
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-              <span className="text-xs font-semibold text-indigo-300/60 uppercase tracking-wider">Council Deliberating</span>
+              <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
+              <span className="text-xs font-semibold text-cyan-300/60 uppercase tracking-wider">Council Deliberating</span>
             </div>
             {arbiterText ? (
               <p className="text-xs text-white/50 leading-relaxed whitespace-pre-wrap">
-                {arbiterText}<span className="inline-block w-1.5 h-3.5 bg-indigo-400/60 ml-0.5 animate-pulse" />
+                {arbiterText}<span className="inline-block w-1.5 h-3.5 bg-cyan-400/60 ml-0.5 animate-pulse" />
               </p>
             ) : (
               <p className="text-xs text-white/30 italic">Agents analyzing your query...</p>
@@ -225,7 +225,7 @@ export default function LandingDemo() {
             <div className="mt-4 flex justify-end">
               <a
                 href="/app"
-                className="flex items-center gap-1.5 text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
+                className="flex items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
               >
                 Open Full Verdict <ArrowRight size={12} />
               </a>
@@ -241,7 +241,7 @@ export default function LandingDemo() {
             className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-5 text-center"
           >
             <p className="text-sm text-amber-300/80 mb-2">5 free queries used</p>
-            <a href="/app" className="text-xs font-semibold text-indigo-400 hover:text-indigo-300">
+            <a href="/app" className="text-xs font-semibold text-cyan-400 hover:text-cyan-300">
               Launch HERMES for unlimited access <ArrowRight size={12} className="inline" />
             </a>
           </motion.div>

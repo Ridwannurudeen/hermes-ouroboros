@@ -106,7 +106,7 @@ function SpotlightCard({ result, index }: { result: BenchmarkData['results'][0];
             <span className="text-[10px] font-bold text-emerald-400 ml-auto">+{qualityDelta} pts</span>
           )}
           {result.council.verdict_label && (
-            <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400">
+            <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400">
               {result.council.verdict_label}
             </span>
           )}
@@ -204,7 +204,7 @@ export default function BenchmarkShowcase() {
             transition={{ delay: 0.1 }}
             className="rounded-xl border border-white/[0.04] bg-white/[0.02] p-5 text-center"
           >
-            <BarChart3 size={16} className="text-indigo-400 mx-auto mb-2 opacity-60" />
+            <BarChart3 size={16} className="text-cyan-400 mx-auto mb-2 opacity-60" />
             <p className="text-3xl font-black font-mono text-white/90">
               <CountUp target={s.quality_improvement} suffix="%" />
             </p>
@@ -272,7 +272,7 @@ export default function BenchmarkShowcase() {
             </h3>
             <button
               onClick={() => setShowAll(!showAll)}
-              className="text-[10px] text-indigo-400 hover:text-indigo-300 font-medium"
+              className="text-[10px] text-cyan-400 hover:text-cyan-300 font-medium"
             >
               {showAll ? 'Show highlights' : `View all ${data.total_claims} results`}
             </button>

@@ -9,13 +9,6 @@ interface VerdictDriftProps {
   sessionId: string
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  supported: 'bg-emerald-500/20 text-emerald-300',
-  weakly_supported: 'bg-amber-500/20 text-amber-300',
-  disputed: 'bg-rose-500/20 text-rose-300',
-  insufficient_evidence: 'bg-white/10 text-white/40',
-}
-
 function ScoreDelta({ current, past, direction }: {
   current: number; past: number; direction?: string
 }) {

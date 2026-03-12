@@ -52,7 +52,7 @@ export default function VerdictPage() {
     <div className="min-h-screen bg-[#06060e] relative">
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="orb w-[600px] h-[600px] bg-indigo-600/[0.04] top-0 right-0" />
+        <div className="orb w-[600px] h-[600px] bg-cyan-600/[0.04] top-0 right-0" />
         <div className="orb w-[500px] h-[500px] bg-violet-600/[0.03] bottom-0 left-0" />
       </div>
 

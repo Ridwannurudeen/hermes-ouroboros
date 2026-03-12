@@ -39,7 +39,7 @@ export default function LiveStats() {
       .then((data) => {
         const items: StatItem[] = []
         if (data.sessions?.total != null) {
-          items.push({ label: 'Sessions Analyzed', value: data.sessions.total, icon: Activity, color: 'text-indigo-400' })
+          items.push({ label: 'Sessions Analyzed', value: data.sessions.total, icon: Activity, color: 'text-cyan-400' })
         }
         if (data.dpo?.total_pairs != null) {
           items.push({ label: 'DPO Training Pairs', value: data.dpo.total_pairs, icon: GitBranch, color: 'text-violet-400' })

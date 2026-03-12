@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import OuroborosRing from './OuroborosRing'
 
 const FLOW_STEPS = [
-  { label: 'Query', desc: 'User submits a question', num: '01', color: 'indigo' },
+  { label: 'Query', desc: 'User submits a question', num: '01', color: 'cyan' },
   { label: 'Debate', desc: 'Five agents deliberate', num: '02', color: 'violet' },
   { label: 'Extract', desc: 'DPO pairs from trajectories', num: '03', color: 'rose' },
   { label: 'Train', desc: 'Fine-tune on Modal GPUs', num: '04', color: 'amber' },
@@ -10,7 +10,7 @@ const FLOW_STEPS = [
 ]
 
 const COLOR_MAP: Record<string, string> = {
-  indigo: 'group-hover:border-indigo-500/20 group-hover:bg-indigo-500/[0.03]',
+  cyan: 'group-hover:border-cyan-500/20 group-hover:bg-cyan-500/[0.03]',
   violet: 'group-hover:border-violet-500/20 group-hover:bg-violet-500/[0.03]',
   rose: 'group-hover:border-rose-500/20 group-hover:bg-rose-500/[0.03]',
   amber: 'group-hover:border-amber-500/20 group-hover:bg-amber-500/[0.03]',
@@ -21,7 +21,7 @@ export default function LearningLoop() {
   return (
     <section id="self-improvement" className="py-36 px-6 relative overflow-hidden">
       {/* Section glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/[0.04] rounded-full pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-cyan-500/[0.04] rounded-full pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
@@ -58,7 +58,7 @@ export default function LearningLoop() {
                   transition={{ delay: 0.3 + i * 0.08, duration: 0.5 }}
                   className="flex items-center gap-4 group"
                 >
-                  <span className="text-[11px] font-mono text-white/10 w-6 group-hover:text-indigo-400/40 transition-colors">{step.num}</span>
+                  <span className="text-[11px] font-mono text-white/10 w-6 group-hover:text-cyan-400/40 transition-colors">{step.num}</span>
                   <div className={`flex-1 flex items-center gap-3 py-2.5 px-4 rounded-xl border border-white/[0.03] bg-white/[0.01] transition-all duration-300 ${COLOR_MAP[step.color]}`}>
                     <span className="text-sm font-medium text-white/60 group-hover:text-white/80 transition-colors">{step.label}</span>
                     <div className="w-px h-3 bg-white/[0.06]" />
@@ -77,8 +77,8 @@ export default function LearningLoop() {
                 transition={{ delay: 0.8 }}
                 className="flex items-center gap-4 pl-10"
               >
-                <span className="text-[10px] text-indigo-400/30 font-mono tracking-wider">LOOP BACK TO 01</span>
-                <div className="flex-1 h-px bg-gradient-to-r from-indigo-500/20 to-transparent" />
+                <span className="text-[10px] text-cyan-400/30 font-mono tracking-wider">LOOP BACK TO 01</span>
+                <div className="flex-1 h-px bg-gradient-to-r from-cyan-500/20 to-transparent" />
               </motion.div>
             </div>
           </motion.div>

@@ -5,12 +5,12 @@ export default function LandingFooter() {
   return (
     <footer className="border-t border-white/[0.04] py-20 px-6 relative">
       {/* Subtle top glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-indigo-500/[0.03] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-cyan-500/[0.03] rounded-full pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative">
         <div className="flex flex-col md:flex-row items-center justify-between gap-10">
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center opacity-70 shadow-lg shadow-indigo-500/20">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-violet-600 flex items-center justify-center opacity-70 shadow-lg shadow-cyan-500/20">
               <span className="text-white font-bold text-xs">H</span>
             </div>
             <span className="font-display font-bold text-white/50 tracking-tight">HERMES — Adversarial Intelligence Engine</span>

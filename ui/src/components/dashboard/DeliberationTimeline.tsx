@@ -3,7 +3,7 @@ import { Check } from 'lucide-react'
 import type { SSEAgentEvent } from '../../api/types'
 
 const AGENT_DOTS: { role: string; color: string; bg: string }[] = [
-  { role: 'advocate', color: 'bg-indigo-500', bg: 'bg-indigo-500/20' },
+  { role: 'advocate', color: 'bg-cyan-500', bg: 'bg-cyan-500/20' },
   { role: 'skeptic', color: 'bg-amber-500', bg: 'bg-amber-500/20' },
   { role: 'oracle', color: 'bg-violet-500', bg: 'bg-violet-500/20' },
   { role: 'contrarian', color: 'bg-rose-500', bg: 'bg-rose-500/20' },
@@ -26,7 +26,7 @@ function Phase({ label, active, done, dots }: {
     <div className="flex-1 min-w-0">
       <div className="flex items-center gap-2 mb-1.5">
         <span className={`text-[10px] font-bold uppercase tracking-wider ${
-          done ? 'text-emerald-400' : active ? 'text-indigo-300' : 'text-white/25'
+          done ? 'text-emerald-400' : active ? 'text-cyan-300' : 'text-white/25'
         }`}>
           {label}
         </span>
@@ -37,7 +37,7 @@ function Phase({ label, active, done, dots }: {
       <div className="relative h-1 rounded-full bg-white/[0.06] overflow-hidden">
         {(done || active) && (
           <motion.div
-            className={`absolute inset-y-0 left-0 rounded-full ${done ? 'bg-emerald-500/60' : 'bg-indigo-500/50'}`}
+            className={`absolute inset-y-0 left-0 rounded-full ${done ? 'bg-emerald-500/60' : 'bg-cyan-500/50'}`}
             initial={{ width: '0%' }}
             animate={{ width: done ? '100%' : '50%' }}
             transition={{ duration: 0.6, ease: 'easeOut' }}

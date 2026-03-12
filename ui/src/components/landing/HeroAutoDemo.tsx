@@ -84,7 +84,7 @@ export default function HeroAutoDemo() {
         {/* Query with typewriter */}
         <p className="text-sm text-white/70 font-mono mb-4 h-6">
           {scenario.query.slice(0, typedChars)}
-          {phase === 'typing' && <span className="inline-block w-1.5 h-4 bg-indigo-400/60 ml-0.5 align-middle animate-pulse" />}
+          {phase === 'typing' && <span className="inline-block w-1.5 h-4 bg-cyan-400/60 ml-0.5 align-middle animate-pulse" />}
         </p>
 
         {/* Score + Verdict row */}

@@ -57,12 +57,12 @@ export default function DifferentiatorSection() {
                   className={`shine p-6 h-full relative rounded-[20px] border transition-all duration-500 ${
                     card.dimmed
                       ? 'bg-white/[0.01] border-white/[0.03] opacity-50'
-                      : 'bg-white/[0.04] border-indigo-500/20 shadow-[0_0_40px_rgba(99,102,241,0.08)]'
+                      : 'bg-white/[0.04] border-cyan-500/20 shadow-[0_0_40px_rgba(6,182,212,0.08)]'
                   }`}
-                  style={!card.dimmed ? { borderLeftWidth: 3, borderLeftColor: 'rgba(99,102,241,0.4)' } : {}}
+                  style={!card.dimmed ? { borderLeftWidth: 3, borderLeftColor: 'rgba(6,182,212,0.4)' } : {}}
                 >
                   <div className="mb-4 opacity-40">
-                    <Icon size={32} className={card.dimmed ? 'text-white/30' : 'text-indigo-400'} />
+                    <Icon size={32} className={card.dimmed ? 'text-white/30' : 'text-cyan-400'} />
                   </div>
                   <h3 className={`text-lg font-semibold mb-2 tracking-tight ${card.dimmed ? 'text-white/40' : 'text-white/90'}`}>
                     {card.title}

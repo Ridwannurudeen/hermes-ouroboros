@@ -68,34 +68,34 @@ export default function ClaimLedgerBadge({ compact }: ClaimLedgerBadgeProps) {
         {/* Status breakdown bar */}
         <div className="space-y-2">
           <div className="flex h-2 rounded-full overflow-hidden bg-white/[0.04]">
-            {status_breakdown.supported > 0 && (
+            {(status_breakdown.supported ?? 0) > 0 && (
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: `${(status_breakdown.supported / total_claims) * 100}%` }}
+                animate={{ width: `${((status_breakdown.supported ?? 0) / total_claims) * 100}%` }}
                 transition={{ duration: 0.8, delay: 0.3 }}
                 className="bg-emerald-500 h-full"
               />
             )}
-            {status_breakdown.weakly_supported > 0 && (
+            {(status_breakdown.weakly_supported ?? 0) > 0 && (
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: `${(status_breakdown.weakly_supported / total_claims) * 100}%` }}
+                animate={{ width: `${((status_breakdown.weakly_supported ?? 0) / total_claims) * 100}%` }}
                 transition={{ duration: 0.8, delay: 0.4 }}
                 className="bg-amber-500 h-full"
               />
             )}
-            {status_breakdown.disputed > 0 && (
+            {(status_breakdown.disputed ?? 0) > 0 && (
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: `${(status_breakdown.disputed / total_claims) * 100}%` }}
+                animate={{ width: `${((status_breakdown.disputed ?? 0) / total_claims) * 100}%` }}
                 transition={{ duration: 0.8, delay: 0.5 }}
                 className="bg-rose-500 h-full"
               />
             )}
-            {status_breakdown.insufficient_evidence > 0 && (
+            {(status_breakdown.insufficient_evidence ?? 0) > 0 && (
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: `${(status_breakdown.insufficient_evidence / total_claims) * 100}%` }}
+                animate={{ width: `${((status_breakdown.insufficient_evidence ?? 0) / total_claims) * 100}%` }}
                 transition={{ duration: 0.8, delay: 0.6 }}
                 className="bg-white/20 h-full"
               />
@@ -103,25 +103,25 @@ export default function ClaimLedgerBadge({ compact }: ClaimLedgerBadgeProps) {
           </div>
 
           <div className="flex flex-wrap gap-3 text-[10px]">
-            {status_breakdown.supported > 0 && (
+            {(status_breakdown.supported ?? 0) > 0 && (
               <span className="flex items-center gap-1 text-white/40">
                 <CheckCircle2 size={10} className="text-emerald-400" />
                 {status_breakdown.supported} Supported
               </span>
             )}
-            {status_breakdown.weakly_supported > 0 && (
+            {(status_breakdown.weakly_supported ?? 0) > 0 && (
               <span className="flex items-center gap-1 text-white/40">
                 <AlertTriangle size={10} className="text-amber-400" />
                 {status_breakdown.weakly_supported} Weak
               </span>
             )}
-            {status_breakdown.disputed > 0 && (
+            {(status_breakdown.disputed ?? 0) > 0 && (
               <span className="flex items-center gap-1 text-white/40">
                 <AlertTriangle size={10} className="text-rose-400" />
                 {status_breakdown.disputed} Disputed
               </span>
             )}
-            {status_breakdown.insufficient_evidence > 0 && (
+            {(status_breakdown.insufficient_evidence ?? 0) > 0 && (
               <span className="flex items-center gap-1 text-white/40">
                 <HelpCircle size={10} className="text-white/30" />
                 {status_breakdown.insufficient_evidence} Unverified

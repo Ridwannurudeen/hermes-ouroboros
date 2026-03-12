@@ -116,15 +116,15 @@ export default function CommandPalette({ isOpen, onClose, onAction }: CommandPal
                       onClick={() => select(cmd)}
                       onMouseEnter={() => setActiveIndex(i)}
                       className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                        isActive ? 'bg-indigo-500/10' : 'hover:bg-white/[0.02]'
+                        isActive ? 'bg-cyan-500/10' : 'hover:bg-white/[0.02]'
                       }`}
                     >
-                      <Icon size={15} className={isActive ? 'text-indigo-400' : 'text-white/25'} />
+                      <Icon size={15} className={isActive ? 'text-cyan-400' : 'text-white/25'} />
                       <span className={`flex-1 text-sm ${isActive ? 'text-white/90' : 'text-white/50'}`}>{cmd.label}</span>
                       {cmd.shortcut && (
                         <kbd className={`text-[10px] px-1.5 py-0.5 rounded border ${
                           isActive
-                            ? 'text-indigo-300/60 bg-indigo-500/10 border-indigo-500/20'
+                            ? 'text-cyan-300/60 bg-cyan-500/10 border-cyan-500/20'
                             : 'text-white/15 bg-white/[0.02] border-white/[0.06]'
                         }`}>{cmd.shortcut}</kbd>
                       )}

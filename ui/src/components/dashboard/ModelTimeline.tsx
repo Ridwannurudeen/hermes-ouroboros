@@ -155,7 +155,7 @@ export default function ModelTimeline({ loopStatus }: ModelTimelineProps) {
                       initial={{ width: 0 }}
                       animate={{ width: `${stage.progress}%` }}
                       transition={{ delay: i * 0.15 + 0.3, duration: 0.8 }}
-                      className={`h-full rounded-full ${stage.done ? 'bg-emerald-500/50' : 'bg-indigo-500/40'}`}
+                      className={`h-full rounded-full ${stage.done ? 'bg-emerald-500/50' : 'bg-cyan-500/40'}`}
                     />
                   </div>
                   <p className="text-[10px] text-white/50 font-mono">{stage.value}</p>
@@ -176,7 +176,7 @@ export default function ModelTimeline({ loopStatus }: ModelTimelineProps) {
           <h3 className="text-xs font-bold text-white/50 uppercase tracking-wider mb-4">Model History</h3>
           <div className="relative pl-6 space-y-4">
             {/* Timeline line */}
-            <div className="absolute left-[9px] top-2 bottom-2 w-px bg-gradient-to-b from-violet-500/30 via-indigo-500/20 to-transparent" />
+            <div className="absolute left-[9px] top-2 bottom-2 w-px bg-gradient-to-b from-violet-500/30 via-cyan-500/20 to-transparent" />
             {modelHistory.map((entry, i) => {
               const prevLoss = i > 0 ? modelHistory[i - 1].loss : undefined
               const lossDelta = entry.loss && prevLoss ? entry.loss - prevLoss : undefined
@@ -195,7 +195,7 @@ export default function ModelTimeline({ loopStatus }: ModelTimelineProps) {
                       {entry.name}
                     </span>
                     {entry.mode && (
-                      <span className="text-[10px] font-semibold text-indigo-300/50 bg-indigo-500/10 px-1.5 py-0.5 rounded uppercase">
+                      <span className="text-[10px] font-semibold text-cyan-300/50 bg-cyan-500/10 px-1.5 py-0.5 rounded uppercase">
                         {entry.mode}
                       </span>
                     )}
@@ -226,7 +226,7 @@ export default function ModelTimeline({ loopStatus }: ModelTimelineProps) {
         <h3 className="text-xs font-bold text-white/50 uppercase tracking-wider mb-4">DPO Quality</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center">
-            <p className="text-2xl font-black text-indigo-300 font-mono"><AnimatedNumber value={dpoPairs} /></p>
+            <p className="text-2xl font-black text-cyan-300 font-mono"><AnimatedNumber value={dpoPairs} /></p>
             <p className="text-[10px] text-white/30 mt-1">Total Pairs</p>
           </div>
           <div className="text-center">
@@ -268,13 +268,13 @@ export default function ModelTimeline({ loopStatus }: ModelTimelineProps) {
               )}
               {benchmark.improvement_pct != null && (
                 <div className="text-center">
-                  <p className="text-lg font-black font-mono text-indigo-400">{benchmark.improvement_pct.toFixed(1)}%</p>
+                  <p className="text-lg font-black font-mono text-cyan-400">{benchmark.improvement_pct.toFixed(1)}%</p>
                   <p className="text-[10px] text-white/30">Improvement</p>
                 </div>
               )}
             </div>
             <div className="flex justify-end">
-              <button className="flex items-center gap-1 text-[10px] text-indigo-400/60 hover:text-indigo-400 font-semibold transition-colors">
+              <button className="flex items-center gap-1 text-[10px] text-cyan-400/60 hover:text-cyan-400 font-semibold transition-colors">
                 View full comparison <ArrowRight size={10} />
               </button>
             </div>

@@ -6,8 +6,8 @@ const STEPS = [
     icon: MessageSquare,
     title: 'Choose Your Mode',
     desc: 'Red Team a startup idea. Verify a viral claim. Research a market thesis. Pick your lens — the agents adapt their entire approach.',
-    gradient: 'from-indigo-500 to-blue-500',
-    glow: 'rgba(99,102,241,0.15)',
+    gradient: 'from-cyan-500 to-blue-500',
+    glow: 'rgba(6,182,212,0.15)',
     accent: '#818cf8',
   },
   {
@@ -40,7 +40,7 @@ export default function HowItWorks() {
   return (
     <section id="how-it-works" className="py-36 px-6 relative">
       {/* Section glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-indigo-500/[0.03] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-cyan-500/[0.03] rounded-full pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative">
         <motion.div
@@ -50,7 +50,7 @@ export default function HowItWorks() {
           transition={{ duration: 0.8 }}
           className="text-center mb-20"
         >
-          <p className="section-label text-indigo-400/60 mb-4">Process</p>
+          <p className="section-label text-cyan-400/60 mb-4">Process</p>
           <h2 className="font-display text-4xl md:text-6xl font-bold text-white tracking-tight mb-5">How It Works</h2>
           <p className="text-white/30 text-lg max-w-xl mx-auto leading-relaxed">From question to adversarial verdict in four steps.</p>
         </motion.div>
@@ -102,7 +102,7 @@ export default function HowItWorks() {
           className="hidden lg:flex items-center justify-center mt-8 gap-2"
         >
           <div className="h-px flex-1 max-w-xs bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-          <span className="text-[10px] font-mono text-indigo-400/30 tracking-wider">CONTINUOUS LOOP</span>
+          <span className="text-[10px] font-mono text-cyan-400/30 tracking-wider">CONTINUOUS LOOP</span>
           <div className="h-px flex-1 max-w-xs bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
         </motion.div>
       </div>

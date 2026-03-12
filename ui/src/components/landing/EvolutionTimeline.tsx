@@ -101,7 +101,7 @@ export default function EvolutionTimeline() {
 
   return (
     <section className="py-28 px-6 relative overflow-hidden">
-      <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-indigo-500/[0.03] rounded-full pointer-events-none" />
+      <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-cyan-500/[0.03] rounded-full pointer-events-none" />
 
       <div className="max-w-4xl mx-auto relative">
         <motion.div
@@ -111,9 +111,9 @@ export default function EvolutionTimeline() {
           transition={{ duration: 0.8 }}
           className="text-center mb-10"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-500/20 bg-indigo-500/[0.06] mb-4">
-            <Brain size={11} className="text-indigo-400" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400/80">Head to Head</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/20 bg-cyan-500/[0.06] mb-4">
+            <Brain size={11} className="text-cyan-400" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400/80">Head to Head</span>
           </div>
           <h2 className="font-display text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
             Solo Model vs <span className="gradient-text">5-Agent Council</span>
@@ -129,7 +129,7 @@ export default function EvolutionTimeline() {
             onClick={() => setViewMode('benchmark')}
             className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all ${
               viewMode === 'benchmark'
-                ? 'border-indigo-500/30 bg-indigo-500/10 text-indigo-300'
+                ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300'
                 : 'border-white/[0.06] bg-white/[0.02] text-white/40 hover:bg-white/[0.04]'
             }`}
           >
@@ -201,7 +201,7 @@ export default function EvolutionTimeline() {
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
               </button>
-              <span className={`text-xs font-semibold transition-colors ${showCouncil ? 'text-indigo-400' : 'text-white/20'}`}>
+              <span className={`text-xs font-semibold transition-colors ${showCouncil ? 'text-cyan-400' : 'text-white/20'}`}>
                 5-Agent Council
               </span>
             </div>
@@ -236,14 +236,14 @@ export default function EvolutionTimeline() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="rounded-xl border border-indigo-500/20 bg-indigo-500/[0.03] p-6 relative overflow-hidden"
+                  className="rounded-xl border border-cyan-500/20 bg-cyan-500/[0.03] p-6 relative overflow-hidden"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/[0.06] rounded-full -translate-y-1/2 translate-x-1/2" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/[0.06] rounded-full -translate-y-1/2 translate-x-1/2" />
                   <div className="relative">
                     <div className="flex items-center gap-2 mb-4">
-                      <Shield size={16} className="text-indigo-400/60" />
-                      <span className="text-xs font-bold text-indigo-300/60 uppercase tracking-wider">5-Agent Council Verdict</span>
-                      <span className="text-[10px] text-indigo-300/30 ml-auto font-mono">{currentData.council.elapsed_seconds?.toFixed(1)}s</span>
+                      <Shield size={16} className="text-cyan-400/60" />
+                      <span className="text-xs font-bold text-cyan-300/60 uppercase tracking-wider">5-Agent Council Verdict</span>
+                      <span className="text-[10px] text-cyan-300/30 ml-auto font-mono">{currentData.council.elapsed_seconds?.toFixed(1)}s</span>
                     </div>
 
                     <div className="flex items-start gap-5 mb-4">
@@ -260,7 +260,7 @@ export default function EvolutionTimeline() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4 text-[10px] text-indigo-300/30 uppercase tracking-wider">
+                    <div className="flex items-center gap-4 text-[10px] text-cyan-300/30 uppercase tracking-wider">
                       <span>5 agents deliberated</span>
                       <span>·</span>
                       <span>Multi-round debate</span>
@@ -279,7 +279,7 @@ export default function EvolutionTimeline() {
                   <button
                     key={i}
                     onClick={() => { setActiveIdx(i); setShowCouncil(false) }}
-                    className={`w-2 h-2 rounded-full transition-all ${i === activeIdx ? 'bg-indigo-400 w-5' : 'bg-white/10 hover:bg-white/20'}`}
+                    className={`w-2 h-2 rounded-full transition-all ${i === activeIdx ? 'bg-cyan-400 w-5' : 'bg-white/10 hover:bg-white/20'}`}
                   />
                 ))}
               </div>
@@ -294,7 +294,7 @@ export default function EvolutionTimeline() {
         )}
         {liveLoading && (
           <div className="text-center py-12">
-            <Loader2 size={24} className="text-indigo-400/50 animate-spin mx-auto mb-3" />
+            <Loader2 size={24} className="text-cyan-400/50 animate-spin mx-auto mb-3" />
             <p className="text-sm text-white/30">Running both solo and council analysis...</p>
           </div>
         )}

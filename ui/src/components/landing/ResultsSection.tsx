@@ -39,8 +39,8 @@ const RESULTS = [
     desc: 'Five agents with incompatible worldviews ensure no angle is missed. Conflict detection reveals when the evidence is genuinely split.',
     stat: 5,
     statLabel: 'Frameworks',
-    gradient: 'from-indigo-500 to-violet-500',
-    glow: 'rgba(99,102,241,0.1)',
+    gradient: 'from-cyan-500 to-violet-500',
+    glow: 'rgba(6,182,212,0.1)',
   },
   {
     icon: TrendingUp,

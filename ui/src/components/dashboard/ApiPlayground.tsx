@@ -92,8 +92,8 @@ export default function ApiPlayground() {
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-          <Code size={20} className="text-indigo-400" />
+        <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+          <Code size={20} className="text-cyan-400" />
         </div>
         <div>
           <h2 className="text-sm font-semibold text-white/80 uppercase tracking-wider">API Reference</h2>
@@ -109,11 +109,11 @@ export default function ApiPlayground() {
         </div>
         <p className="text-xs text-white/40 mb-3">Include your API key in the request header:</p>
         <div className="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
-          <code className="text-xs text-indigo-300 font-mono flex-1">X-API-Key: your_api_key_here</code>
+          <code className="text-xs text-cyan-300 font-mono flex-1">X-API-Key: your_api_key_here</code>
           <CopyButton text="X-API-Key: your_api_key_here" />
         </div>
         <p className="text-[11px] text-white/25 mt-2">
-          Generate keys in the <span className="text-indigo-400">API Keys</span> panel. Guest access available without auth (rate-limited).
+          Generate keys in the <span className="text-cyan-400">API Keys</span> panel. Guest access available without auth (rate-limited).
         </p>
       </GlassCard>
 
@@ -131,7 +131,7 @@ export default function ApiPlayground() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <p className="text-[10px] font-bold text-white/30 uppercase tracking-wider mb-1">Request Body</p>
-              <pre className="bg-black/30 rounded-lg p-3 text-[11px] font-mono text-indigo-300/70 overflow-x-auto leading-relaxed">{ep.request}</pre>
+              <pre className="bg-black/30 rounded-lg p-3 text-[11px] font-mono text-cyan-300/70 overflow-x-auto leading-relaxed">{ep.request}</pre>
             </div>
             <div>
               <p className="text-[10px] font-bold text-white/30 uppercase tracking-wider mb-1">Response</p>
@@ -158,7 +158,7 @@ export default function ApiPlayground() {
         <div className="space-y-2">
           {MODES.map((m) => (
             <div key={m.mode} className="flex items-start gap-3 py-1.5">
-              <code className="text-[11px] font-mono text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded flex-shrink-0">{m.mode}</code>
+              <code className="text-[11px] font-mono text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded flex-shrink-0">{m.mode}</code>
               <p className="text-xs text-white/40">{m.desc}</p>
             </div>
           ))}

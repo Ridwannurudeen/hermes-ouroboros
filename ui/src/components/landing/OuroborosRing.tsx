@@ -18,7 +18,7 @@ export default function OuroborosRing() {
       <div className="relative">
         {/* Outer glow */}
         <div className="absolute inset-0 scale-150">
-          <div className="w-full h-full rounded-full bg-indigo-500/[0.05]" />
+          <div className="w-full h-full rounded-full bg-cyan-500/[0.05]" />
         </div>
 
         <svg viewBox="0 0 400 400" className="w-72 h-72 md:w-96 md:h-96 relative">

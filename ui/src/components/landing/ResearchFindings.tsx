@@ -207,7 +207,7 @@ export default function ResearchFindings() {
             stat={data.dpo.total_pairs}
             statSuffix=""
             description={`From ${data.sessions.total} sessions — ${pairsPerSession.toFixed(1)} pairs per session. Each debate automatically produces preference data.`}
-            color="text-indigo-400"
+            color="text-cyan-400"
             delay={0}
           />
           <FindingCard
@@ -244,7 +244,7 @@ export default function ResearchFindings() {
           viewport={{ once: true }}
           className="relative rounded-xl p-[1px] overflow-hidden max-w-2xl mx-auto mb-10"
         >
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/20 via-violet-500/20 to-emerald-500/20" />
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/20 via-violet-500/20 to-emerald-500/20" />
           <div className="relative rounded-xl bg-[#0a0a14] p-6">
             <div className="flex items-start gap-3">
               <FlaskConical size={18} className="text-violet-400 flex-shrink-0 mt-0.5 opacity-60" />
@@ -270,7 +270,7 @@ export default function ResearchFindings() {
         >
           <Link
             to="/paper"
-            className="flex items-center gap-2 px-6 py-3 rounded-xl border border-indigo-500/30 bg-indigo-500/[0.08] hover:bg-indigo-500/[0.15] transition-colors text-sm text-indigo-300 hover:text-indigo-200 font-medium"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl border border-cyan-500/30 bg-cyan-500/[0.08] hover:bg-cyan-500/[0.15] transition-colors text-sm text-cyan-300 hover:text-cyan-200 font-medium"
           >
             <FileText size={14} />
             <span>Read the Technical Report</span>
@@ -281,7 +281,7 @@ export default function ResearchFindings() {
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-5 py-3 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] transition-colors text-sm text-white/50 hover:text-white/80"
           >
-            <Database size={14} className="text-indigo-400" />
+            <Database size={14} className="text-cyan-400" />
             <span>DPO Dataset</span>
             <ExternalLink size={11} className="opacity-40" />
           </a>

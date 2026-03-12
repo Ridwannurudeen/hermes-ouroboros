@@ -86,7 +86,7 @@ body{background:#0a0a14;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFo
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem}
 .agents-title{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.3);font-weight:700;margin:1.5rem 0 0.75rem}
 .agent{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:10px;padding:1rem;margin-bottom:0.5rem}
-.agent h4{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:rgba(99,102,241,0.7);margin-bottom:0.5rem;font-weight:700}
+.agent h4{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:rgba(6,182,212,0.7);margin-bottom:0.5rem;font-weight:700}
 .agent p{font-size:0.75rem;color:rgba(255,255,255,0.5)}
 .sources{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:1rem}
 .source{display:block;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:0.75rem;text-decoration:none;color:inherit;font-size:0.75rem}
@@ -159,7 +159,7 @@ ${sourceCards ? `<p class="agents-title">Web Sources</p><div class="sources">${s
             <button onClick={exportJSON} className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white/60 hover:bg-white/10 transition-colors">
               <FileJson size={14} /> JSON
             </button>
-            <button onClick={exportHTML} className="flex items-center gap-2 px-4 py-2.5 bg-indigo-500/15 border border-indigo-500/20 rounded-xl text-sm text-indigo-300 hover:bg-indigo-500/25 transition-colors">
+            <button onClick={exportHTML} className="flex items-center gap-2 px-4 py-2.5 bg-cyan-500/15 border border-cyan-500/20 rounded-xl text-sm text-cyan-300 hover:bg-cyan-500/25 transition-colors">
               <Globe size={14} /> HTML Report
             </button>
           </div>

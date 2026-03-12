@@ -225,7 +225,7 @@ export type AgentRole = 'advocate' | 'skeptic' | 'oracle' | 'contrarian' | 'arbi
 export const AGENT_ROLES: AgentRole[] = ['advocate', 'skeptic', 'oracle', 'contrarian', 'arbiter']
 
 export const AGENT_META: Record<AgentRole, { label: string; color: string; description: string }> = {
-  advocate: { label: 'Advocate', color: 'indigo', description: 'Builds strongest case for the position' },
+  advocate: { label: 'Advocate', color: 'cyan', description: 'Builds strongest case for the position' },
   skeptic: { label: 'Skeptic', color: 'amber', description: 'Tears arguments apart with rigor' },
   oracle: { label: 'Oracle', color: 'violet', description: 'Data and evidence, no opinions' },
   contrarian: { label: 'Contrarian', color: 'rose', description: 'Challenges the majority view' },

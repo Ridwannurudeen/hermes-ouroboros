@@ -12,7 +12,7 @@ const ICONS: Record<AgentRole, typeof Shield> = {
 }
 
 const COLOR_MAP: Record<string, { border: string; glow: string; icon: string; bg: string; pulse: string }> = {
-  indigo:  { border: 'rgba(99,102,241,0.3)', glow: '0 0 40px rgba(99,102,241,0.2), 0 0 80px rgba(99,102,241,0.05)', icon: 'text-indigo-400', bg: 'bg-indigo-500/10', pulse: 'bg-indigo-400' },
+  cyan:  { border: 'rgba(6,182,212,0.3)', glow: '0 0 40px rgba(6,182,212,0.2), 0 0 80px rgba(6,182,212,0.05)', icon: 'text-cyan-400', bg: 'bg-cyan-500/10', pulse: 'bg-cyan-400' },
   amber:   { border: 'rgba(245,158,11,0.3)', glow: '0 0 40px rgba(245,158,11,0.2), 0 0 80px rgba(245,158,11,0.05)', icon: 'text-amber-400', bg: 'bg-amber-500/10', pulse: 'bg-amber-400' },
   violet:  { border: 'rgba(139,92,246,0.3)', glow: '0 0 40px rgba(139,92,246,0.2), 0 0 80px rgba(139,92,246,0.05)', icon: 'text-violet-400', bg: 'bg-violet-500/10', pulse: 'bg-violet-400' },
   rose:    { border: 'rgba(244,63,94,0.3)', glow: '0 0 40px rgba(244,63,94,0.2), 0 0 80px rgba(244,63,94,0.05)', icon: 'text-rose-400', bg: 'bg-rose-500/10', pulse: 'bg-rose-400' },

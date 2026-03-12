@@ -106,13 +106,13 @@ export default function ClaimBreakdown({ claims }: ClaimBreakdownProps) {
                           href={claim.source_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 mt-2 text-[11px] text-indigo-400 hover:text-indigo-300 transition-colors"
+                          className="inline-flex items-center gap-1 mt-2 text-[11px] text-cyan-400 hover:text-cyan-300 transition-colors"
                           onClick={e => e.stopPropagation()}
                         >
                           <span>Source</span>
                           <span className="text-white/20">{'\u2192'}</span>
                           <span className="text-white/30 truncate max-w-[200px]">
-                            {new URL(claim.source_url).hostname}
+                            {(() => { try { return new URL(claim.source_url).hostname } catch { return claim.source_url } })()}
                           </span>
                         </a>
                       )}

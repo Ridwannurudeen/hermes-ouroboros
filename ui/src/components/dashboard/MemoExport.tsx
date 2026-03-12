@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { apiFetch } from '../../api/client'
 
 const MEMO_TYPES = [
@@ -14,6 +14,16 @@ interface MemoExportProps {
 export default function MemoExport({ sessionId }: MemoExportProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState<string | null>(null)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const handleClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [open])
 
   const handleExport = async (memoType: string) => {
     setLoading(memoType)
@@ -53,7 +63,7 @@ export default function MemoExport({ sessionId }: MemoExportProps) {
   }
 
   return (
-    <div className="relative">
+    <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium
@@ -91,7 +101,7 @@ export default function MemoExport({ sessionId }: MemoExportProps) {
               <button
                 onClick={() => handleExport(key)}
                 disabled={loading === key}
-                className="text-[10px] px-2 py-1 rounded bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20 transition-colors"
+                className="text-[10px] px-2 py-1 rounded bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 transition-colors"
               >
                 {loading === key ? '...' : 'Download'}
               </button>

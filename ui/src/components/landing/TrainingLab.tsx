@@ -216,7 +216,7 @@ export default function TrainingLab() {
             className="space-y-4"
           >
             <div className="rounded-xl border border-white/[0.04] bg-white/[0.02] p-5">
-              <Database size={14} className="text-indigo-400/50 mb-3" />
+              <Database size={14} className="text-cyan-400/50 mb-3" />
               <div className="text-2xl font-black font-mono text-white">
                 <CountUp target={data.dpo.total_pairs} />
               </div>
@@ -259,14 +259,14 @@ export default function TrainingLab() {
                 {/* Generation counter */}
                 <div className="text-right">
                   <div className="text-xs text-white/20 uppercase tracking-wider">Generation</div>
-                  <div className="text-xl font-black font-mono text-indigo-400">
+                  <div className="text-xl font-black font-mono text-cyan-400">
                     {animating ? genCounter : lossVersions.length}
                   </div>
                 </div>
                 <button
                   onClick={startAnimation}
                   disabled={animating || lossVersions.length < 2}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-indigo-500/20 text-indigo-300 text-xs font-semibold hover:bg-indigo-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-cyan-500/20 text-cyan-300 text-xs font-semibold hover:bg-cyan-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {animating ? (
                     <><Activity size={14} className="animate-pulse" /> Training...</>
@@ -300,7 +300,7 @@ export default function TrainingLab() {
                   </div>
                   <div className="h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
                     <motion.div
-                      className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full"
+                      className="h-full bg-gradient-to-r from-cyan-500 to-violet-500 rounded-full"
                       style={{ width: `${progress * 100}%` }}
                     />
                   </div>
@@ -316,7 +316,7 @@ export default function TrainingLab() {
                     key={v.name}
                     className={`flex-shrink-0 px-3 py-1.5 rounded-lg border text-[10px] font-mono transition-all ${
                       (!animating || i < genCounter)
-                        ? 'border-indigo-500/20 bg-indigo-500/[0.06] text-indigo-300'
+                        ? 'border-cyan-500/20 bg-cyan-500/[0.06] text-cyan-300'
                         : 'border-white/[0.04] bg-white/[0.01] text-white/15'
                     }`}
                   >

@@ -15,12 +15,12 @@ export default function LandingHero() {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
       {/* Radial gradient behind hero */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1200px]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(79,70,229,0.12)_0%,transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(139,92,246,0.08)_0%,transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(6,182,212,0.12)_0%,transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(34,211,238,0.08)_0%,transparent_50%)]" />
       </div>
 
       {/* Vertical light beam */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-[40vh] bg-gradient-to-b from-indigo-500/40 via-indigo-500/10 to-transparent" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-[40vh] bg-gradient-to-b from-cyan-500/40 via-cyan-500/10 to-transparent" />
 
       {/* Grid lines for depth */}
       <div className="absolute inset-0 opacity-[0.015]"
@@ -42,10 +42,10 @@ export default function LandingHero() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-indigo-500/20 bg-indigo-500/[0.06]"
+            className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-brand-500/20 bg-brand-500/[0.06]"
           >
-            <Sparkles size={14} className="text-indigo-400" />
-            <span className="text-xs font-medium tracking-wide text-indigo-300/90">Powered by Hermes-3 on NousResearch</span>
+            <Sparkles size={14} className="text-brand-400" />
+            <span className="text-xs font-medium tracking-wide text-brand-300/90">Powered by Hermes-3 on NousResearch</span>
           </motion.div>
 
           {/* Title */}
@@ -77,7 +77,7 @@ export default function LandingHero() {
             Five AI agents that <span className="text-white/60 font-normal">argue, fact-check, and stress-test</span> your thinking.{' '}
             Red team any idea. Verify any claim. Research any topic.
             <br className="hidden md:block" />
-            <span className="text-indigo-300/40">Then watch the verdict form in real-time.</span>
+            <span className="text-brand-300/40">Then watch the verdict form in real-time.</span>
           </motion.p>
 
           {/* Auto-playing hero demo */}

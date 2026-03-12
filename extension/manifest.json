@@ -1,11 +1,19 @@
 {
   "manifest_version": 3,
   "name": "HERMES — Adversarial Intelligence",
-  "version": "1.0.0",
-  "description": "Right-click any claim. Get an adversarial verdict from 5 AI agents.",
+  "version": "1.1.0",
+  "description": "Auto-scans any page for claims and gives adversarial verdicts from 5 AI agents. Right-click or let it scan automatically.",
   "permissions": ["contextMenus", "activeTab", "storage"],
-  "host_permissions": ["https://hermes-ouroboros.online/*"],
+  "host_permissions": ["https://hermes-ouroboros.online/*", "<all_urls>"],
   "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["autoscan.js"],
+      "css": ["autoscan.css"],
+      "run_at": "document_idle"
+    }
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {

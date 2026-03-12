@@ -1,0 +1,175 @@
+/* HERMES Auto-Scan Inline Badges */
+.hermes-autoscan-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  margin-left: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: system-ui, -apple-system, sans-serif;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  z-index: 10000;
+  line-height: 1;
+  text-decoration: none !important;
+}
+
+.hermes-autoscan-badge:hover {
+  transform: scale(1.3);
+  z-index: 10001;
+}
+
+/* Colors */
+.hermes-autoscan-badge.hermes-green {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1.5px solid rgba(34, 197, 94, 0.5);
+  color: #22c55e;
+}
+.hermes-autoscan-badge.hermes-green:hover {
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+}
+
+.hermes-autoscan-badge.hermes-amber {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1.5px solid rgba(245, 158, 11, 0.5);
+  color: #f59e0b;
+}
+.hermes-autoscan-badge.hermes-amber:hover {
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+}
+
+.hermes-autoscan-badge.hermes-red {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1.5px solid rgba(239, 68, 68, 0.5);
+  color: #ef4444;
+}
+.hermes-autoscan-badge.hermes-red:hover {
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+.hermes-autoscan-badge.hermes-gray {
+  background: rgba(150, 150, 150, 0.15);
+  border: 1.5px solid rgba(150, 150, 150, 0.4);
+  color: #999;
+}
+
+/* Loading state */
+.hermes-autoscan-badge.hermes-loading {
+  background: rgba(99, 102, 241, 0.1);
+  border: 1.5px solid rgba(99, 102, 241, 0.3);
+}
+
+.hermes-badge-dot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #6366f1;
+  animation: hermes-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes hermes-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.hermes-badge-score {
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Tooltip */
+.hermes-autoscan-tooltip {
+  position: absolute;
+  z-index: 2147483647;
+  width: 320px;
+  padding: 14px 16px;
+  background: #0c0c1a;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(99, 102, 241, 0.1);
+  font-family: system-ui, -apple-system, sans-serif;
+  color: rgba(255, 255, 255, 0.8);
+  animation: hermes-fade-in 0.15s ease;
+}
+
+@keyframes hermes-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hermes-tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.hermes-tooltip-score {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.hermes-tooltip-score.hermes-green {
+  background: rgba(34, 197, 94, 0.15);
+  border: 2px solid rgba(34, 197, 94, 0.5);
+  color: #22c55e;
+}
+.hermes-tooltip-score.hermes-amber {
+  background: rgba(245, 158, 11, 0.15);
+  border: 2px solid rgba(245, 158, 11, 0.5);
+  color: #f59e0b;
+}
+.hermes-tooltip-score.hermes-red {
+  background: rgba(239, 68, 68, 0.15);
+  border: 2px solid rgba(239, 68, 68, 0.5);
+  color: #ef4444;
+}
+
+.hermes-tooltip-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hermes-tooltip-label.hermes-green { color: #22c55e; }
+.hermes-tooltip-label.hermes-amber { color: #f59e0b; }
+.hermes-tooltip-label.hermes-red { color: #ef4444; }
+
+.hermes-tooltip-claim {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  line-height: 1.4;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.hermes-tooltip-summary {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.hermes-tooltip-footer {
+  font-size: 9px;
+  color: rgba(99, 102, 241, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  text-align: right;
+}

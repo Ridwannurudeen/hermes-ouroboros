@@ -147,6 +147,21 @@ function processState(data) {
   }
 }
 
+// Auto-scan toggle
+const autoScanToggle = document.getElementById("autoscan-toggle");
+const autoScanLabel = document.getElementById("autoscan-label");
+
+chrome.storage.sync.get(["autoScan"], (data) => {
+  autoScanToggle.checked = data.autoScan === true;
+  autoScanLabel.textContent = data.autoScan ? "Scanning" : "Auto";
+});
+
+autoScanToggle.addEventListener("change", () => {
+  const enabled = autoScanToggle.checked;
+  chrome.storage.sync.set({ autoScan: enabled });
+  autoScanLabel.textContent = enabled ? "Scanning" : "Auto";
+});
+
 // Initial load
 chrome.storage.local.get(["hermes"], (data) => {
   processState(data);

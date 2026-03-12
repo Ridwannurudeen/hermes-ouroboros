@@ -4,6 +4,7 @@ import LandingDemo from '../components/landing/LandingDemo'
 import VerdictGallery from '../components/landing/VerdictGallery'
 import LiveStats from '../components/landing/LiveStats'
 import HowItWorks from '../components/landing/HowItWorks'
+import ResearchFindings from '../components/landing/ResearchFindings'
 import DifferentiatorSection from '../components/landing/DifferentiatorSection'
 import HermesAdvantage from '../components/landing/HermesAdvantage'
 import AgentShowcase from '../components/landing/AgentShowcase'
@@ -66,6 +67,13 @@ export default function LandingPage() {
         </div>
 
         <HowItWorks />
+
+        <div className="relative h-px mx-auto max-w-4xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
+          <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-amber-400/60" />
+        </div>
+
+        <ResearchFindings />
 
         <div className="relative h-px mx-auto max-w-4xl">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-violet-500/30 to-transparent" />

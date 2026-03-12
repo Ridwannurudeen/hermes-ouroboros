@@ -133,6 +133,7 @@ class HermesWebApp:
                 web.post('/api/workspaces/{workspace_id}/claims', self.handle_workspace_pin_claim),
                 web.delete('/api/workspaces/{workspace_id}/claims/{claim_id}', self.handle_workspace_unpin_claim),
                 web.post('/api/workspaces/{workspace_id}/evidence', self.handle_workspace_pin_evidence),
+                web.delete('/api/workspaces/{workspace_id}/evidence', self.handle_workspace_unpin_evidence),
                 web.post('/api/workspaces/{workspace_id}/notes', self.handle_workspace_add_note),
                 web.delete('/api/workspaces/{workspace_id}/notes/{note_id}', self.handle_workspace_delete_note),
                 # Watchlist routes
@@ -558,6 +559,18 @@ class HermesWebApp:
             raise web.HTTPBadRequest(text='url is required')
         store = WorkspaceStore(self.root)
         ws = store.pin_evidence(wid, url, payload.get('title', ''), payload.get('trust_tier', ''), payload.get('note', ''))
+        if ws is None:
+            raise web.HTTPNotFound(text='Workspace not found.')
+        return web.json_response(ws)
+
+    async def handle_workspace_unpin_evidence(self, request: web.Request) -> web.Response:
+        wid = request.match_info['workspace_id']
+        payload = await self._read_json(request)
+        url = payload.get('url', '')
+        if not url:
+            raise web.HTTPBadRequest(text='url is required')
+        store = WorkspaceStore(self.root)
+        ws = store.unpin_evidence(wid, url)
         if ws is None:
             raise web.HTTPNotFound(text='Workspace not found.')
         return web.json_response(ws)

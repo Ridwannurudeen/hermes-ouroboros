@@ -127,6 +127,7 @@ Loss decreased **35% across 5 iterations**. The ouroboros loop is working.
 - DPO preference extraction from every session
 - SFT + DPO fine-tuning on Modal A10G GPU (LoRA r=16)
 - Automated benchmarking before adapter promotion
+- [Open-source DPO dataset on HuggingFace](https://huggingface.co/datasets/gudman1/hermes-adversarial-dpo) (491+ pairs)
 - API key auth with per-key rate limiting
 - Telegram bot integration
 - Web search evidence gathering

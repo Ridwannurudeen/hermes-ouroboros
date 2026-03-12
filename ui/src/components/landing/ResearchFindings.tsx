@@ -268,7 +268,7 @@ export default function ResearchFindings() {
           className="flex items-center justify-center gap-6"
         >
           <a
-            href="https://huggingface.co/datasets/Ridwannurudeen/hermes-adversarial-dpo"
+            href="https://huggingface.co/datasets/gudman1/hermes-adversarial-dpo"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-5 py-3 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] transition-colors text-sm text-white/50 hover:text-white/80"

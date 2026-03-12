@@ -111,6 +111,20 @@ export interface LoopStatusData {
   sessions_total?: number
 }
 
+export interface ClaimItem {
+  claim: string
+  status: 'supported' | 'weakly_supported' | 'disputed' | 'insufficient_evidence'
+  reasoning: string
+  source_url?: string
+}
+
+export interface FeedbackData {
+  session_id: string
+  rating: number
+  tags: string[]
+  timestamp: string
+}
+
 export interface SessionResult {
   session_id: string
   timestamp: string
@@ -135,6 +149,8 @@ export interface SessionResult {
   share_id?: string | null
   dpo_pairs_created?: number
   web_evidence?: WebEvidence | null
+  claim_breakdown?: ClaimItem[]
+  feedback?: FeedbackData
 }
 
 export interface SessionSummary {

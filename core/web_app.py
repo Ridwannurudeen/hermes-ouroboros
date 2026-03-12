@@ -19,6 +19,8 @@ from core.session_store import SessionStore
 from core.user_store import UserStore
 from core.api_key_store import ApiKeyStore
 from core.email_service import EmailService
+from core.feedback_store import FeedbackStore
+from core.memo_generator import generate_memo
 from learning.atropos_runner import get_training_status
 from learning.preference_extractor import build_dpo_dataset
 from learning.trajectory_stats import build_stats
@@ -67,6 +69,7 @@ class HermesWebApp:
         self.email_service = EmailService()
         self.api_key_rate_limiter = InMemoryRateLimiter(limit=30, window_seconds=60)
         self.guest_rate_limiter = InMemoryRateLimiter(limit=5, window_seconds=60)
+        self.feedback_store = FeedbackStore(str(self.root))
 
     def build_app(self) -> web.Application:
         app = web.Application(client_max_size=2 * 1024 * 1024, middlewares=[self._security_headers_middleware])
@@ -103,6 +106,8 @@ class HermesWebApp:
                 web.get('/api/export/dpo', self.handle_export_dpo),
                 web.get('/api/skills', self.handle_skills_list),
                 web.get('/api/research/analysis', self.handle_research_analysis),
+                web.post('/api/sessions/{session_id}/feedback', self.handle_session_feedback),
+                web.get('/api/feedback/stats', self.handle_feedback_stats),
             ]
         )
         # SPA routes — serve React index.html for /app and /app/*
@@ -233,6 +238,7 @@ class HermesWebApp:
         trajectory_stats = build_stats(self.root)
         training_status = get_training_status(self.root)
         benchmark_summary = self._load_benchmark_summary()
+        feedback_stats = self.feedback_store.get_stats()
         return web.json_response(
             {
                 'total_sessions': len(sessions),
@@ -242,6 +248,7 @@ class HermesWebApp:
                 'trajectory': trajectory_stats,
                 'training': training_status,
                 'benchmark': benchmark_summary,
+                'feedback': feedback_stats,
             }
         )
 
@@ -296,8 +303,18 @@ class HermesWebApp:
                     'Content-Disposition': f'attachment; filename="{session["session_id"]}.json"',
                 },
             )
+        # Decision memo exports
+        if export_format in ('research_brief', 'risk_memo', 'investment_memo'):
+            body = generate_memo(session, export_format)
+            return web.Response(
+                text=body,
+                content_type='text/markdown',
+                headers={
+                    'Content-Disposition': f'attachment; filename="{session["session_id"]}_{export_format}.md"',
+                },
+            )
         if export_format != 'markdown':
-            raise web.HTTPBadRequest(text='format must be markdown or json')
+            raise web.HTTPBadRequest(text='format must be markdown, json, research_brief, risk_memo, or investment_memo')
         body = self._render_session_markdown(session)
         return web.Response(
             text=body,
@@ -306,6 +323,26 @@ class HermesWebApp:
                 'Content-Disposition': f'attachment; filename="{session["session_id"]}.md"',
             },
         )
+
+    async def handle_session_feedback(self, request: web.Request) -> web.Response:
+        """Save user feedback (thumbs up/down + tags) for a session."""
+        principal = self._resolve_principal(request)
+        # Allow guest feedback too — anyone who can see a session can rate it
+        session_id = request.match_info['session_id']
+        payload = await self._read_json(request)
+        rating = payload.get('rating')
+        if rating not in (1, -1):
+            raise web.HTTPBadRequest(text='Field "rating" must be 1 or -1.')
+        tags = payload.get('tags', [])
+        if not isinstance(tags, list):
+            tags = []
+        feedback = self.feedback_store.save_feedback(session_id, rating, tags)
+        return web.json_response({'ok': True, 'feedback': feedback})
+
+    async def handle_feedback_stats(self, request: web.Request) -> web.Response:
+        """Aggregate feedback stats — no auth required (read-only, non-sensitive)."""
+        stats = self.feedback_store.get_stats()
+        return web.json_response(stats)
 
     async def handle_benchmark_report(self, request: web.Request) -> web.Response:
         self._require_principal(request)
@@ -792,6 +829,10 @@ class HermesWebApp:
         payload = dict(session)
         if session.get('share_id'):
             payload['share_url'] = self._share_url(request, str(session['share_id']))
+        # Attach feedback if exists
+        feedback = self.feedback_store.get_feedback(str(session.get('session_id', '')))
+        if feedback:
+            payload['feedback'] = feedback
         return payload
 
     def _public_shared_session(self, session: dict[str, Any], request: web.Request) -> dict[str, Any]:

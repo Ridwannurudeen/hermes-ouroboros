@@ -13,6 +13,7 @@ from core.arbiter_prompt import build_arbiter_prompt
 from core.conflict_resolver import ConflictResolver
 from core.mode_prompts import get_arbiter_prompt
 from core.verdict_parser import parse_verdict
+from core.claim_extractor import extract_claims
 from core.web_search import EvidenceGatherer
 from core.session_store import SessionStore
 from core.settings import load_settings
@@ -105,6 +106,10 @@ class MasterOrchestrator:
             if hermes_score == -1 and 'hermes_score' in verdict_sections:
                 hermes_score = verdict_sections['hermes_score']
             elapsed_seconds = round((datetime.now(timezone.utc) - started).total_seconds(), 3)
+            # Extract atomic claims from arbiter verdict (no extra LLM call)
+            web_evidence_dict = evidence.to_dict() if evidence and not evidence.is_empty() else None
+            claim_breakdown = extract_claims(arbiter_verdict, web_evidence_dict)
+
             session_result: dict[str, Any] = {
                 'query': query,
                 'timestamp': timestamp,
@@ -122,7 +127,8 @@ class MasterOrchestrator:
                 'agent_timings': agent_timings,
                 'round2_timings': round2_timings,
                 'verdict_sections': verdict_sections,
-                'web_evidence': evidence.to_dict() if evidence and not evidence.is_empty() else None,
+                'claim_breakdown': claim_breakdown,
+                'web_evidence': web_evidence_dict,
                 'provider_meta': {
                     'research': conflict.additional_research_meta,
                     'arbiter': arbiter_meta,

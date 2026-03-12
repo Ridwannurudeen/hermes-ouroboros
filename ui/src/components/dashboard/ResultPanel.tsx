@@ -8,6 +8,9 @@ import {
 import GlassCard from '../ui/GlassCard'
 import Pill from '../ui/Pill'
 import ProgressBar from '../ui/ProgressBar'
+import ClaimBreakdown from './ClaimBreakdown'
+import FeedbackPanel from './FeedbackPanel'
+import MemoExport from './MemoExport'
 import { apiPost } from '../../api/client'
 import type { SessionResult, AgentRole, AnalysisMode, EvidenceItem, LoopStatusData } from '../../api/types'
 import { MODE_AGENT_LABELS } from '../../api/types'
@@ -412,10 +415,11 @@ export default function ResultPanel({ result, soloResult, soloLoading, loopStatu
                     </motion.p>
                   )}
                 </div>
-                <div className="flex items-center gap-0.5 flex-shrink-0">
+                <div className="flex items-center gap-1 flex-shrink-0">
                   <CopyButton result={result} />
                   <ShareButton result={result} />
                   <ShareOnXButton result={result} />
+                  <MemoExport sessionId={result.session_id} />
                 </div>
               </div>
               <motion.p
@@ -431,8 +435,13 @@ export default function ResultPanel({ result, soloResult, soloLoading, loopStatu
         </GlassCard>
       </motion.div>
 
-      {/* Web Sources (Feature 1) */}
+      {/* Web Sources */}
       <WebSourcesSection result={result} />
+
+      {/* Claim Breakdown — atomic claim analysis */}
+      {result.claim_breakdown && result.claim_breakdown.length > 0 && (
+        <ClaimBreakdown claims={result.claim_breakdown} />
+      )}
 
       {/* Structured verdict sections */}
       {(vs.fatal_flaws || vs.key_strengths || vs.key_evidence_for || vs.key_evidence_against ||
@@ -633,6 +642,9 @@ export default function ResultPanel({ result, soloResult, soloLoading, loopStatu
         </GlassCard>
       )}
 
+      {/* Feedback — rate this verdict (feeds DPO training) */}
+      <FeedbackPanel sessionId={result.session_id} existing={result.feedback} />
+
       {/* DPO */}
       {result.dpo_pairs_created !== undefined && result.dpo_pairs_created > 0 && (
         <div className="flex items-center gap-2 px-1">
@@ -641,7 +653,7 @@ export default function ResultPanel({ result, soloResult, soloLoading, loopStatu
         </div>
       )}
 
-      {/* DPO Loop Status Badge (Feature 5) */}
+      {/* DPO Loop Status Badge */}
       {loopStatus && <LoopStatusBadge loopStatus={loopStatus} />}
 
       {/* Follow-up Questions (Feature E) */}

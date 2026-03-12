@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, useInView, useMotionValue, useTransform, animate } from 'framer-motion'
-import { Activity, GitBranch, Cpu, TrendingUp } from 'lucide-react'
+import { Activity, GitBranch, Cpu, TrendingUp, ShieldCheck } from 'lucide-react'
 
 interface StatItem {
   label: string
@@ -50,7 +50,16 @@ export default function LiveStats() {
         if (data.sessions?.average_confidence != null) {
           items.push({ label: 'Avg Confidence', value: Math.round(data.sessions.average_confidence), suffix: '%', icon: TrendingUp, color: 'text-amber-400' })
         }
-        if (items.length > 0) setStats(items)
+        // Also fetch claim ledger stats
+        fetch('/api/claims/ledger')
+          .then((r) => r.ok ? r.json() : null)
+          .then((ledger) => {
+            if (ledger && ledger.total_claims > 0) {
+              items.push({ label: 'Claims Verified', value: ledger.total_claims, icon: ShieldCheck, color: 'text-rose-400' })
+            }
+            if (items.length > 0) setStats(items)
+          })
+          .catch(() => { if (items.length > 0) setStats(items) })
       })
       .catch(() => {})
   }, [])

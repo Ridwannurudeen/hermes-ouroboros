@@ -39,6 +39,7 @@ _TEXT_SECTIONS: list[tuple[str, str]] = [
     ('bear_case_summary', r'BEAR\s+CASE\s+SUMMARY\s*[:=]\s*'),
     ('key_uncertainties', r'KEY\s+UNCERTAINTIES\s*[:=]\s*'),
     ('dissenting_views', r'DISSENTING\s+VIEWS?\s*[:=]\s*'),
+    ('what_would_change', r'WHAT\s+WOULD\s+CHANGE\s+(?:THIS\s+)?(?:VERDICT|ASSESSMENT|ANALYSIS)\s*[:=]\s*'),
 ]
 
 # Headers that mark the start of a new section (used to find boundaries)
@@ -46,7 +47,7 @@ _ALL_HEADERS = re.compile(
     r'^(?:VERDICT|HERMES\s+SCORE|CONFIDENCE|FATAL\s+FLAW|KEY\s+STRENGTH|FIX\s+OR\s+DIE|'
     r'THINKING\s+TRAP|BLIND\s+SPOT|PREMORTEM|SO\s+WHAT|KEY\s+EVIDENCE|MISSING\s+CONTEXT|'
     r'SOURCE\s+CREDIB|BULL\s+CASE\s+SUMM|BEAR\s+CASE\s+SUMM|KEY\s+UNCERTAIN|'
-    r'DISSENTING|SURVIVAL\s+PROB|PROBABILITY\s+OF|FACTUAL\s+ACC|MISLEADING)\s*[:=]',
+    r'DISSENTING|WHAT\s+WOULD\s+CHANGE|SURVIVAL\s+PROB|PROBABILITY\s+OF|FACTUAL\s+ACC|MISLEADING)\s*[:=]',
     re.IGNORECASE | re.MULTILINE,
 )
 

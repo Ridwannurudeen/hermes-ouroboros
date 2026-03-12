@@ -21,6 +21,8 @@ from core.api_key_store import ApiKeyStore
 from core.email_service import EmailService
 from core.feedback_store import FeedbackStore
 from core.memo_generator import generate_memo
+from core.drift_monitor import build_drift_analysis
+from core.claim_ledger import build_claim_ledger
 from learning.atropos_runner import get_training_status
 from learning.preference_extractor import build_dpo_dataset
 from learning.trajectory_stats import build_stats
@@ -108,6 +110,8 @@ class HermesWebApp:
                 web.get('/api/research/analysis', self.handle_research_analysis),
                 web.post('/api/sessions/{session_id}/feedback', self.handle_session_feedback),
                 web.get('/api/feedback/stats', self.handle_feedback_stats),
+                web.get('/api/sessions/{session_id}/drift', self.handle_session_drift),
+                web.get('/api/claims/ledger', self.handle_claim_ledger),
             ]
         )
         # SPA routes — serve React index.html for /app and /app/*
@@ -343,6 +347,22 @@ class HermesWebApp:
         """Aggregate feedback stats — no auth required (read-only, non-sensitive)."""
         stats = self.feedback_store.get_stats()
         return web.json_response(stats)
+
+    async def handle_session_drift(self, request: web.Request) -> web.Response:
+        """Get verdict drift analysis for a session — compare to similar past sessions."""
+        session_id = request.match_info['session_id']
+        session = self.session_store.get_session(session_id)
+        if session is None:
+            raise web.HTTPNotFound(text='Session not found.')
+        drift = build_drift_analysis(session, self.session_store.sessions_dir)
+        if drift is None:
+            return web.json_response({'has_drift': False, 'similar_sessions': []})
+        return web.json_response(drift)
+
+    async def handle_claim_ledger(self, request: web.Request) -> web.Response:
+        """Global claim statistics across all sessions — no auth required."""
+        ledger = build_claim_ledger(self.session_store.sessions_dir)
+        return web.json_response(ledger)
 
     async def handle_benchmark_report(self, request: web.Request) -> web.Response:
         self._require_principal(request)

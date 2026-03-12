@@ -79,6 +79,7 @@ export interface VerdictSections {
   bear_case_summary?: string
   key_uncertainties?: string
   dissenting_views?: string
+  what_would_change?: string
   survival_probability?: number
   failure_probability?: number
   factual_accuracy?: number
@@ -275,3 +276,59 @@ export const ANALYSIS_MODES: ModeInfo[] = [
   { key: 'verify', label: 'Verify', tagline: 'Fact-check any claim', icon: 'search', color: 'amber' },
   { key: 'research', label: 'Research', tagline: 'Deep-dive analysis', icon: 'chart', color: 'violet' },
 ]
+
+/* ---------- Verdict Drift Types ---------- */
+
+export interface DriftEntry {
+  session_id: string
+  timestamp: string
+  query: string
+  similarity: number
+  hermes_score: number
+  confidence_score: number
+  verdict_label: string
+  analysis_mode: AnalysisMode | string
+  claim_count: number
+  claim_statuses: Record<string, number>
+}
+
+export interface DriftAnalysis {
+  has_drift: boolean
+  similar_sessions: DriftEntry[]
+  closest_match?: {
+    session_id: string
+    query: string
+    timestamp: string
+    similarity: number
+  }
+  score_delta?: number | null
+  score_direction?: 'improved' | 'declined' | 'stable'
+  current_score: number
+  past_score: number
+  label_changed?: boolean
+  current_label?: string
+  past_label?: string
+  current_claims: number
+  past_claims: number
+}
+
+/* ---------- Claim Ledger Types ---------- */
+
+export interface ClaimLedger {
+  total_claims: number
+  total_sessions: number
+  sessions_with_claims: number
+  status_breakdown: Record<string, number>
+  supported_pct: number
+  disputed_pct: number
+  recent_claims: LedgerClaim[]
+}
+
+export interface LedgerClaim {
+  claim: string
+  status: string
+  session_id: string
+  query: string
+  timestamp: string
+  hermes_score: number
+}

@@ -1,6 +1,7 @@
 import StatTile from '../ui/StatTile'
 import GlassCard from '../ui/GlassCard'
 import LossChart from './LossChart'
+import ClaimLedgerBadge from './ClaimLedgerBadge'
 import type { StatsResponse } from '../../api/types'
 import { BarChart3 } from 'lucide-react'
 
@@ -74,6 +75,9 @@ export default function StatsPanel({ stats }: StatsPanelProps) {
           </div>
         </GlassCard>
       )}
+
+      {/* Claim Ledger */}
+      <ClaimLedgerBadge />
 
       <LossChart />
     </div>

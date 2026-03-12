@@ -3,7 +3,7 @@ import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 import {
   Scale, AlertTriangle, BookOpen, Zap, Brain, Eye, Skull, Target,
   TrendingUp, TrendingDown, HelpCircle, Copy, Check, Share2, ExternalLink,
-  Columns, Globe, Clock, ArrowRight,
+  Columns, Globe, Clock, ArrowRight, RotateCcw,
 } from 'lucide-react'
 import GlassCard from '../ui/GlassCard'
 import Pill from '../ui/Pill'
@@ -11,6 +11,7 @@ import ProgressBar from '../ui/ProgressBar'
 import ClaimBreakdown from './ClaimBreakdown'
 import FeedbackPanel from './FeedbackPanel'
 import MemoExport from './MemoExport'
+import VerdictDrift from './VerdictDrift'
 import { apiPost } from '../../api/client'
 import type { SessionResult, AgentRole, AnalysisMode, EvidenceItem, LoopStatusData } from '../../api/types'
 import { MODE_AGENT_LABELS } from '../../api/types'
@@ -587,6 +588,17 @@ export default function ResultPanel({ result, soloResult, soloLoading, loopStatu
         </div>
       )}
 
+      {/* What Would Change This Verdict */}
+      {vs.what_would_change && (
+        <GlassCard className="p-5 border-violet-500/20">
+          <div className="flex items-center gap-2 mb-2">
+            <RotateCcw size={16} className="text-violet-400" />
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">What Would Change This Verdict</h3>
+          </div>
+          <p className="text-sm text-white/70 leading-relaxed whitespace-pre-wrap">{vs.what_would_change}</p>
+        </GlassCard>
+      )}
+
       {/* Conflict */}
       {result.conflict_detected && (
         <GlassCard className="p-5 border-amber-500/30">
@@ -670,6 +682,9 @@ export default function ResultPanel({ result, soloResult, soloLoading, loopStatu
 
       {/* Feedback — rate this verdict (feeds DPO training) */}
       <FeedbackPanel sessionId={result.session_id} existing={result.feedback} />
+
+      {/* Verdict Drift — how has Hermes answered this before? */}
+      <VerdictDrift sessionId={result.session_id} />
 
       {/* DPO */}
       {result.dpo_pairs_created !== undefined && result.dpo_pairs_created > 0 && (

@@ -70,6 +70,7 @@ RED_TEAM_PROMPTS: dict[str, str] = {
         'THINKING TRAPS: (cognitive biases detected in how this idea was framed), '
         'BLIND SPOTS: (things the creator has not considered but should), '
         'PREMORTEM: (it is one year later and this failed — the most likely reason is...), '
+        'WHAT WOULD CHANGE THIS VERDICT: (what specific new evidence, data, or events would flip this assessment — be concrete), '
         'SO WHAT — DO THIS NOW: (the single most important next action), '
         'CONFIDENCE: [0-100].'
     ),
@@ -134,6 +135,7 @@ VERIFY_PROMPTS: dict[str, str] = {
         'THINKING TRAPS: (cognitive biases that make people believe or disbelieve this), '
         'BLIND SPOTS: (aspects of this claim that most people overlook), '
         'SOURCE CREDIBILITY: (how trustworthy are the origins of this claim), '
+        'WHAT WOULD CHANGE THIS VERDICT: (what specific new evidence or developments would flip this assessment), '
         'SO WHAT — THE BOTTOM LINE: (what should you actually believe and why), '
         'CONFIDENCE: [0-100].'
     ),
@@ -197,6 +199,7 @@ RESEARCH_PROMPTS: dict[str, str] = {
         'THINKING TRAPS: (cognitive biases that affect analysis of this topic), '
         'BLIND SPOTS: (what most analyses of this topic miss), '
         'PREMORTEM: (if the bull case is wrong, this is the most likely reason), '
+        'WHAT WOULD CHANGE THIS VERDICT: (what specific new data, events, or evidence would fundamentally alter this assessment), '
         'SO WHAT — RECOMMENDED ACTION: (what to do based on this analysis), '
         'CONFIDENCE: [0-100].'
     ),

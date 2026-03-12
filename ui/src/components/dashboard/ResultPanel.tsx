@@ -117,7 +117,33 @@ function SourceCard({ item, label }: { item: EvidenceItem; label: string }) {
         <ExternalLink size={10} className="text-white/20 flex-shrink-0" />
       </div>
       <p className="text-[10px] text-white/35 line-clamp-2 leading-relaxed">{item.snippet}</p>
-      <span className={`text-[9px] font-bold uppercase tracking-wider mt-1.5 inline-block ${labelColor}`}>{label}</span>
+      <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+        <span className={`text-[9px] font-bold uppercase tracking-wider ${labelColor}`}>{label}</span>
+        {item.trust_tier && item.trust_tier !== 'Unknown' && (
+          <span className={`text-[8px] px-1.5 py-0.5 rounded-full border ${
+            item.trust_tier === 'Academic' ? 'bg-violet-500/10 text-violet-300 border-violet-500/20' :
+            item.trust_tier === 'Government' ? 'bg-blue-500/10 text-blue-300 border-blue-500/20' :
+            item.trust_tier === 'Major News' ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' :
+            'bg-amber-500/10 text-amber-300 border-amber-500/20'
+          }`}>
+            {item.trust_tier}
+          </span>
+        )}
+        {item.recency && item.recency !== 'Unknown' && (
+          <span className={`text-[8px] px-1.5 py-0.5 rounded-full border ${
+            item.recency === 'Current' ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' :
+            item.recency === 'Recent' ? 'bg-amber-500/10 text-amber-300 border-amber-500/20' :
+            'bg-white/[0.05] text-white/30 border-white/[0.1]'
+          }`}>
+            {item.recency}
+          </span>
+        )}
+        {item.corroboration !== undefined && item.corroboration > 0 && (
+          <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+            +{item.corroboration} corr.
+          </span>
+        )}
+      </div>
     </a>
   )
 }

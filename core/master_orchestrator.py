@@ -14,6 +14,7 @@ from core.conflict_resolver import ConflictResolver
 from core.mode_prompts import get_arbiter_prompt
 from core.verdict_parser import parse_verdict
 from core.claim_extractor import extract_claims
+from core.source_trust import enrich_sources
 from core.web_search import EvidenceGatherer
 from core.session_store import SessionStore
 from core.settings import load_settings
@@ -106,8 +107,9 @@ class MasterOrchestrator:
             if hermes_score == -1 and 'hermes_score' in verdict_sections:
                 hermes_score = verdict_sections['hermes_score']
             elapsed_seconds = round((datetime.now(timezone.utc) - started).total_seconds(), 3)
-            # Extract atomic claims from arbiter verdict (no extra LLM call)
+            # Post-processing: enrich sources with trust metadata, extract claims
             web_evidence_dict = evidence.to_dict() if evidence and not evidence.is_empty() else None
+            web_evidence_dict = enrich_sources(web_evidence_dict)
             claim_breakdown = extract_claims(arbiter_verdict, web_evidence_dict)
 
             session_result: dict[str, Any] = {

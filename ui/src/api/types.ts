@@ -89,6 +89,9 @@ export interface EvidenceItem {
   title: string
   url: string
   snippet: string
+  trust_tier?: 'Academic' | 'Government' | 'Major News' | 'Blog/Forum' | 'Unknown'
+  recency?: 'Current' | 'Recent' | 'Dated' | 'Unknown'
+  corroboration?: number
 }
 
 export interface WebEvidence {

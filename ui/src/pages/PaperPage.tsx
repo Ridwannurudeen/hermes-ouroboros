@@ -223,11 +223,13 @@ function SubSection({ number, title, children }: { number: string; title: string
 /* ------------------------------------------------------------------ */
 interface ComparisonResult {
   query: string
-  mode: string
-  base: { quality: number; confidence: number }
-  trained: { quality: number; confidence: number }
+  mode?: string
+  base_quality: number
+  trained_quality: number
   quality_delta: number
-  confidence_delta: number
+  base_confidence: number
+  trained_confidence: number
+  delta: number
 }
 
 export default function PaperPage() {
@@ -550,31 +552,37 @@ export default function PaperPage() {
                   Table 6 shows per-query results.
                 </p>
                 <DataTable
-                  headers={['Query', 'Mode', 'Base Quality', 'Trained Quality', 'Δ Quality']}
+                  headers={['Query', 'Base Quality', 'Trained Quality', 'Δ Quality']}
                   rows={comparison.map(c => [
                     c.query.length > 60 ? c.query.slice(0, 57) + '...' : c.query,
-                    c.mode.toUpperCase(),
-                    c.base.quality,
-                    c.trained.quality,
+                    c.base_quality,
+                    c.trained_quality,
                     (c.quality_delta > 0 ? '+' : '') + c.quality_delta,
                   ])}
                 />
-                <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                  Across {comparison.length} test queries, the trained model achieved higher quality scores on{' '}
-                  {comparison.filter(c => c.quality_delta > 0).length}/{comparison.length} queries
-                  (average Δ = {comparison.length > 0 ? (comparison.reduce((s, c) => s + c.quality_delta, 0) / comparison.length > 0 ? '+' : '') : ''}
-                  {(comparison.reduce((s, c) => s + c.quality_delta, 0) / comparison.length).toFixed(1)} points).
-                  This provides evidence that the LoRA adapters trained on debate-generated DPO pairs
-                  produce measurable downstream quality improvements in the council's output, closing the loop from
-                  debate → preference data → training → improved deliberation.
-                </p>
-                <p className="text-sm text-gray-700 leading-relaxed">
-                  Notably, confidence scores show a slight decrease in the trained model
-                  (avg Δ = {(comparison.reduce((s, c) => s + c.confidence_delta, 0) / comparison.length).toFixed(1)}),
-                  which we interpret as improved calibration rather than degradation — the trained model is
-                  less overconfident on uncertain claims, consistent with the Bayesian reasoning patterns
-                  reinforced through DPO training on Arbiter-preferred responses.
-                </p>
+                {(() => {
+                  const avgDelta = comparison.reduce((s, c) => s + c.quality_delta, 0) / comparison.length
+                  const avgConfDelta = comparison.reduce((s, c) => s + c.delta, 0) / comparison.length
+                  return (
+                    <>
+                      <p className="text-sm text-gray-700 leading-relaxed mb-4">
+                        Across {comparison.length} test queries, the trained model achieved higher quality scores on{' '}
+                        {comparison.filter(c => c.quality_delta > 0).length}/{comparison.length} queries
+                        (average Δ = {avgDelta > 0 ? '+' : ''}{avgDelta.toFixed(1)} points).
+                        This provides evidence that the LoRA adapters trained on debate-generated DPO pairs
+                        produce measurable downstream quality improvements in the council's output, closing the loop from
+                        debate → preference data → training → improved deliberation.
+                      </p>
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        Notably, confidence scores show a slight shift in the trained model
+                        (avg Δ = {avgConfDelta > 0 ? '+' : ''}{avgConfDelta.toFixed(1)}),
+                        which we interpret as improved calibration — the trained model is
+                        less overconfident on uncertain claims, consistent with the Bayesian reasoning patterns
+                        reinforced through DPO training on Arbiter-preferred responses.
+                      </p>
+                    </>
+                  )
+                })()}
               </SubSection>
             )}
           </Section>

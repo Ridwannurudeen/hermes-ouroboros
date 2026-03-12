@@ -34,6 +34,7 @@ export default function DashboardPage() {
   const [currentAnalysisMode, setCurrentAnalysisMode] = useState<AnalysisMode>('red_team')
   const [soloResult, setSoloResult] = useState<{ response: string; elapsed_seconds: number } | null>(null)
   const [soloLoading, setSoloLoading] = useState(false)
+  const [followUpQuery, setFollowUpQuery] = useState('')
   const meta = useMeta()
   const stats = useStats()
   const loopStatus = useLoopStatus()
@@ -64,7 +65,14 @@ export default function DashboardPage() {
     fetchSessionsRef.current()
   }, [])
 
+  const handleFollowUp = useCallback((query: string) => {
+    setFollowUpQuery(query)
+    setActivePanel('query')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
   const handleQuery = useCallback(async (query: string, mode: string, analysisMode: AnalysisMode = 'default', compare?: boolean) => {
+    setFollowUpQuery('')
     setCurrentAnalysisMode(analysisMode)
     setSoloResult(null)
     setSoloLoading(false)
@@ -122,6 +130,7 @@ export default function DashboardPage() {
       onPanelChange={setActivePanel}
       providerName={providerName}
       model={model}
+      onOpenPalette={() => setPaletteOpen(true)}
     >
       {activePanel === 'query' && (
         <div className="space-y-6 max-w-4xl">
@@ -140,6 +149,7 @@ export default function DashboardPage() {
             isStreaming={sse.isStreaming}
             elapsed={sse.elapsed}
             onSubmit={handleQuery}
+            initialQuery={followUpQuery}
           />
 
           {/* Council Ring visualization */}
@@ -186,6 +196,7 @@ export default function DashboardPage() {
               soloResult={soloResult}
               soloLoading={soloLoading}
               loopStatus={loopStatus.data}
+              onFollowUp={handleFollowUp}
             />
           )}
         </div>

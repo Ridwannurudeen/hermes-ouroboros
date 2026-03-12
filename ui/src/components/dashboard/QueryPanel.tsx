@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import CommandInput from '../ui/CommandInput'
 import ExampleChips from '../ui/ExampleChips'
@@ -10,6 +10,7 @@ interface QueryPanelProps {
   isStreaming: boolean
   elapsed: number
   onSubmit: (query: string, mode: string, analysisMode: AnalysisMode, compare?: boolean) => void
+  initialQuery?: string
 }
 
 const MODE_CARDS: { key: AnalysisMode; label: string; tagline: string; icon: typeof Shield; color: string; bg: string; border: string; text: string }[] = [
@@ -37,12 +38,16 @@ const MODE_EXAMPLES: Record<AnalysisMode, string[]> = {
   ],
 }
 
-export default function QueryPanel({ examples, isStreaming, elapsed, onSubmit }: QueryPanelProps) {
+export default function QueryPanel({ examples, isStreaming, elapsed, onSubmit, initialQuery }: QueryPanelProps) {
   const [query, setQuery] = useState('')
   const [mode] = useState('default')
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>('red_team')
   const [compareMode, setCompareMode] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    if (initialQuery) setQuery(initialQuery)
+  }, [initialQuery])
 
   const handleSubmit = () => {
     if (!query.trim() || isStreaming) return

@@ -3,7 +3,7 @@ import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 import {
   Scale, AlertTriangle, BookOpen, Zap, Brain, Eye, Skull, Target,
   TrendingUp, TrendingDown, HelpCircle, Copy, Check, Share2, ExternalLink,
-  Columns, Globe, Clock,
+  Columns, Globe, Clock, ArrowRight,
 } from 'lucide-react'
 import GlassCard from '../ui/GlassCard'
 import Pill from '../ui/Pill'
@@ -17,6 +17,7 @@ interface ResultPanelProps {
   soloResult?: { response: string; elapsed_seconds: number } | null
   soloLoading?: boolean
   loopStatus?: LoopStatusData | null
+  onFollowUp?: (query: string) => void
 }
 
 const COUNCIL_ROLES: AgentRole[] = ['advocate', 'skeptic', 'oracle', 'contrarian']
@@ -207,6 +208,29 @@ function CopyButton({ result }: { result: SessionResult }) {
   )
 }
 
+/* ---------- Share on X Button ---------- */
+function ShareOnXButton({ result }: { result: SessionResult }) {
+  const vs = result.verdict_sections || {}
+  const label = vs.verdict_label || 'VERDICT'
+  const score = result.hermes_score ?? vs.hermes_score ?? result.confidence_score
+  const q = (result.query || '').slice(0, 100)
+  const text = `HERMES Verdict: ${label} (Score: ${score}/100)\n\n"${q}"\n\nAnalyzed by 5 adversarial AI agents\nhermes-ouroboros.online`
+
+  return (
+    <a
+      href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      title="Share on X"
+      className="p-1.5 rounded-lg hover:bg-white/[0.06] transition-colors text-white/30 hover:text-white/60"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+      </svg>
+    </a>
+  )
+}
+
 /* ---------- Share Button (Feature 6) ---------- */
 function ShareButton({ result }: { result: SessionResult }) {
   const [shared, setShared] = useState(false)
@@ -286,8 +310,48 @@ function SoloCard({ response, elapsed, loading }: {
   )
 }
 
+/* ---------- Follow-Up Questions (Feature E) ---------- */
+function generateFollowUps(query: string, mode: AnalysisMode): string[] {
+  switch (mode) {
+    case 'red_team':
+      return ['What\'s the minimum viable version?', 'How would a competitor attack this?', 'What assumptions could be wrong?']
+    case 'verify':
+      return ['What are the primary sources?', 'Has this been debunked?', 'What\'s the historical context?']
+    case 'research':
+      return ['What are the counter-arguments?', 'What do experts disagree on?', 'How does this compare to alternatives?']
+    default:
+      return ['What risks am I not seeing?', 'What would change the verdict?', 'What should I do next?']
+  }
+}
+
+function FollowUpQuestions({ query, mode, onFollowUp }: { query: string; mode: AnalysisMode; onFollowUp: (q: string) => void }) {
+  const followUps = generateFollowUps(query, mode)
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 2.0, duration: 0.5 }}
+      className="space-y-3"
+    >
+      <p className="text-[10px] uppercase tracking-wider text-white/25 font-semibold px-1">Dig Deeper</p>
+      <div className="flex flex-wrap gap-2">
+        {followUps.map((q) => (
+          <button
+            key={q}
+            onClick={() => onFollowUp(q)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-indigo-500/[0.06] hover:border-indigo-500/20 text-xs text-white/40 hover:text-white/70 transition-all"
+          >
+            {q}
+            <ArrowRight size={12} className="opacity-40" />
+          </button>
+        ))}
+      </div>
+    </motion.div>
+  )
+}
+
 /* ---------- Main Component ---------- */
-export default function ResultPanel({ result, soloResult, soloLoading, loopStatus }: ResultPanelProps) {
+export default function ResultPanel({ result, soloResult, soloLoading, loopStatus, onFollowUp }: ResultPanelProps) {
   const vs = result.verdict_sections || {}
   const mode: AnalysisMode = (result.analysis_mode as AnalysisMode) || 'default'
   const labels = MODE_AGENT_LABELS[mode] || MODE_AGENT_LABELS.default
@@ -351,6 +415,7 @@ export default function ResultPanel({ result, soloResult, soloLoading, loopStatu
                 <div className="flex items-center gap-0.5 flex-shrink-0">
                   <CopyButton result={result} />
                   <ShareButton result={result} />
+                  <ShareOnXButton result={result} />
                 </div>
               </div>
               <motion.p
@@ -578,6 +643,9 @@ export default function ResultPanel({ result, soloResult, soloLoading, loopStatu
 
       {/* DPO Loop Status Badge (Feature 5) */}
       {loopStatus && <LoopStatusBadge loopStatus={loopStatus} />}
+
+      {/* Follow-up Questions (Feature E) */}
+      {onFollowUp && <FollowUpQuestions query={result.query} mode={mode} onFollowUp={onFollowUp} />}
     </div>
   )
 

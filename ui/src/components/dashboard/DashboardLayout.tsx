@@ -8,9 +8,10 @@ interface DashboardLayoutProps {
   onPanelChange: (panel: string) => void
   providerName: string
   model: string
+  onOpenPalette?: () => void
 }
 
-export default function DashboardLayout({ children, activePanel, onPanelChange, providerName, model }: DashboardLayoutProps) {
+export default function DashboardLayout({ children, activePanel, onPanelChange, providerName, model, onOpenPalette }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-[#06060e] flex relative">
       {/* Static background glows */}
@@ -21,7 +22,7 @@ export default function DashboardLayout({ children, activePanel, onPanelChange, 
 
       <Sidebar activePanel={activePanel} onPanelChange={onPanelChange} />
       <div className="flex-1 flex flex-col min-h-screen relative z-10">
-        <TopBar providerName={providerName} model={model} />
+        <TopBar providerName={providerName} model={model} onOpenPalette={onOpenPalette} />
         <main className="flex-1 p-6 overflow-y-auto dot-grid">
           {children}
         </main>

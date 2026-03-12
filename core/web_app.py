@@ -102,12 +102,14 @@ class HermesWebApp:
                 web.get('/api/benchmark/council-vs-solo', self.handle_council_vs_solo_benchmark),
                 web.get('/api/export/dpo', self.handle_export_dpo),
                 web.get('/api/skills', self.handle_skills_list),
+                web.get('/api/research/analysis', self.handle_research_analysis),
             ]
         )
         # SPA routes — serve React index.html for /app and /app/*
         app.router.add_get('/app', self.handle_index)
         app.router.add_get('/app/{rest:.*}', self.handle_index)
         app.router.add_get('/verdict/{rest:.*}', self.handle_index)
+        app.router.add_get('/paper', self.handle_index)
         # Serve built React assets
         dist_dir = self.root / 'web' / 'dist'
         if dist_dir.is_dir():
@@ -463,6 +465,136 @@ class HermesWebApp:
                     'size_bytes': path.stat().st_size,
                 })
         return web.json_response({'skills': skills, 'total': len(skills)})
+
+    async def handle_research_analysis(self, request: web.Request) -> web.Response:
+        """Comprehensive research analysis data for the technical report page."""
+        from benchmark.common import response_quality_score
+
+        # 1. Benchmark data
+        bench_path = self.root / 'benchmark_results' / 'results_council_vs_solo.json'
+        if not bench_path.exists():
+            bench_path = self.root / 'benchmark' / 'results_council_vs_solo.json'
+        bench_data = None
+        if bench_path.exists():
+            bench_data = json.loads(bench_path.read_text(encoding='utf-8'))
+
+        # 2. Loop / training data (inline — mirrors handle_loop_status)
+        models_dir = self.root / 'models'
+        model_versions = []
+        if models_dir.exists():
+            for entry in sorted(models_dir.iterdir()):
+                result_path = entry / 'training_result.json'
+                if result_path.exists():
+                    try:
+                        res = json.loads(result_path.read_text(encoding='utf-8'))
+                        model_versions.append({
+                            'name': entry.name,
+                            'loss': res.get('final_training_loss'),
+                            'steps': res.get('steps'),
+                            'mode': res.get('mode', 'sft'),
+                        })
+                    except Exception:
+                        pass
+        sessions = self.session_store.get_recent_sessions(n=1000)
+        dpo_dir = self.root / 'trajectories' / 'dpo'
+        dpo_pair_files = list(dpo_dir.glob('*.json')) if dpo_dir.exists() else []
+        total_dpo_count = 0
+        for f in dpo_pair_files:
+            try:
+                p = json.loads(f.read_text(encoding='utf-8'))
+                total_dpo_count += len(p) if isinstance(p, list) else 0
+            except Exception:
+                pass
+        loop_data = {
+            'total_sessions': len(sessions),
+            'avg_confidence': round(self._average_confidence(sessions), 1),
+            'total_dpo_pairs': total_dpo_count,
+            'model_history': model_versions,
+        }
+
+        # 3. DPO quality validation
+        dpo_pairs = build_dpo_dataset(self.root)
+
+        def _text_quality(text: str) -> int:
+            low = text.lower()
+            s = 0
+            if len(text) >= 600: s += 25
+            elif len(text) >= 300: s += 15
+            elif len(text) >= 100: s += 8
+            if any(k in low for k in ('however', 'on the other hand', 'counter-argument', 'nuance', 'caveat', 'alternatively')): s += 15
+            if any(k in low for k in ('study', 'research', 'data', 'according to', 'evidence', 'literature')): s += 15
+            if any(k in low for k in ('first', 'second', 'argument for', 'pros', 'cons', '1.', '2.', '3.')): s += 15
+            if any(k in low for k in ('uncertain', 'unclear', 'debatable', 'depends', 'complex', 'mixed')): s += 10
+            if any(c.isdigit() for c in text) and '%' in text: s += 10
+            if any(k in low for k in ('risk', 'trade-off', 'downside', 'weakness')): s += 10
+            return min(s, 100)
+
+        dpo_validation = None
+        if dpo_pairs:
+            chosen_scores = [_text_quality(p.get('chosen', '')) for p in dpo_pairs]
+            rejected_scores = [_text_quality(p.get('rejected', '')) for p in dpo_pairs]
+            n = len(dpo_pairs)
+            avg_c = sum(chosen_scores) / n
+            avg_r = sum(rejected_scores) / n
+            c_wins = sum(1 for c, r in zip(chosen_scores, rejected_scores) if c > r)
+            r_wins = sum(1 for c, r in zip(chosen_scores, rejected_scores) if r > c)
+            dpo_validation = {
+                'total_pairs': n,
+                'avg_chosen_quality': round(avg_c, 1),
+                'avg_rejected_quality': round(avg_r, 1),
+                'quality_gap': round(avg_c - avg_r, 1),
+                'chosen_win_rate': round(c_wins / n * 100, 1),
+                'rejected_win_rate': round(r_wins / n * 100, 1),
+                'tie_rate': round((n - c_wins - r_wins) / n * 100, 1),
+                'avg_chosen_length': round(sum(len(p.get('chosen', '')) for p in dpo_pairs) / n),
+                'avg_rejected_length': round(sum(len(p.get('rejected', '')) for p in dpo_pairs) / n),
+            }
+
+        # 4. Per-category analysis from benchmark
+        per_category = {}
+        confidence_cal = {'low_0_60': [], 'mid_60_80': [], 'high_80_100': []}
+        if bench_data and bench_data.get('results'):
+            for r in bench_data['results']:
+                cat = r.get('category', 'unknown')
+                if cat not in per_category:
+                    per_category[cat] = {'solo_q': [], 'council_q': [], 'conf': [], 'c_wins': 0, 's_wins': 0}
+                sq = r['solo']['quality_score']
+                cq = r['council'].get('quality_score', 0)
+                conf = r['council'].get('confidence_score', -1)
+                per_category[cat]['solo_q'].append(sq)
+                per_category[cat]['council_q'].append(cq)
+                if conf >= 0:
+                    per_category[cat]['conf'].append(conf)
+                if cq > sq: per_category[cat]['c_wins'] += 1
+                elif sq > cq: per_category[cat]['s_wins'] += 1
+                # Confidence calibration
+                if conf >= 0:
+                    if conf < 60: confidence_cal['low_0_60'].append(cq)
+                    elif conf < 80: confidence_cal['mid_60_80'].append(cq)
+                    else: confidence_cal['high_80_100'].append(cq)
+
+        per_cat_summary = {}
+        for cat, d in per_category.items():
+            n = len(d['solo_q'])
+            per_cat_summary[cat] = {
+                'n': n,
+                'avg_solo': round(sum(d['solo_q']) / n, 1),
+                'avg_council': round(sum(d['council_q']) / n, 1),
+                'avg_confidence': round(sum(d['conf']) / len(d['conf']), 1) if d['conf'] else 0,
+                'council_wins': d['c_wins'],
+                'solo_wins': d['s_wins'],
+            }
+
+        conf_cal_summary = {k: {'n': len(v), 'avg_quality': round(sum(v) / len(v), 1)} for k, v in confidence_cal.items() if v}
+
+        return web.json_response({
+            'benchmark': bench_data.get('summary') if bench_data else None,
+            'benchmark_claims': bench_data.get('total_claims', 0) if bench_data else 0,
+            'per_category': per_cat_summary,
+            'confidence_calibration': conf_cal_summary,
+            'dpo_validation': dpo_validation,
+            'training': loop_data,
+        })
 
     async def handle_create_share(self, request: web.Request) -> web.Response:
         principal = self._require_principal(request)

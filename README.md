@@ -1,6 +1,6 @@
 # HERMES OUROBOROS — Adversarial Intelligence Engine
 
-**Live:** [hermes-ouroboros.online](https://hermes-ouroboros.online) · **Dashboard:** [/app](https://hermes-ouroboros.online/app) · **API Docs:** [/docs](https://hermes-ouroboros.online/docs)
+**Live:** [hermes-ouroboros.online](https://hermes-ouroboros.online) · **Paper:** [/paper](https://hermes-ouroboros.online/paper) · **Dataset:** [HuggingFace](https://huggingface.co/datasets/gudman1/hermes-adversarial-dpo) · **Dashboard:** [/app](https://hermes-ouroboros.online/app)
 
 > Five adversarial AI agents debate every query. The Arbiter delivers a verdict. The debate becomes training data. The model improves itself. The ouroboros turns.
 

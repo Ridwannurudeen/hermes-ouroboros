@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, useInView, useMotionValue, useTransform, animate } from 'framer-motion'
-import { TrendingDown, Database, Zap, FlaskConical, ExternalLink } from 'lucide-react'
+import { TrendingDown, Database, Zap, FlaskConical, ExternalLink, FileText } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 interface LoopData {
   dpo: { total_pairs: number; sessions_with_pairs: number }
@@ -260,13 +261,20 @@ export default function ResearchFindings() {
           </div>
         </motion.div>
 
-        {/* Dataset Link */}
+        {/* Paper + Dataset + Code Links */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="flex items-center justify-center gap-6"
+          className="flex flex-wrap items-center justify-center gap-4"
         >
+          <Link
+            to="/paper"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl border border-indigo-500/30 bg-indigo-500/[0.08] hover:bg-indigo-500/[0.15] transition-colors text-sm text-indigo-300 hover:text-indigo-200 font-medium"
+          >
+            <FileText size={14} />
+            <span>Read the Technical Report</span>
+          </Link>
           <a
             href="https://huggingface.co/datasets/gudman1/hermes-adversarial-dpo"
             target="_blank"
@@ -274,7 +282,7 @@ export default function ResearchFindings() {
             className="flex items-center gap-2 px-5 py-3 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] transition-colors text-sm text-white/50 hover:text-white/80"
           >
             <Database size={14} className="text-indigo-400" />
-            <span>DPO Dataset on HuggingFace</span>
+            <span>DPO Dataset</span>
             <ExternalLink size={11} className="opacity-40" />
           </a>
           <a

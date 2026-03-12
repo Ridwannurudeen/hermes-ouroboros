@@ -9,6 +9,7 @@ import DifferentiatorSection from '../components/landing/DifferentiatorSection'
 import HermesAdvantage from '../components/landing/HermesAdvantage'
 import AgentShowcase from '../components/landing/AgentShowcase'
 import BenchmarkShowcase from '../components/landing/BenchmarkShowcase'
+import ProofSection from '../components/landing/ProofSection'
 import LearningLoop from '../components/landing/LearningLoop'
 import ResultsSection from '../components/landing/ResultsSection'
 import LandingFooter from '../components/landing/LandingFooter'
@@ -60,6 +61,13 @@ export default function LandingPage() {
         <section className="py-16 px-6">
           <LiveStats />
         </section>
+
+        <div className="relative h-px mx-auto max-w-4xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
+        </div>
+
+        {/* The Proof — side-by-side solo vs council */}
+        <ProofSection />
 
         <div className="relative h-px mx-auto max-w-4xl">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-violet-500/25 to-transparent" />

@@ -221,17 +221,11 @@ class FeedbackStore:
                     tag_counts[tag] = tag_counts.get(tag, 0) + 1
                 continue
 
-            has_rating = False
+            last_rating = None
             for ev in events:
                 ev_type = ev.get('type')
                 if ev_type == 'rating':
-                    if not has_rating:
-                        total += 1
-                        has_rating = True
-                    if ev.get('rating', 0) > 0:
-                        positive += 1
-                    else:
-                        negative += 1
+                    last_rating = ev
                     for tag in ev.get('tags', []):
                         tag_counts[tag] = tag_counts.get(tag, 0) + 1
                 elif ev_type == 'outcome':
@@ -242,8 +236,12 @@ class FeedbackStore:
                 elif ev_type == 'note':
                     notes_count += 1
 
-            if not has_rating:
-                total += 1
+            total += 1
+            if last_rating is not None:
+                if last_rating.get('rating', 0) > 0:
+                    positive += 1
+                else:
+                    negative += 1
 
         return {
             "total_rated": total,

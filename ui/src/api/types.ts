@@ -95,12 +95,26 @@ export interface EvidenceItem {
   corroboration?: number
   trust_score?: number
   trust_explanation?: string
+  source_type?: 'primary' | 'secondary' | 'commentary' | 'unknown'
+}
+
+export interface FragileEvidence {
+  is_fragile: boolean
+  reasons: string[]
+  single_source: boolean
+  low_trust_only: boolean
+  no_primary?: boolean
+  conflicting_strong: boolean
 }
 
 export interface WebEvidence {
   general: EvidenceItem[]
   counter: EvidenceItem[]
   statistical: EvidenceItem[]
+  overall_fragile?: FragileEvidence
+  general_fragile?: FragileEvidence
+  counter_fragile?: FragileEvidence
+  statistical_fragile?: FragileEvidence
 }
 
 export interface LoopStatusData {
@@ -332,6 +346,86 @@ export interface DriftAnalysis {
   past_label?: string
   current_claims: number
   past_claims: number
+}
+
+/* ---------- Workspace Types ---------- */
+
+export interface WorkspacePinnedClaim {
+  claim_id: string
+  claim_text: string
+  note: string
+  pinned_at: string
+}
+
+export interface WorkspacePinnedEvidence {
+  url: string
+  title: string
+  trust_tier: string
+  note: string
+  pinned_at: string
+}
+
+export interface WorkspaceNote {
+  note_id: string
+  text: string
+  created_at: string
+}
+
+export interface Workspace {
+  workspace_id: string
+  name: string
+  description: string
+  owner_user_id: string | null
+  created_at: string
+  updated_at: string
+  sessions: string[]
+  pinned_claims: WorkspacePinnedClaim[]
+  pinned_evidence: WorkspacePinnedEvidence[]
+  notes: WorkspaceNote[]
+}
+
+export interface WorkspaceSummary {
+  workspace_id: string
+  name: string
+  description: string
+  session_count: number
+  pinned_claims_count: number
+  pinned_evidence_count: number
+  notes_count: number
+  created_at: string
+  updated_at: string
+}
+
+/* ---------- Watchlist Types ---------- */
+
+export interface WatchChange {
+  timestamp: string
+  from_status: string
+  to_status: string
+  appearances: number
+  trigger_session: string | null
+}
+
+export interface WatchedClaim {
+  claim_id: string
+  claim_text: string
+  watched_at: string
+  user_id: string | null
+  initial_status: string
+  latest_status: string
+  initial_score: number | null
+  latest_score: number | null
+  last_checked: string
+  change_count: number
+  changes: WatchChange[]
+  appearances?: number
+  last_seen?: string
+}
+
+export interface WatchlistStats {
+  total_watched: number
+  claims_with_changes: number
+  status_breakdown: Record<string, number>
 }
 
 /* ---------- Claim Ledger Types ---------- */

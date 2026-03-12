@@ -17,6 +17,8 @@ import ApiKeysPanel from '../components/dashboard/ApiKeysPanel'
 import ApiPlayground from '../components/dashboard/ApiPlayground'
 import CommandPalette from '../components/dashboard/CommandPalette'
 import AuthPanel from '../components/dashboard/AuthPanel'
+import WorkspacePanel from '../components/dashboard/WorkspacePanel'
+import WatchlistPanel from '../components/dashboard/WatchlistPanel'
 import GlassCard from '../components/ui/GlassCard'
 import StatTile from '../components/ui/StatTile'
 import { useMeta } from '../hooks/useMeta'
@@ -211,6 +213,14 @@ export default function DashboardPage() {
             onRefresh={() => fetchSessions()}
           />
         </div>
+      )}
+
+      {activePanel === 'workspaces' && (
+        <WorkspacePanel />
+      )}
+
+      {activePanel === 'watchlist' && (
+        <WatchlistPanel />
       )}
 
       {activePanel === 'stats' && (

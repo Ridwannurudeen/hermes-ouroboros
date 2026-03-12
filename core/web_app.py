@@ -24,6 +24,8 @@ from core.memo_generator import generate_memo
 from core.drift_monitor import build_drift_analysis
 from core.claim_ledger import build_claim_ledger
 from core.claim_store import ClaimStore
+from core.workspace_store import WorkspaceStore
+from core.watchlist_store import WatchlistStore
 from learning.atropos_runner import get_training_status
 from learning.preference_extractor import build_dpo_dataset
 from learning.trajectory_stats import build_stats
@@ -120,6 +122,26 @@ class HermesWebApp:
                 web.get('/api/claims/search', self.handle_claim_search),
                 web.get('/api/claims/recurring', self.handle_recurring_claims),
                 web.get('/api/claims/{claim_id}', self.handle_claim_detail),
+                # Workspace routes
+                web.post('/api/workspaces', self.handle_create_workspace),
+                web.get('/api/workspaces', self.handle_list_workspaces),
+                web.get('/api/workspaces/{workspace_id}', self.handle_get_workspace),
+                web.patch('/api/workspaces/{workspace_id}', self.handle_update_workspace),
+                web.delete('/api/workspaces/{workspace_id}', self.handle_delete_workspace),
+                web.post('/api/workspaces/{workspace_id}/sessions', self.handle_workspace_add_session),
+                web.delete('/api/workspaces/{workspace_id}/sessions/{session_id}', self.handle_workspace_remove_session),
+                web.post('/api/workspaces/{workspace_id}/claims', self.handle_workspace_pin_claim),
+                web.delete('/api/workspaces/{workspace_id}/claims/{claim_id}', self.handle_workspace_unpin_claim),
+                web.post('/api/workspaces/{workspace_id}/evidence', self.handle_workspace_pin_evidence),
+                web.post('/api/workspaces/{workspace_id}/notes', self.handle_workspace_add_note),
+                web.delete('/api/workspaces/{workspace_id}/notes/{note_id}', self.handle_workspace_delete_note),
+                # Watchlist routes
+                web.post('/api/watchlist/watch', self.handle_watchlist_watch),
+                web.post('/api/watchlist/unwatch', self.handle_watchlist_unwatch),
+                web.get('/api/watchlist', self.handle_watchlist_list),
+                web.post('/api/watchlist/refresh', self.handle_watchlist_refresh),
+                web.get('/api/watchlist/stats', self.handle_watchlist_stats),
+                web.get('/api/watchlist/{claim_id}', self.handle_watchlist_detail),
             ]
         )
         # SPA routes — serve React index.html for /app and /app/*
@@ -438,6 +460,184 @@ class HermesWebApp:
         record = store.get_claim(claim_id)
         if record is None:
             raise web.HTTPNotFound(text='Claim not found.')
+        return web.json_response(record)
+
+    # ------------------------------------------------------------------
+    # Workspace handlers
+    # ------------------------------------------------------------------
+
+    async def handle_create_workspace(self, request: web.Request) -> web.Response:
+        payload = await self._read_json(request)
+        name = payload.get('name', '').strip()
+        if not name:
+            raise web.HTTPBadRequest(text='name is required')
+        principal = self._resolve_principal(request)
+        user_id = principal.get('user_id') if principal else None
+        store = WorkspaceStore(self.root)
+        ws = store.create_workspace(name, payload.get('description', ''), owner_user_id=user_id)
+        return web.json_response(ws, status=201)
+
+    async def handle_list_workspaces(self, request: web.Request) -> web.Response:
+        principal = self._resolve_principal(request)
+        user_id = principal.get('user_id') if principal else None
+        store = WorkspaceStore(self.root)
+        workspaces = store.list_workspaces(owner_user_id=user_id)
+        return web.json_response({'workspaces': workspaces})
+
+    async def handle_get_workspace(self, request: web.Request) -> web.Response:
+        wid = request.match_info['workspace_id']
+        store = WorkspaceStore(self.root)
+        ws = store.get_workspace(wid)
+        if ws is None:
+            raise web.HTTPNotFound(text='Workspace not found.')
+        return web.json_response(ws)
+
+    async def handle_update_workspace(self, request: web.Request) -> web.Response:
+        wid = request.match_info['workspace_id']
+        payload = await self._read_json(request)
+        store = WorkspaceStore(self.root)
+        ws = store.update_workspace(wid, name=payload.get('name'), description=payload.get('description'))
+        if ws is None:
+            raise web.HTTPNotFound(text='Workspace not found.')
+        return web.json_response(ws)
+
+    async def handle_delete_workspace(self, request: web.Request) -> web.Response:
+        wid = request.match_info['workspace_id']
+        store = WorkspaceStore(self.root)
+        if not store.delete_workspace(wid):
+            raise web.HTTPNotFound(text='Workspace not found.')
+        return web.json_response({'ok': True})
+
+    async def handle_workspace_add_session(self, request: web.Request) -> web.Response:
+        wid = request.match_info['workspace_id']
+        payload = await self._read_json(request)
+        session_id = payload.get('session_id', '')
+        if not session_id:
+            raise web.HTTPBadRequest(text='session_id is required')
+        store = WorkspaceStore(self.root)
+        ws = store.add_session(wid, session_id)
+        if ws is None:
+            raise web.HTTPNotFound(text='Workspace not found.')
+        return web.json_response(ws)
+
+    async def handle_workspace_remove_session(self, request: web.Request) -> web.Response:
+        wid = request.match_info['workspace_id']
+        sid = request.match_info['session_id']
+        store = WorkspaceStore(self.root)
+        ws = store.remove_session(wid, sid)
+        if ws is None:
+            raise web.HTTPNotFound(text='Workspace not found.')
+        return web.json_response(ws)
+
+    async def handle_workspace_pin_claim(self, request: web.Request) -> web.Response:
+        wid = request.match_info['workspace_id']
+        payload = await self._read_json(request)
+        claim_id = payload.get('claim_id', '')
+        if not claim_id:
+            raise web.HTTPBadRequest(text='claim_id is required')
+        store = WorkspaceStore(self.root)
+        ws = store.pin_claim(wid, claim_id, payload.get('claim_text', ''), payload.get('note', ''))
+        if ws is None:
+            raise web.HTTPNotFound(text='Workspace not found.')
+        return web.json_response(ws)
+
+    async def handle_workspace_unpin_claim(self, request: web.Request) -> web.Response:
+        wid = request.match_info['workspace_id']
+        cid = request.match_info['claim_id']
+        store = WorkspaceStore(self.root)
+        ws = store.unpin_claim(wid, cid)
+        if ws is None:
+            raise web.HTTPNotFound(text='Workspace not found.')
+        return web.json_response(ws)
+
+    async def handle_workspace_pin_evidence(self, request: web.Request) -> web.Response:
+        wid = request.match_info['workspace_id']
+        payload = await self._read_json(request)
+        url = payload.get('url', '')
+        if not url:
+            raise web.HTTPBadRequest(text='url is required')
+        store = WorkspaceStore(self.root)
+        ws = store.pin_evidence(wid, url, payload.get('title', ''), payload.get('trust_tier', ''), payload.get('note', ''))
+        if ws is None:
+            raise web.HTTPNotFound(text='Workspace not found.')
+        return web.json_response(ws)
+
+    async def handle_workspace_add_note(self, request: web.Request) -> web.Response:
+        wid = request.match_info['workspace_id']
+        payload = await self._read_json(request)
+        text = payload.get('text', '').strip()
+        if not text:
+            raise web.HTTPBadRequest(text='text is required')
+        store = WorkspaceStore(self.root)
+        ws = store.add_note(wid, text)
+        if ws is None:
+            raise web.HTTPNotFound(text='Workspace not found.')
+        return web.json_response(ws)
+
+    async def handle_workspace_delete_note(self, request: web.Request) -> web.Response:
+        wid = request.match_info['workspace_id']
+        nid = request.match_info['note_id']
+        store = WorkspaceStore(self.root)
+        ws = store.delete_note(wid, nid)
+        if ws is None:
+            raise web.HTTPNotFound(text='Workspace not found.')
+        return web.json_response(ws)
+
+    # ------------------------------------------------------------------
+    # Watchlist handlers
+    # ------------------------------------------------------------------
+
+    async def handle_watchlist_watch(self, request: web.Request) -> web.Response:
+        user = self._require_principal(request)
+        body = await request.json()
+        claim_id = body.get('claim_id', '').strip()
+        if not claim_id:
+            raise web.HTTPBadRequest(text='claim_id is required.')
+        store = WatchlistStore(self.root)
+        record = store.watch(
+            claim_id=claim_id,
+            claim_text=body.get('claim_text', ''),
+            current_status=body.get('current_status', ''),
+            current_score=body.get('current_score'),
+            user_id=user,
+        )
+        return web.json_response(record)
+
+    async def handle_watchlist_unwatch(self, request: web.Request) -> web.Response:
+        self._require_principal(request)
+        body = await request.json()
+        claim_id = body.get('claim_id', '').strip()
+        if not claim_id:
+            raise web.HTTPBadRequest(text='claim_id is required.')
+        store = WatchlistStore(self.root)
+        removed = store.unwatch(claim_id)
+        return web.json_response({'removed': removed})
+
+    async def handle_watchlist_list(self, request: web.Request) -> web.Response:
+        user = self._require_principal(request)
+        store = WatchlistStore(self.root)
+        items = store.list_watched(user_id=user)
+        return web.json_response({'watched': items, 'total': len(items)})
+
+    async def handle_watchlist_refresh(self, request: web.Request) -> web.Response:
+        self._require_principal(request)
+        watchlist = WatchlistStore(self.root)
+        claim_store = ClaimStore(self.root)
+        changed = watchlist.refresh_from_claim_store(claim_store)
+        return web.json_response({'changed': changed, 'total_changed': len(changed)})
+
+    async def handle_watchlist_stats(self, request: web.Request) -> web.Response:
+        self._require_principal(request)
+        store = WatchlistStore(self.root)
+        return web.json_response(store.get_stats())
+
+    async def handle_watchlist_detail(self, request: web.Request) -> web.Response:
+        self._require_principal(request)
+        claim_id = request.match_info['claim_id']
+        store = WatchlistStore(self.root)
+        record = store.get_watched(claim_id)
+        if record is None:
+            raise web.HTTPNotFound(text='Claim not on watchlist.')
         return web.json_response(record)
 
     async def handle_benchmark_report(self, request: web.Request) -> web.Response:

@@ -30,6 +30,8 @@ export default function FeedbackPanel({ sessionId, existing }: FeedbackPanelProp
   const [submitting, setSubmitting] = useState(false)
   const [showOutcome, setShowOutcome] = useState(false)
   const [outcomeNote, setOutcomeNote] = useState('')
+  const [noteText, setNoteText] = useState('')
+  const [noteSaved, setNoteSaved] = useState(false)
 
   const handleRate = async (rating: number) => {
     if (submitting) return
@@ -57,6 +59,25 @@ export default function FeedbackPanel({ sessionId, existing }: FeedbackPanelProp
       )
       setFeedback(res.feedback)
       setShowOutcome(false)
+    } catch {
+      // Silently fail
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleNote = async () => {
+    if (submitting || !noteText.trim()) return
+    setSubmitting(true)
+    try {
+      const res = await apiPost<{ ok: boolean; feedback: FeedbackData }>(
+        `/api/sessions/${sessionId}/note`,
+        { text: noteText }
+      )
+      setFeedback(res.feedback)
+      setNoteText('')
+      setNoteSaved(true)
+      setTimeout(() => setNoteSaved(false), 2000)
     } catch {
       // Silently fail
     } finally {
@@ -147,6 +168,25 @@ export default function FeedbackPanel({ sessionId, existing }: FeedbackPanelProp
             )}
           </div>
         )}
+
+        {/* Standalone note */}
+        <div className="flex gap-2 items-center">
+          <input
+            type="text"
+            placeholder="Add a note about this session..."
+            value={noteText}
+            onChange={e => setNoteText(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleNote()}
+            className="flex-1 text-xs bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-1.5 text-white/60 placeholder-white/15 focus:outline-none focus:border-cyan-500/30"
+          />
+          <button
+            onClick={handleNote}
+            disabled={submitting || !noteText.trim()}
+            className="text-[10px] px-2.5 py-1.5 rounded-lg bg-white/[0.05] text-white/40 border border-white/[0.08] hover:bg-white/[0.08] disabled:opacity-30 transition-colors"
+          >
+            {noteSaved ? 'Saved' : 'Note'}
+          </button>
+        </div>
       </div>
     )
   }

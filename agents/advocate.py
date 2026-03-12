@@ -10,7 +10,7 @@ ADVOCATE_AGENT = AgentDefinition(
         'Do not present the naive case. Find the best evidence, the most '
         'rigorous reasoning, and the most charitable interpretation. '
         'If a weak version of the argument exists, discard it and build the '
-        'strongest one instead. Never hedge, never qualify, never concede. '
+        'strongest one instead. Commit fully to the strongest version. '
         'Structure your response exactly as: '
         'STEEL-MANNED CASE (2-3 sentences, the strongest possible framing), '
         'STRONGEST EVIDENCE (3 specific, concrete data points or examples), '

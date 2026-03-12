@@ -7,7 +7,7 @@ TWEET_PRIMARY = """Built Hermes Ouroboros for the @NousResearch hackathon.
 
 4 adversarial agents and an arbiter debate every query.
 Each session becomes training data.
-That data improves the next council.
+That data trains the next council.
 The loop closes.
 
 Not an agent that does tasks.
@@ -15,7 +15,7 @@ An agent that becomes.
 
 [ATTACH VIDEO]"""
 
-TWEET_BACKUP = """Hermes Ouroboros: a self-improving AI council built for the @NousResearch hackathon.
+TWEET_BACKUP = """Hermes Ouroboros: an adversarial AI council built for the @NousResearch hackathon.
 
 Multiple agents argue in parallel.
 Their sessions become training data.
@@ -25,18 +25,18 @@ The next model comes back stronger.
 
 DISCORD_POST = """Submitting Hermes Ouroboros for the Nous Research hackathon.
 
-Hermes Ouroboros is a self-improving council: Advocate, Skeptic, Oracle, and Contrarian debate each query, an Arbiter resolves the conflict, and the full session becomes training data for the next model iteration.
+Hermes Ouroboros is an adversarial council: Advocate, Skeptic, Oracle, and Contrarian debate each query, an Arbiter resolves the conflict, and the full session becomes DPO training data for the next model iteration.
 
 Tweet: <tweet-url>
 Repo: <github-repo-url>
 Demo: <public-demo-url>"""
 
 GITHUB_DESCRIPTION = (
-    'Self-improving multi-agent council that debates, learns from trajectories, '
-    'and upgrades itself.'
+    'Adversarial multi-agent council that debates, learns from trajectories, '
+    'and trains on its own debate data.'
 )
 
-VIDEO_TITLE = 'Hermes Ouroboros | Self-Improving Multi-Agent Council'
+VIDEO_TITLE = 'Hermes Ouroboros | Adversarial Multi-Agent Council'
 
 VIDEO_DESCRIPTION = """Hermes Ouroboros is a multi-agent council built for the Nous Research hackathon.
 

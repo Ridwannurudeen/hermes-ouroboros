@@ -8,7 +8,7 @@ The Arbiter's verdict is the natural preference signal: agent responses that
 align with the verdict are "chosen"; those that were explicitly dismissed or
 contradicted are "rejected".
 
-This is the self-improvement loop's core insight:
+This is the DPO loop's core insight:
   every council session generates free preference data.
 """
 from __future__ import annotations

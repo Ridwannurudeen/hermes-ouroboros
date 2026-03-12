@@ -153,6 +153,15 @@ function SourceCard({ item, label }: { item: EvidenceItem; label: string }) {
             Trust: {item.trust_score}
           </span>
         )}
+        {item.source_type && item.source_type !== 'unknown' && (
+          <span className={`text-[8px] px-1.5 py-0.5 rounded-full border ${
+            item.source_type === 'primary' ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' :
+            item.source_type === 'secondary' ? 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20' :
+            'bg-white/[0.05] text-white/30 border-white/[0.1]'
+          }`}>
+            {item.source_type}
+          </span>
+        )}
       </div>
       {item.trust_explanation && (
         <p className="text-[9px] text-white/20 mt-1 leading-relaxed line-clamp-2 hover:line-clamp-none transition-all">
@@ -193,6 +202,17 @@ function WebSourcesSection({ result }: { result: SessionResult }) {
         <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider">Web Sources</h3>
         <span className="text-[10px] text-white/20">{all.length} sources</span>
       </div>
+      {we.overall_fragile?.is_fragile && (
+        <div className="rounded-lg border border-amber-500/20 bg-amber-500/[0.05] p-2.5 flex items-start gap-2">
+          <AlertTriangle size={13} className="text-amber-400 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-[10px] font-semibold text-amber-400 uppercase tracking-wider mb-0.5">Fragile Evidence</p>
+            {we.overall_fragile.reasons.map((r, ri) => (
+              <p key={ri} className="text-[10px] text-amber-300/60 leading-relaxed">{r}</p>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {visible.map(({ item, label }, i) => (
           <SourceCard key={item.url + i} item={item} label={label} />

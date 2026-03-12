@@ -2,7 +2,7 @@
 
 **Live:** [hermes-ouroboros.online](https://hermes-ouroboros.online) · **Paper:** [/paper](https://hermes-ouroboros.online/paper) · **Dataset:** [HuggingFace](https://huggingface.co/datasets/gudman1/hermes-adversarial-dpo) · **Dashboard:** [/app](https://hermes-ouroboros.online/app)
 
-> Five adversarial AI agents debate every query. The Arbiter delivers a verdict. The debate becomes training data. The model improves itself. The ouroboros turns.
+> Five adversarial AI agents debate every query. The Arbiter delivers a verdict. The debate becomes DPO training data. Each iteration feeds the next. The ouroboros turns.
 
 ## Why Hermes-3
 
@@ -75,13 +75,13 @@ the case   fatal flaw rates    the frame
 | **Verify** | Fact-checks claims against evidence | Statistics, news claims, viral statements |
 | **Research** | Deep bull/bear analysis | Investment decisions, technology bets, career choices |
 
-## The Self-Improvement Loop
+## The DPO Training Loop
 
 The key insight: **the debate IS the preference data.**
 
 When the Arbiter picks a winner, aligned agent responses become `chosen` and overruled responses become `rejected` — automatic DPO pairs from every session. No human labeling needed.
 
-Five self-improvement loops have completed:
+Five training iterations have completed:
 
 | Version | Training Loss | Status |
 |---------|--------------|--------|
@@ -92,7 +92,7 @@ Five self-improvement loops have completed:
 | v4 | 3.281 | Benchmarked |
 | v5 | **2.657** | Promoted |
 
-Loss decreased **35% across 5 iterations**. The ouroboros loop is working.
+Loss decreased **35% across 5 iterations** on the recorded benchmark set.
 
 ## Features
 

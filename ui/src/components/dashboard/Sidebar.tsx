@@ -1,11 +1,14 @@
 import {
   MessageSquare, History, BarChart3, GitBranch,
   Key, Settings, Sparkles, Scale, Share2, Download, Code,
+  FolderOpen, Eye,
 } from 'lucide-react'
 
 const NAV_ITEMS = [
   { id: 'query', icon: MessageSquare, label: 'Query' },
   { id: 'history', icon: History, label: 'History' },
+  { id: 'workspaces', icon: FolderOpen, label: 'Workspaces' },
+  { id: 'watchlist', icon: Eye, label: 'Watchlist' },
   { id: 'stats', icon: BarChart3, label: 'Stats' },
   { id: 'loop', icon: GitBranch, label: 'DPO Loop' },
   { id: 'comparison', icon: Scale, label: 'Compare' },

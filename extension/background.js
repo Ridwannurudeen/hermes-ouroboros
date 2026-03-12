@@ -129,19 +129,12 @@ async function queryHermes(text, mode) {
   }
 }
 
-function extractScore(result) {
-  // Try various paths where score might live in the API response
-  if (result && typeof result.score === "number") return result.score;
-  if (result && result.final_verdict && typeof result.final_verdict.score === "number")
-    return result.final_verdict.score;
-  if (result && result.arbiter_verdict && typeof result.arbiter_verdict.confidence_score === "number")
-    return result.arbiter_verdict.confidence_score;
-  if (result && typeof result.confidence_score === "number")
-    return result.confidence_score;
-  // Try to parse from verdict text
-  if (result && result.final_verdict && typeof result.final_verdict === "string") {
-    const match = result.final_verdict.match(/(\d+)\s*\/\s*100/);
-    if (match) return parseInt(match[1], 10);
-  }
+function extractScore(apiResponse) {
+  // API returns {runtime, result: {hermes_score, confidence_score, verdict_sections: {hermes_score}}}
+  const r = apiResponse && apiResponse.result ? apiResponse.result : apiResponse;
+  if (!r) return null;
+  if (typeof r.hermes_score === "number" && r.hermes_score >= 0) return r.hermes_score;
+  if (r.verdict_sections && typeof r.verdict_sections.hermes_score === "number") return r.verdict_sections.hermes_score;
+  if (typeof r.confidence_score === "number") return r.confidence_score;
   return null;
 }

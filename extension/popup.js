@@ -24,7 +24,9 @@ function renderLoading(data) {
 
 function renderResult(data) {
   showState("result");
-  const result = data.result || {};
+  // API response is {runtime, result: {hermes_score, verdict_sections, arbiter_verdict, ...}}
+  const apiResponse = data.result || {};
+  const r = apiResponse.result || apiResponse;
 
   // Query preview
   const queryEl = document.getElementById("result-query");
@@ -37,18 +39,16 @@ function renderResult(data) {
   modeLabel.textContent = "MODE: " + (modeMap[data.mode] || data.mode.toUpperCase());
 
   // Extract score
-  const score = extractScore(result);
+  const score = extractScore(r);
   const scoreEl = document.getElementById("score-value");
   const ringFg = document.getElementById("score-ring-fg");
 
   if (score !== null) {
     scoreEl.textContent = score;
-    // Animate ring: circumference = 2 * PI * 34 = ~213.6
     const circumference = 213.6;
     const offset = circumference - (score / 100) * circumference;
     ringFg.style.strokeDashoffset = offset;
 
-    // Color
     ringFg.classList.remove("green", "amber", "red", "indigo");
     if (score >= 70) ringFg.classList.add("green");
     else if (score >= 40) ringFg.classList.add("amber");
@@ -62,13 +62,13 @@ function renderResult(data) {
 
   // Verdict pill
   const verdictPill = document.getElementById("verdict-pill");
-  const verdict = extractVerdict(result);
+  const verdict = extractVerdict(r);
   verdictPill.textContent = verdict.label;
   verdictPill.className = "verdict-pill " + verdict.color;
 
   // Summary
   const summaryEl = document.getElementById("summary-text");
-  const summary = extractSummary(result);
+  const summary = extractSummary(r);
   summaryEl.textContent = summary.length > 300 ? summary.slice(0, 300) + "..." : summary;
 }
 
@@ -89,37 +89,26 @@ function renderError(data) {
   }
 }
 
-function extractScore(result) {
-  if (result && typeof result.score === "number") return result.score;
-  if (result && result.final_verdict && typeof result.final_verdict.score === "number")
-    return result.final_verdict.score;
-  if (result && result.arbiter_verdict && typeof result.arbiter_verdict.confidence_score === "number")
-    return result.arbiter_verdict.confidence_score;
-  if (result && typeof result.confidence_score === "number")
-    return result.confidence_score;
-  if (result && result.final_verdict && typeof result.final_verdict === "string") {
-    const match = result.final_verdict.match(/(\d+)\s*\/\s*100/);
-    if (match) return parseInt(match[1], 10);
-  }
+function extractScore(r) {
+  if (!r) return null;
+  if (typeof r.hermes_score === "number" && r.hermes_score >= 0) return r.hermes_score;
+  if (r.verdict_sections && typeof r.verdict_sections.hermes_score === "number") return r.verdict_sections.hermes_score;
+  if (typeof r.confidence_score === "number") return r.confidence_score;
   return null;
 }
 
-function extractVerdict(result) {
-  // Try to get a verdict label from the result
-  let label = "UNKNOWN";
-  if (result && result.final_verdict && typeof result.final_verdict === "object" && result.final_verdict.verdict) {
-    label = result.final_verdict.verdict;
-  } else if (result && result.verdict) {
-    label = result.verdict;
-  } else if (result && result.arbiter_verdict && result.arbiter_verdict.verdict) {
-    label = result.arbiter_verdict.verdict;
+function extractVerdict(r) {
+  let label = "ANALYSIS COMPLETE";
+
+  // Primary path: verdict_sections.verdict_label
+  if (r && r.verdict_sections && r.verdict_sections.verdict_label) {
+    label = r.verdict_sections.verdict_label;
   }
 
   label = String(label).toUpperCase();
 
-  // Determine color
-  const greenLabels = ["TRUE", "VERIFIED", "STRONG", "CONFIRMED", "SUPPORTED", "ACCURATE"];
-  const redLabels = ["FALSE", "FATAL", "DEBUNKED", "REFUTED", "MISLEADING", "INCORRECT", "UNVERIFIED"];
+  const greenLabels = ["TRUE", "VERIFIED", "STRONG", "CONFIRMED", "SUPPORTED", "ACCURATE", "BULL"];
+  const redLabels = ["FALSE", "FATAL", "DEBUNKED", "REFUTED", "MISLEADING", "INCORRECT", "FLAW", "BEAR"];
 
   let color = "amber";
   if (greenLabels.some((g) => label.includes(g))) color = "green";
@@ -128,21 +117,12 @@ function extractVerdict(result) {
   return { label, color };
 }
 
-function extractSummary(result) {
-  // Try various paths
-  if (result && result.arbiter_verdict && typeof result.arbiter_verdict === "string")
-    return result.arbiter_verdict;
-  if (result && result.arbiter_verdict && result.arbiter_verdict.reasoning)
-    return result.arbiter_verdict.reasoning;
-  if (result && result.arbiter_verdict && result.arbiter_verdict.summary)
-    return result.arbiter_verdict.summary;
-  if (result && result.final_verdict && typeof result.final_verdict === "string")
-    return result.final_verdict;
-  if (result && result.final_verdict && result.final_verdict.reasoning)
-    return result.final_verdict.reasoning;
-  if (result && result.summary) return result.summary;
-  if (result && result.reasoning) return result.reasoning;
-  // Fallback: stringify keys we find
+function extractSummary(r) {
+  // Primary path: arbiter_verdict is a string
+  if (r && typeof r.arbiter_verdict === "string" && r.arbiter_verdict.length > 0)
+    return r.arbiter_verdict;
+  if (r && r.verdict_sections && r.verdict_sections.detailed_reasoning)
+    return r.verdict_sections.detailed_reasoning;
   return "Analysis complete. Open the full dashboard for detailed results.";
 }
 
